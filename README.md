@@ -30,14 +30,16 @@ src/
       students/[id]/       STU-006 상세 · STU-007 보호자 연결 해제 · STU-008 반 이동 · STU-012 휴원·퇴원
       classes/             CLS-001 반 목록·생성·수정 · CLS-002 삭제 · STF-003 담당 교사 배정
       staff/               STF-001 교직원 목록·직접 등록 · STF-002 이메일 초대·초대 내역
-      notices|events|settings/   다음 단계 (API 목록만 표시)
+      notices/             NTC-004 발송 이력 · new/ NTC-001 작성(예약·첨부) · [id]/ NTC-005 수신 확인·NTC-006 미열람 재발송 · [id]/edit 예약 수정
+      events/              EVT-001 행사 목록·만들기(RSVP) · [id]/ EVT-003 응답 집계·명단 엑셀 · EVT-004 독촉
+      settings/            다음 단계 (API 목록만 표시)
     invite/[token]         STF-002 초대 수락 (로그인 전 공개 화면)
     api/
       auth/login|logout|session|ws-token        BFF 인증
       auth/staff-invitations/[token]/accept     초대 수락 → 로그인 쿠키
       proxy/[...path]      → BACKEND_URL/api/v1/** (인증 필요 API)
       proxy-public/[...path]  공개 API 허용 목록 (임시 비밀번호 등)
-  components/              AdminShell, PageHeader, StatusChip, ChangeStatusDialog …
+  components/              AdminShell, PageHeader, StatusChip, TargetPicker(발송 대상), AttachmentField(S3 직접 업로드) …
   lib/
     api.ts                 클라이언트 fetch 래퍼 (ApiError, 엑셀 다운로드)
     session.ts             세션·기관 전환·로그아웃 훅
@@ -69,4 +71,4 @@ src/
 
 ## 다음 단계
 
-알림장 작성·수신확인, 행사 RSVP, 기관 설정.
+기관 설정·약관(SET).

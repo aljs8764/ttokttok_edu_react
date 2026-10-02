@@ -258,3 +258,107 @@ export interface PublicStaffInvitation {
   existingAccount: boolean;
   expiresAt: string;
 }
+
+// ───────── 알림장·행사 공통 ─────────
+
+export type TargetScope = 'ALL' | 'CLASS' | 'STUDENT';
+
+/** 발송 대상. 요청은 {scope, id}, 응답은 name 까지 */
+export interface Target {
+  scope: TargetScope;
+  id: string | null;
+  name?: string;
+}
+
+export interface FileRef {
+  id: string;
+  name: string;
+  mime: string;
+  size: number;
+  downloadUrl: string | null;
+}
+
+export interface ReadStats {
+  targetStudents: number;
+  readStudents: number;
+  rate: number | null;
+}
+
+// ───────── 알림장 (NTC) ─────────
+
+export type NoticeKind = 'NOTE' | 'ANNOUNCEMENT';
+export type NoticeStatus = 'SCHEDULED' | 'SENT' | 'CANCELED';
+
+export interface Notice {
+  id: string;
+  kind: NoticeKind;
+  title: string;
+  body: string;
+  pinned: boolean;
+  targets: Target[];
+  status: NoticeStatus;
+  scheduledAt: string | null;
+  sentAt: string | null;
+  lastResentAt: string | null;
+  author: { id: string; name: string };
+  createdAt: string;
+  readStats: ReadStats | null;
+  attachments: FileRef[];
+}
+
+export interface NoticeReceipts {
+  noticeId: string;
+  stats: ReadStats;
+  canResendAt: string | null;
+  students: {
+    studentId: string;
+    studentName: string;
+    classroomNames: string[];
+    read: boolean;
+    firstReadAt: string | null;
+    resentCount: number;
+    appLinked: boolean;
+    guardians: { userId: string; name: string; deliveredAt: string | null; readAt: string | null }[];
+  }[];
+}
+
+// ───────── 행사 (EVT) ─────────
+
+export interface Tally {
+  targets: number;
+  attend: number;
+  absent: number;
+  pending: number;
+}
+
+export interface SchoolEvent {
+  id: string;
+  title: string;
+  body: string | null;
+  location: string | null;
+  startsAt: string;
+  endsAt: string | null;
+  targets: Target[];
+  rsvpEnabled: boolean;
+  rsvpDeadline: string | null;
+  reminderHoursBefore: number | null;
+  remindedAt: string | null;
+  status: 'ACTIVE' | 'CANCELED';
+  authorName: string;
+  createdAt: string;
+  tally: Tally | null;
+}
+
+export interface EventSummary {
+  event: SchoolEvent;
+  tally: Tally;
+  rows: {
+    studentId: string;
+    studentName: string;
+    classroomNames: string[];
+    answer: 'ATTEND' | 'ABSENT' | null;
+    reason: string | null;
+    respondedAt: string | null;
+    respondedByName: string | null;
+  }[];
+}

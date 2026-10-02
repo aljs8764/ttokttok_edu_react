@@ -1,7 +1,7 @@
-import ComingSoon from '@/components/ComingSoon';
+import NoticesView from './NoticesView';
 
 export const metadata = { title: '알림장' };
 
-export default function Page() {
-  return <ComingSoon title="알림장" menuId="NTC-001" apis={['POST/GET /notices', 'GET /notices/{id}/receipts', 'POST /notices/{id}/resend-unread']} />;
+export default function NoticesPage() {
+  return <NoticesView />;
 }
