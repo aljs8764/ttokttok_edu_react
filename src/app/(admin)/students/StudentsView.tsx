@@ -25,7 +25,7 @@ import UploadIcon from '@mui/icons-material/UploadFile';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import SendIcon from '@mui/icons-material/Send';
 import NextLink from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { api, errorMessage } from '@/lib/api';
 import { useSession } from '@/lib/session';
@@ -42,7 +42,8 @@ import PageHeader from '@/components/PageHeader';
 export default function StudentsView() {
   const { session, manager } = useSession();
   const instId = session?.institution?.institutionId;
-  const [classId, setClassId] = useState('');
+  const searchParams = useSearchParams();
+  const [classId, setClassId] = useState(searchParams.get('classId') ?? '');
   const [status, setStatus] = useState<StudentStatus | ''>('ACTIVE');
   const [input, setInput] = useState('');
   const [keyword, setKeyword] = useState('');

@@ -1,7 +1,7 @@
-import ComingSoon from '@/components/ComingSoon';
+import StaffView from './StaffView';
 
 export const metadata = { title: '교직원' };
 
-export default function Page() {
-  return <ComingSoon title="교직원" menuId="STF-001" apis={['GET/POST /staff', 'POST/GET/DELETE /staff/invitations']} />;
+export default function StaffPage() {
+  return <StaffView />;
 }

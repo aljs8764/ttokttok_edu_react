@@ -31,3 +31,15 @@ export const STATUS_OPTIONS: { value: AttendanceStatus; label: string }[] = [
 export const time = (iso?: string | null) => (iso ? dayjs(iso).format('HH:mm') : '-');
 export const dateTime = (iso?: string | null) => (iso ? dayjs(iso).format('M/D HH:mm') : '-');
 export const percent = (v?: number | null) => (v === null || v === undefined ? '-' : `${v.toFixed(1)}%`);
+
+export const DAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'] as const;
+export const DAY_LABEL: Record<string, string> = { MONDAY: '월', TUESDAY: '화', WEDNESDAY: '수', THURSDAY: '목', FRIDAY: '금', SATURDAY: '토', SUNDAY: '일' };
+
+/** ["MONDAY","WEDNESDAY"] → "월·수" (요일 순서대로) */
+export const dayList = (days: string[]) =>
+  DAYS.filter((d) => days.includes(d))
+    .map((d) => DAY_LABEL[d])
+    .join('·');
+
+/** 백엔드 LocalTime("14:00" 또는 "14:00:00") → "14:00" */
+export const hm = (t?: string | null) => (t ? t.slice(0, 5) : '-');

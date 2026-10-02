@@ -12,7 +12,7 @@ npm install
 npm run dev                     # http://localhost:3000
 ```
 
-백엔드(`:8080`)와 PostgreSQL 이 떠 있어야 한다. 원장 계정은 백엔드 `POST /api/v1/auth/institutions` 로 만든다.
+백엔드(`:8080`)와 PostgreSQL 이 떠 있어야 한다. 교직원 초대 메일 링크가 이 웹으로 오도록 백엔드에 `STAFF_INVITE_BASE_URL=http://localhost:3000/invite/` 를 준다. 원장 계정은 백엔드 `POST /api/v1/auth/institutions` 로 만든다.
 
 ## 구조
 
@@ -28,9 +28,13 @@ src/
       students/import/     STU-002 엑셀 일괄 등록
       students/join-requests/  STU-004 가입 승인
       students/[id]/       STU-006 상세 · STU-007 보호자 연결 해제 · STU-008 반 이동 · STU-012 휴원·퇴원
-      classes|staff|notices|events|settings/   다음 단계 (API 목록만 표시)
+      classes/             CLS-001 반 목록·생성·수정 · CLS-002 삭제 · STF-003 담당 교사 배정
+      staff/               STF-001 교직원 목록·직접 등록 · STF-002 이메일 초대·초대 내역
+      notices|events|settings/   다음 단계 (API 목록만 표시)
+    invite/[token]         STF-002 초대 수락 (로그인 전 공개 화면)
     api/
       auth/login|logout|session|ws-token        BFF 인증
+      auth/staff-invitations/[token]/accept     초대 수락 → 로그인 쿠키
       proxy/[...path]      → BACKEND_URL/api/v1/** (인증 필요 API)
       proxy-public/[...path]  공개 API 허용 목록 (임시 비밀번호 등)
   components/              AdminShell, PageHeader, StatusChip, ChangeStatusDialog …
@@ -65,4 +69,4 @@ src/
 
 ## 다음 단계
 
-반·교직원 관리, 알림장 작성·수신확인, 행사 RSVP, 기관 설정.
+알림장 작성·수신확인, 행사 RSVP, 기관 설정.

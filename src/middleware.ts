@@ -5,6 +5,9 @@ export function middleware(req: NextRequest) {
   const hasSession = !!req.cookies.get('ttok_rt')?.value;
   const { pathname, search } = req.nextUrl;
 
+  // 교직원 초대 수락은 로그인 전 화면
+  if (pathname.startsWith('/invite/')) return NextResponse.next();
+
   if (pathname === '/login') {
     // 이미 로그인했고 기관도 골랐으면 대시보드로
     if (hasSession && req.cookies.get('ttok_inst')?.value) return NextResponse.redirect(new URL('/dashboard', req.url));

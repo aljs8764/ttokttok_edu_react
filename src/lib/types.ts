@@ -226,3 +226,35 @@ export interface JoinRequest {
   status: JoinRequestStatus;
   submittedAt: string;
 }
+
+// ───────── 교직원 ─────────
+
+export interface StaffMember {
+  userId: string;
+  name: string;
+  email: string;
+  role: Role;
+  title: string | null;
+  classrooms: { id: string; name: string }[];
+}
+
+export type StaffInvitationStatus = 'PENDING' | 'ACCEPTED' | 'REVOKED' | 'EXPIRED';
+
+export interface StaffInvitation {
+  id: string;
+  email: string;
+  name: string;
+  role: Role;
+  status: StaffInvitationStatus;
+  expiresAt: string;
+  acceptedAt: string | null;
+}
+
+export interface PublicStaffInvitation {
+  institutionName: string;
+  name: string;
+  email: string;
+  role: Role;
+  existingAccount: boolean;
+  expiresAt: string;
+}
