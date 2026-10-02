@@ -192,3 +192,37 @@ export interface Student {
   classroomIds: string[];
   guardians: Guardian[];
 }
+
+export type WithdrawalReason = 'MOVING' | 'GRADES' | 'OTHER_ACADEMY' | 'SCHEDULE' | 'COST' | 'GRADUATION' | 'OTHER';
+
+/** STU-006 원생 상세 */
+export interface StudentDetail {
+  student: Student;
+  memo: string | null;
+  classHistory: { classroomId: string; classroomName: string; fromDate: string; toDate: string | null }[];
+  statusHistory: { from: StudentStatus | null; to: StudentStatus; reason: WithdrawalReason | null; effectiveDate: string; note: string | null }[];
+  siblings: { studentId: string; name: string }[];
+}
+
+/** STU-002 엑셀 업로드 검증 결과 */
+export interface ImportResult {
+  jobId: string;
+  totalRows: number;
+  validRows: number;
+  errors: { rowNumber: number; column: string; message: string }[];
+  committed: boolean;
+}
+
+/** STU-004 가입 대기자 */
+export type JoinRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+
+export interface JoinRequest {
+  id: string;
+  childName: string;
+  birthDate: string;
+  guardianName: string;
+  guardianPhone: string;
+  relation: string | null;
+  status: JoinRequestStatus;
+  submittedAt: string;
+}

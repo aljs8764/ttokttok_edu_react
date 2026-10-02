@@ -18,25 +18,27 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import LinearProgress from '@mui/material/LinearProgress';
 import SearchIcon from '@mui/icons-material/Search';
+import Badge from '@mui/material/Badge';
+import Button from '@mui/material/Button';
+import PersonAddIcon from '@mui/icons-material/PersonAddAlt1';
+import UploadIcon from '@mui/icons-material/UploadFile';
+import HowToRegIcon from '@mui/icons-material/HowToReg';
+import SendIcon from '@mui/icons-material/Send';
+import NextLink from 'next/link';
+import { useRouter } from 'next/navigation';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { api, errorMessage } from '@/lib/api';
 import { useSession } from '@/lib/session';
-import type { Classroom, Page, Student, StudentStatus } from '@/lib/types';
+import type { Classroom, JoinRequest, Page, Student, StudentStatus } from '@/lib/types';
+import { LINK_STATUS, STUDENT_STATUS } from '@/lib/student';
+import RegisterStudentDialog from '@/components/students/RegisterStudentDialog';
+import InviteParentDialog from '@/components/students/InviteParentDialog';
 import PageHeader from '@/components/PageHeader';
 
-const STATUS: Record<StudentStatus, { label: string; color: 'success' | 'warning' | 'default' }> = {
-  ACTIVE: { label: '재원', color: 'success' },
-  PAUSED: { label: '휴원', color: 'warning' },
-  WITHDRAWN: { label: '퇴원', color: 'default' },
-};
-
-const LINK: Record<string, { label: string; color: 'success' | 'default' | 'warning' }> = {
-  LINKED: { label: '앱 연결', color: 'success' },
-  PENDING: { label: '설치 대기', color: 'warning' },
-  UNLINKED: { label: '연결 해제', color: 'default' },
-};
-
-/** STU-001 원생 목록 — 반·재원상태 필터, 이름/보호자 번호 뒷 4자리 검색, 20개씩 */
+/**
+ * STU-001 원생 목록 — 반·재원상태 필터, 이름/보호자 번호 뒷 4자리 검색, 20개씩.
+ * 원장·실장은 등록(STU-003)·엑셀 업로드(STU-002)·가입 승인(STU-004)·초대(STU-005)로 이어진다.
+ */
 export default function StudentsView() {
   const { session, manager } = useSession();
   const instId = session?.institution?.institutionId;
@@ -45,6 +47,9 @@ export default function StudentsView() {
   const [input, setInput] = useState('');
   const [keyword, setKeyword] = useState('');
   const [page, setPage] = useState(0);
+  const [registerOpen, setRegisterOpen] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const router = useRouter();
 
   // 입력이 멈추면 검색 (0.3초)
   useEffect(() => {
@@ -65,12 +70,38 @@ export default function StudentsView() {
     placeholderData: keepPreviousData,
   });
 
+  const pending = useQuery({
+    queryKey: ['join-requests', instId, 'PENDING'],
+    queryFn: () => api.get<JoinRequest[]>('join-requests', { status: 'PENDING' }),
+    enabled: !!instId && manager,
+  });
+
   return (
     <>
       <PageHeader
         title="원생 관리"
         menuId="STU-001"
-        description={manager ? '등록·엑셀 업로드·가입 승인 화면은 다음 단계에서 추가됩니다.' : '담당 반 원생만 보이며, 생년월일·연락처는 마스킹됩니다.'}
+        description={manager ? '행을 누르면 상세(반 이동·상태 변경·보호자 관리)로 이동합니다.' : '담당 반 원생만 보이며, 생년월일·연락처는 마스킹됩니다.'}
+        actions={
+          manager && (
+            <>
+              <Badge color="secondary" badgeContent={pending.data?.length ?? 0}>
+                <Button variant="outlined" startIcon={<HowToRegIcon />} component={NextLink} href="/students/join-requests">
+                  가입 승인
+                </Button>
+              </Badge>
+              <Button variant="outlined" startIcon={<SendIcon />} onClick={() => setInviteOpen(true)}>
+                학부모 초대
+              </Button>
+              <Button variant="outlined" startIcon={<UploadIcon />} component={NextLink} href="/students/import">
+                엑셀 일괄 등록
+              </Button>
+              <Button variant="contained" startIcon={<PersonAddIcon />} onClick={() => setRegisterOpen(true)}>
+                원생 등록
+              </Button>
+            </>
+          )
+        }
       />
 
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mb: 2 }}>
@@ -98,9 +129,9 @@ export default function StudentsView() {
         </TextField>
         <TextField select size="small" label="상태" value={status} onChange={(e) => (setStatus(e.target.value as StudentStatus | ''), setPage(0))} sx={{ minWidth: 120 }}>
           <MenuItem value="">전체</MenuItem>
-          {(Object.keys(STATUS) as StudentStatus[]).map((s) => (
+          {(Object.keys(STUDENT_STATUS) as StudentStatus[]).map((s) => (
             <MenuItem key={s} value={s}>
-              {STATUS[s].label}
+              {STUDENT_STATUS[s].label}
             </MenuItem>
           ))}
         </TextField>
@@ -131,7 +162,7 @@ export default function StudentsView() {
                 </TableRow>
               )}
               {list.data?.items.map((s) => (
-                <TableRow key={s.id} hover>
+                <TableRow key={s.id} hover onClick={() => router.push(`/students/${s.id}`)} sx={{ cursor: 'pointer' }}>
                   <TableCell sx={{ fontWeight: 600 }}>{s.name}</TableCell>
                   <TableCell>{s.classroomIds.map((id) => classNames.get(id) ?? '-').join(', ') || '-'}</TableCell>
                   <TableCell>
@@ -142,7 +173,7 @@ export default function StudentsView() {
                             {g.phone}
                             {g.relation ? ` (${g.relation})` : ''}
                           </Typography>
-                          <Chip size="small" variant="outlined" color={LINK[g.linkStatus]?.color} label={LINK[g.linkStatus]?.label ?? g.linkStatus} />
+                          <Chip size="small" variant="outlined" color={LINK_STATUS[g.linkStatus]?.color} label={LINK_STATUS[g.linkStatus]?.label ?? g.linkStatus} />
                         </Stack>
                       ))}
                     </Stack>
@@ -150,7 +181,7 @@ export default function StudentsView() {
                   <TableCell>{s.birthDate ?? '••••-••-••'}</TableCell>
                   <TableCell>{s.grade ?? '-'}</TableCell>
                   <TableCell>
-                    <Chip size="small" label={STATUS[s.status].label} color={STATUS[s.status].color} variant={s.status === 'WITHDRAWN' ? 'outlined' : 'filled'} />
+                    <Chip size="small" label={STUDENT_STATUS[s.status].label} color={STUDENT_STATUS[s.status].color} variant={s.status === 'WITHDRAWN' ? 'outlined' : 'filled'} />
                   </TableCell>
                 </TableRow>
               ))}
@@ -167,6 +198,9 @@ export default function StudentsView() {
           labelDisplayedRows={({ from, to, count }) => `${from}–${to} / 총 ${count}명`}
         />
       </Paper>
+
+      <RegisterStudentDialog open={registerOpen} classes={classes.data ?? []} onClose={() => setRegisterOpen(false)} onCreated={(st) => router.push(`/students/${st.id}`)} />
+      <InviteParentDialog open={inviteOpen} onClose={() => setInviteOpen(false)} />
     </>
   );
 }

@@ -24,7 +24,10 @@ src/
       dashboard/           DASH-001·002·003·005
       attendance/          ATT-001 데일리 리포트 + ATT-002 수동 변경
       attendance/monthly/  ATT-003 월간 출석부 + ATT-004 출석부 엑셀
-      students/            STU-001 원생 목록
+      students/            STU-001 원생 목록 (등록 STU-003·초대 STU-005 다이얼로그)
+      students/import/     STU-002 엑셀 일괄 등록
+      students/join-requests/  STU-004 가입 승인
+      students/[id]/       STU-006 상세 · STU-007 보호자 연결 해제 · STU-008 반 이동 · STU-012 휴원·퇴원
       classes|staff|notices|events|settings/   다음 단계 (API 목록만 표시)
     api/
       auth/login|logout|session|ws-token        BFF 인증
@@ -62,4 +65,4 @@ src/
 
 ## 다음 단계
 
-원생 등록·엑셀 업로드·가입 승인(STU-002~005), 반·교직원 관리, 알림장 작성·수신확인, 행사 RSVP, 기관 설정.
+반·교직원 관리, 알림장 작성·수신확인, 행사 RSVP, 기관 설정.

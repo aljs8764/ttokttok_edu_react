@@ -50,6 +50,16 @@ export const api = {
   delete: <T>(path: string, body?: unknown) => request<T>('DELETE', path, { body }),
 };
 
+/** multipart 업로드 (Content-Type 은 브라우저가 boundary 와 함께 붙인다) */
+export async function upload<T>(path: string, form: FormData): Promise<T> {
+  const res = await fetch(`/api/proxy/${path.replace(/^\//, '')}`, { method: 'POST', body: form, headers: { Accept: 'application/json' } });
+  if (!res.ok) {
+    const err = (await res.json().catch(() => null)) as ApiErrorBody | null;
+    throw new ApiError(res.status, err?.code ?? 'ERROR', err?.message ?? `업로드에 실패했습니다 (${res.status})`, err?.details);
+  }
+  return (await res.json()) as T;
+}
+
 /** 엑셀 등 파일 응답을 받아 브라우저 다운로드로 저장 */
 export async function download(method: 'GET' | 'POST', path: string, body?: unknown, fallbackName = 'download.xlsx') {
   const res = await fetch(`/api/proxy/${path.replace(/^\//, '')}`, {
