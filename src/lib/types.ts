@@ -362,3 +362,46 @@ export interface EventSummary {
     respondedByName: string | null;
   }[];
 }
+
+// ───────── 설정 (SET) ─────────
+
+export interface InstitutionSettings {
+  id: string;
+  name: string;
+  ownerName: string;
+  address: string | null;
+  phone: string | null;
+  lateThresholdMinutes: number;
+  earlyLeaveThresholdMinutes: number;
+  logo: FileRef | null;
+  seal: FileRef | null;
+}
+
+export type DestinationType = 'HOME' | 'ACADEMY' | 'SHUTTLE' | 'ETC';
+
+export interface Destination {
+  id: string;
+  name: string;
+  type: DestinationType;
+  sortOrder: number;
+}
+
+export interface Terms {
+  id: string;
+  type: string;
+  version: number;
+  title: string;
+  body: string;
+  required: boolean;
+  effectiveAt: string;
+}
+
+export interface AuditLog {
+  id: number;
+  action: string;
+  resource: string;
+  resourceId: string | null;
+  actor: { id: string; name: string };
+  diff: Record<string, unknown>;
+  at: string;
+}

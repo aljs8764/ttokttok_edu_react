@@ -32,14 +32,14 @@ src/
       staff/               STF-001 교직원 목록·직접 등록 · STF-002 이메일 초대·초대 내역
       notices/             NTC-004 발송 이력 · new/ NTC-001 작성(예약·첨부) · [id]/ NTC-005 수신 확인·NTC-006 미열람 재발송 · [id]/edit 예약 수정
       events/              EVT-001 행사 목록·만들기(RSVP) · [id]/ EVT-003 응답 집계·명단 엑셀 · EVT-004 독촉
-      settings/            다음 단계 (API 목록만 표시)
+      settings/            ?tab= 기관 정보 SET-001(로고·직인) · 하원 목적지 SET-002 · 약관 SET-005 · 감사 로그 SEC-002(원장) · 내 계정
     invite/[token]         STF-002 초대 수락 (로그인 전 공개 화면)
     api/
       auth/login|logout|session|ws-token        BFF 인증
       auth/staff-invitations/[token]/accept     초대 수락 → 로그인 쿠키
       proxy/[...path]      → BACKEND_URL/api/v1/** (인증 필요 API)
       proxy-public/[...path]  공개 API 허용 목록 (임시 비밀번호 등)
-  components/              AdminShell, PageHeader, StatusChip, TargetPicker(발송 대상), AttachmentField(S3 직접 업로드) …
+  components/              AdminShell, PageHeader, StatusChip, TargetPicker(발송 대상), AttachmentField(S3 직접 업로드), TermsGate(약관 재동의) …
   lib/
     api.ts                 클라이언트 fetch 래퍼 (ApiError, 엑셀 다운로드)
     session.ts             세션·기관 전환·로그아웃 훅
@@ -71,4 +71,4 @@ src/
 
 ## 다음 단계
 
-기관 설정·약관(SET).
+관리자 웹 IA 화면은 모두 들어갔다. 남은 일: `npm run build` 로 타입·빌드 검증, 실제 백엔드와 연동 점검(응답 필드명·권한), 통계(STAT) 화면은 Phase 2.

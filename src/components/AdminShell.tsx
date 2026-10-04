@@ -34,6 +34,7 @@ import AccountIcon from '@mui/icons-material/AccountCircleOutlined';
 import { useSession, useSwitchInstitution, logout } from '@/lib/session';
 import { ROLE_LABEL } from '@/lib/format';
 import ChangePasswordDialog from './ChangePasswordDialog';
+import TermsGate from './TermsGate';
 
 const DRAWER = 232;
 
@@ -69,7 +70,7 @@ const NAV: { group: string; items: NavItem[] }[] = [
       { href: '/events', label: '행사(RSVP)', icon: <EventIcon /> },
     ],
   },
-  { group: '기관', items: [{ href: '/settings', label: '설정', icon: <SettingsIcon />, managerOnly: true }] },
+  { group: '기관', items: [{ href: '/settings', label: '설정', icon: <SettingsIcon /> }] },
 ];
 
 export default function AdminShell({ children }: { children: ReactNode }) {
@@ -185,6 +186,8 @@ export default function AdminShell({ children }: { children: ReactNode }) {
       </Box>
 
       {/* 임시 비밀번호로 들어온 경우 변경을 강제 (AUTH-005) */}
+      {/* 비밀번호 강제 변경이 먼저, 그다음 약관 재동의 */}
+      {!session?.user.mustChangePassword && <TermsGate />}
       <ChangePasswordDialog open={pwOpen || !!session?.user.mustChangePassword} forced={!!session?.user.mustChangePassword} onClose={() => setPwOpen(false)} />
     </Box>
   );
