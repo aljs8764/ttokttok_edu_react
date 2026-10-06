@@ -195,7 +195,7 @@ function SchedulePanel({ items, loading }: { items?: ScheduleItem[]; loading: bo
   );
 }
 
-const SOURCE_LABEL: Record<TimelineEntry['source'], string> = { TEACHER_APP: '교사앱', ADMIN_WEB: '웹', SYSTEM: '시스템' };
+const SOURCE_LABEL: Record<TimelineEntry['source'], string> = { TEACHER_APP: '교사앱', ADMIN_WEB: '웹', SYSTEM: '시스템', STUDENT_APP: '학생 QR' };
 
 /** DASH-002 실시간 타임라인 (최신 20건, 소켓 신호로 갱신) */
 function TimelinePanel({ entries, loading }: { entries?: TimelineEntry[]; loading: boolean }) {

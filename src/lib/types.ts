@@ -147,7 +147,7 @@ export interface TimelineEntry {
   destinationName: string | null;
   reason: string | null;
   actorName: string;
-  source: 'TEACHER_APP' | 'ADMIN_WEB' | 'SYSTEM';
+  source: 'TEACHER_APP' | 'ADMIN_WEB' | 'SYSTEM' | 'STUDENT_APP';
   occurredAt: string;
 }
 
@@ -403,5 +403,30 @@ export interface AuditLog {
   resourceId: string | null;
   actor: { id: string; name: string };
   diff: Record<string, unknown>;
+  at: string;
+}
+
+// ───────── 학생앱 QR 출석 (QR-001·002) ─────────
+
+export interface CheckinQr {
+  id: string;
+  name: string;
+  /** QR 에 담을 문자열 (https://ttok.app/qr/{token}) */
+  content: string;
+  createdAt: string;
+  rotatedAt: string | null;
+}
+
+export interface Geofence {
+  latitude: number;
+  longitude: number;
+  radiusMeters: number;
+}
+
+export interface QrScanFailure {
+  studentId: string;
+  studentName: string;
+  reason: 'QR_INVALID' | 'NOT_ENROLLED' | 'OUT_OF_RANGE' | 'NO_CLASS_NOW' | 'LOCATION_REQUIRED' | string;
+  distanceMeters: number | null;
   at: string;
 }

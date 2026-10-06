@@ -29,6 +29,7 @@ import BadgeIcon from '@mui/icons-material/BadgeOutlined';
 import CampaignIcon from '@mui/icons-material/CampaignOutlined';
 import EventIcon from '@mui/icons-material/EventAvailableOutlined';
 import SettingsIcon from '@mui/icons-material/SettingsOutlined';
+import QrCodeIcon from '@mui/icons-material/QrCode2';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountIcon from '@mui/icons-material/AccountCircleOutlined';
 import { useSession, useSwitchInstitution, logout } from '@/lib/session';
@@ -70,7 +71,13 @@ const NAV: { group: string; items: NavItem[] }[] = [
       { href: '/events', label: '행사(RSVP)', icon: <EventIcon /> },
     ],
   },
-  { group: '기관', items: [{ href: '/settings', label: '설정', icon: <SettingsIcon /> }] },
+  {
+    group: '기관',
+    items: [
+      { href: '/qr-codes', label: '출석 QR', icon: <QrCodeIcon />, managerOnly: true },
+      { href: '/settings', label: '설정', icon: <SettingsIcon /> },
+    ],
+  },
 ];
 
 export default function AdminShell({ children }: { children: ReactNode }) {

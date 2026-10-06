@@ -32,8 +32,10 @@ src/
       staff/               STF-001 교직원 목록·직접 등록 · STF-002 이메일 초대·초대 내역
       notices/             NTC-004 발송 이력 · new/ NTC-001 작성(예약·첨부) · [id]/ NTC-005 수신 확인·NTC-006 미열람 재발송 · [id]/edit 예약 수정
       events/              EVT-001 행사 목록·만들기(RSVP) · [id]/ EVT-003 응답 집계·명단 엑셀 · EVT-004 독촉
+      qr-codes/            QR-001 출석 QR 만들기·재발급·삭제·인쇄 · QR-002 기관 위치(지오펜스) · 최근 스캔 실패
       settings/            ?tab= 기관 정보 SET-001(로고·직인) · 하원 목적지 SET-002 · 약관 SET-005 · 감사 로그 SEC-002(원장) · 내 계정
     invite/[token]         STF-002 초대 수락 (로그인 전 공개 화면)
+    print/qr?ids=          출석 QR A4 인쇄 화면 (사이드바 없이, 열리면 인쇄 창)
     api/
       auth/login|logout|session|ws-token        BFF 인증
       auth/staff-invitations/[token]/accept     초대 수락 → 로그인 쿠키
@@ -68,6 +70,11 @@ src/
 
 어드민 기획서 가이드: Primary `#1B2559`, Accent `#FF6B4A`, Surface `#F6F7FB`, 라운드 8px·그림자 최소,
 상태 색 고정(등원/성공=그린, 결석=레드, 지각=앰버). 화면 제목 옆에 IA 메뉴ID 를 표시한다. 폰트는 Pretendard(CDN).
+
+## 학생 QR 출석 (스펙 7-7)
+
+`qrcode` 패키지로 QR 을 SVG 로 그린다 (인쇄해도 선명). 새 의존성이므로 `npm install` 을 다시 한 번 실행한다.
+학생은 학생앱으로 찍고, 대시보드 타임라인에는 출처가 "학생 QR" 로 보인다.
 
 ## 다음 단계
 
