@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import Alert from '@mui/material/Alert';
+import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
@@ -29,13 +30,19 @@ import StatusChip from '@/components/StatusChip';
 /** DASH-001 투데이 KPI · DASH-002 실시간 타임라인 · DASH-003 주요 일정 · DASH-005 결석/지각 위젯 */
 export default function DashboardView() {
   const qc = useQueryClient();
-  const { session, manager } = useSession();
+  const { session, manager, role } = useSession();
   const instId = session?.institution?.institutionId;
 
   const today = useQuery({ queryKey: ['dashboard', 'today', instId], queryFn: () => api.get<DashboardToday>('dashboard/today'), enabled: !!instId, refetchInterval: 60_000 });
   const timeline = useQuery({ queryKey: ['dashboard', 'timeline', instId], queryFn: () => api.get<TimelineEntry[]>('dashboard/timeline', { limit: 20 }), enabled: !!instId });
   const schedule = useQuery({ queryKey: ['dashboard', 'schedule', instId], queryFn: () => api.get<ScheduleItem[]>('dashboard/schedule', { days: 2 }), enabled: !!instId });
   const classes = useQuery({ queryKey: ['classes', instId], queryFn: () => api.get<Classroom[]>('classes'), enabled: !!instId && !manager });
+
+  // ONB-001: 원장이 반·하원 목적지를 아직 안 만들었으면 시작하기로 안내
+  const owner = role === 'OWNER';
+  const setupClasses = useQuery({ queryKey: ['classes', instId], queryFn: () => api.get<Classroom[]>('classes'), enabled: !!instId && owner });
+  const setupDestinations = useQuery({ queryKey: ['destinations', instId], queryFn: () => api.get<unknown[]>('destinations'), enabled: !!instId && owner });
+  const needsSetup = owner && !!setupClasses.data && !!setupDestinations.data && (setupClasses.data.length === 0 || setupDestinations.data.length === 0);
 
   // 관리자는 기관 토픽, 교사는 담당 반 토픽 (백엔드 구독 권한과 동일)
   const topics = useMemo(() => {
@@ -61,6 +68,19 @@ export default function DashboardView() {
         menuId="DASH-001"
         description={today.data ? `${dayjs(today.data.date).format('M월 D일 (dd)')} · ${time(today.data.asOf)} 기준${manager ? '' : ' · 담당 반'}` : undefined}
       />
+      {needsSetup && (
+        <Alert
+          severity="info"
+          sx={{ mb: 2 }}
+          action={
+            <Button color="inherit" size="small" component={Link} href="/onboarding">
+              시작하기
+            </Button>
+          }
+        >
+          아직 반이나 하원 목적지가 없습니다. 기본 설정을 마치면 교사 앱에서 출결을 처리할 수 있습니다.
+        </Alert>
+      )}
       {today.isError && <Alert severity="error" sx={{ mb: 2 }}>{errorMessage(today.error)}</Alert>}
 
       <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(4, 1fr)' }, mb: 2 }}>
