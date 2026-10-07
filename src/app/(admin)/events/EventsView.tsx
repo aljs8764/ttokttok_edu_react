@@ -25,7 +25,7 @@ import { useRouter } from 'next/navigation';
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, errorMessage } from '@/lib/api';
 import { dateTime } from '@/lib/format';
-import { useRealtime } from '@/lib/realtime';
+import { ownerEventDestinations, useRealtime } from '@/lib/realtime';
 import { useSession } from '@/lib/session';
 import type { Page, SchoolEvent, Tally } from '@/lib/types';
 import PageHeader from '@/components/PageHeader';
@@ -47,7 +47,7 @@ export default function EventsView() {
     placeholderData: keepPreviousData,
   });
 
-  useRealtime(manager && instId ? [`/topic/inst.${instId}`] : [], (msg) => {
+  useRealtime(ownerEventDestinations(manager, instId), (msg) => {
     if (msg.type === 'event.responded') void qc.invalidateQueries({ queryKey: ['events'] });
   });
 

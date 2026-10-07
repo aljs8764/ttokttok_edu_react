@@ -32,7 +32,7 @@ import { api, errorMessage } from '@/lib/api';
 import { dateTime } from '@/lib/format';
 import { fileSize, openFile } from '@/lib/files';
 import { NOTICE_KIND, NOTICE_STATUS } from '@/lib/notice';
-import { useRealtime } from '@/lib/realtime';
+import { ownerEventDestinations, useRealtime } from '@/lib/realtime';
 import { useSession } from '@/lib/session';
 import type { Notice, NoticeReceipts } from '@/lib/types';
 import PageHeader from '@/components/PageHeader';
@@ -57,10 +57,10 @@ export default function NoticeDetailView({ id }: { id: string }) {
     queryKey: ['notices', instId, 'receipts', id],
     queryFn: () => api.get<NoticeReceipts>(`notices/${id}/receipts`),
     enabled: !!instId && sent,
-    refetchInterval: manager ? false : 30_000,
+    refetchInterval: manager ? false : 120_000, // 교사는 개인 큐가 주 경로, 폴링은 안전망
   });
 
-  useRealtime(manager && instId ? [`/topic/inst.${instId}`] : [], (msg) => {
+  useRealtime(ownerEventDestinations(manager, instId), (msg) => {
     if ((msg.type === 'notice.read' || msg.type === 'notice.sent') && msg.noticeId === id) void qc.invalidateQueries({ queryKey: ['notices'] });
   });
 

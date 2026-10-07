@@ -3,8 +3,17 @@
 import { useEffect, useRef } from 'react';
 import { Client, type IMessage } from '@stomp/stompjs';
 
+/** 교사가 받는 개인 큐 — 본인이 쓴 알림장·행사의 notice.read·notice.sent·event.responded */
+export const USER_QUEUE = '/user/queue/events';
+
+/** 알림장·행사 화면의 실시간 신호 목적지: 원장·실장은 기관 토픽, 교사는 개인 큐(원장·실장이 둘 다 받으면 중복) */
+export function ownerEventDestinations(manager: boolean, instId?: string): string[] {
+  if (!instId) return [];
+  return [manager ? `/topic/inst.${instId}` : USER_QUEUE];
+}
+
 /**
- * STOMP 구독 (스펙 6장). 원장·실장은 /topic/inst.{기관}, 교사는 담당 반 /topic/class.{반}.
+ * STOMP 구독 (스펙 6장). 원장·실장은 /topic/inst.{기관}, 교사는 담당 반 /topic/class.{반}, 알림장·행사는 개인 큐 /user/queue/events.
  * 메시지가 오면 화면은 REST 로 다시 조회한다 — 소켓은 "바뀌었다"는 신호로만 쓴다.
  * 연결이 끊기면 5초 뒤 새 토큰으로 재연결.
  */
