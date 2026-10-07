@@ -33,7 +33,7 @@ import NextLink from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, download, errorMessage } from '@/lib/api';
 import { dateTime } from '@/lib/format';
-import { useRealtime } from '@/lib/realtime';
+import { ownerEventDestinations, useRealtime } from '@/lib/realtime';
 import { useSession } from '@/lib/session';
 import type { EventSummary, SchoolEvent } from '@/lib/types';
 import PageHeader from '@/components/PageHeader';
@@ -59,9 +59,9 @@ export default function EventDetailView({ id }: { id: string }) {
     queryKey: ['events', instId, 'summary', id],
     queryFn: () => api.get<EventSummary>(`events/${id}/summary`),
     enabled: !!instId,
-    refetchInterval: manager ? false : 30_000,
+    refetchInterval: manager ? false : 120_000, // 교사는 개인 큐가 주 경로, 폴링은 안전망
   });
-  useRealtime(manager && instId ? [`/topic/inst.${instId}`] : [], (msg) => {
+  useRealtime(ownerEventDestinations(manager, instId), (msg) => {
     if (msg.type === 'event.responded' && msg.eventId === id) void qc.invalidateQueries({ queryKey: ['events'] });
   });
 

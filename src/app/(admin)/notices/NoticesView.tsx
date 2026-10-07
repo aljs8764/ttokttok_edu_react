@@ -26,7 +26,7 @@ import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-quer
 import { api, errorMessage } from '@/lib/api';
 import { dateTime } from '@/lib/format';
 import { NOTICE_KIND, NOTICE_STATUS } from '@/lib/notice';
-import { useRealtime } from '@/lib/realtime';
+import { ownerEventDestinations, useRealtime } from '@/lib/realtime';
 import { useSession } from '@/lib/session';
 import type { Notice, NoticeKind, NoticeStatus, Page } from '@/lib/types';
 import PageHeader from '@/components/PageHeader';
@@ -47,11 +47,11 @@ export default function NoticesView() {
     queryFn: () => api.get<Page<Notice>>('notices', { kind: kind || undefined, status: status || undefined, page, size: 20 }),
     enabled: !!instId,
     placeholderData: keepPreviousData,
-    refetchInterval: manager ? false : 30_000,
+    refetchInterval: manager ? false : 120_000, // 교사는 개인 큐가 주 경로, 폴링은 안전망
   });
 
-  // 열람·발송 신호는 기관 토픽으로만 온다 (원장·실장)
-  useRealtime(manager && instId ? [`/topic/inst.${instId}`] : [], (msg) => {
+  // 열람·발송 신호: 원장·실장은 기관 토픽, 교사는 개인 큐(본인 작성분)
+  useRealtime(ownerEventDestinations(manager, instId), (msg) => {
     if (msg.type === 'notice.read' || msg.type === 'notice.sent') void qc.invalidateQueries({ queryKey: ['notices'] });
   });
 
