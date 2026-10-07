@@ -375,7 +375,17 @@ export interface InstitutionSettings {
   earlyLeaveThresholdMinutes: number;
   logo: FileRef | null;
   seal: FileRef | null;
+  /** 스펙 7-8 기관 종류 */
+  type: InstitutionType;
 }
+
+export type InstitutionType = 'ACADEMY' | 'SCHOOL' | 'DAYCARE' | 'OTHER';
+export const INSTITUTION_TYPE_LABEL: Record<InstitutionType, string> = {
+  ACADEMY: '학원',
+  SCHOOL: '학교',
+  DAYCARE: '어린이집·유치원',
+  OTHER: '기타',
+};
 
 export type DestinationType = 'HOME' | 'ACADEMY' | 'SHUTTLE' | 'ETC';
 
@@ -424,7 +434,8 @@ export interface Geofence {
 }
 
 export interface QrScanFailure {
-  studentId: string;
+  /** null = 이 기관에 등록되지 않은 아이가 찍음 (스펙 7-8) */
+  studentId: string | null;
   studentName: string;
   reason: 'QR_INVALID' | 'NOT_ENROLLED' | 'OUT_OF_RANGE' | 'NO_CLASS_NOW' | 'LOCATION_REQUIRED' | string;
   distanceMeters: number | null;

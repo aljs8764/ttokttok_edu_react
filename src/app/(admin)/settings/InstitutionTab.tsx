@@ -6,6 +6,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import InputAdornment from '@mui/material/InputAdornment';
+import MenuItem from '@mui/material/MenuItem';
 import LinearProgress from '@mui/material/LinearProgress';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
@@ -15,7 +16,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, errorMessage } from '@/lib/api';
 import { acceptFor, checkFile, uploadFile, type FilePurpose } from '@/lib/files';
 import { useSession } from '@/lib/session';
-import type { FileRef, InstitutionSettings } from '@/lib/types';
+import { INSTITUTION_TYPE_LABEL, type FileRef, type InstitutionSettings, type InstitutionType } from '@/lib/types';
 
 /**
  * SET-001 기관 정보. 수정은 원장만 (실장·교사는 보기만).
@@ -38,6 +39,7 @@ export default function InstitutionTab() {
   const [early, setEarly] = useState('10');
   const [logo, setLogo] = useState<FileRef | null>(null);
   const [seal, setSeal] = useState<FileRef | null>(null);
+  const [type, setType] = useState<InstitutionType>('ACADEMY');
   const [saved, setSaved] = useState(false);
 
   const reset = (d: InstitutionSettings) => {
@@ -49,6 +51,7 @@ export default function InstitutionTab() {
     setEarly(String(d.earlyLeaveThresholdMinutes));
     setLogo(d.logo);
     setSeal(d.seal);
+    setType(d.type ?? 'ACADEMY');
   };
   useEffect(() => {
     if (inst.data) reset(inst.data);
@@ -65,6 +68,7 @@ export default function InstitutionTab() {
         earlyLeaveThresholdMinutes: Number(early),
         logoFileId: logo?.id ?? null,
         sealFileId: seal?.id ?? null,
+        type,
       }),
     onSuccess: (d) => {
       qc.setQueryData(['institution', instId], d);
@@ -94,6 +98,23 @@ export default function InstitutionTab() {
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField label="대표자" required fullWidth value={ownerName} onChange={(e) => (setOwnerName(e.target.value), setSaved(false))} disabled={ro} inputProps={{ maxLength: 50 }} />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 4 }}>
+          <TextField
+            select
+            label="기관 종류"
+            fullWidth
+            value={type}
+            onChange={(e) => (setType(e.target.value as InstitutionType), setSaved(false))}
+            disabled={ro}
+            helperText="학부모 앱에서 아이가 다니는 곳을 구분해 보여줍니다"
+          >
+            {(Object.keys(INSTITUTION_TYPE_LABEL) as InstitutionType[]).map((t) => (
+              <MenuItem key={t} value={t}>
+                {INSTITUTION_TYPE_LABEL[t]}
+              </MenuItem>
+            ))}
+          </TextField>
         </Grid>
         <Grid size={{ xs: 12, sm: 8 }}>
           <TextField label="주소" fullWidth value={address} onChange={(e) => (setAddress(e.target.value), setSaved(false))} disabled={ro} inputProps={{ maxLength: 200 }} />
