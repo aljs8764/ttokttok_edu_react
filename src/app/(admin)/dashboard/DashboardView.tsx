@@ -24,10 +24,11 @@ import { dateTime, percent, time } from '@/lib/format';
 import { useRealtime } from '@/lib/realtime';
 import { useSession } from '@/lib/session';
 import type { Classroom, DashboardStudentItem, DashboardToday, ScheduleItem, TimelineEntry } from '@/lib/types';
+import { CongestionMiniWidget, LowReadNoticesWidget } from '@/components/InsightWidgets';
 import PageHeader from '@/components/PageHeader';
 import StatusChip from '@/components/StatusChip';
 
-/** DASH-001 투데이 KPI · DASH-002 실시간 타임라인 · DASH-003 주요 일정 · DASH-005 결석/지각 위젯 */
+/** DASH-001 투데이 KPI · DASH-002 실시간 타임라인 · DASH-003 주요 일정 · DASH-004 미열람 알림장 · DASH-005 결석/지각 위젯 · DASH-006 혼잡도 */
 export default function DashboardView() {
   const qc = useQueryClient();
   const { session, manager, role } = useSession();
@@ -94,6 +95,8 @@ export default function DashboardView() {
         <Stack spacing={2}>
           <StudentWidgets data={today.data} loading={today.isLoading} />
           <SchedulePanel items={schedule.data} loading={schedule.isLoading} />
+          <LowReadNoticesWidget instId={instId} />
+          <CongestionMiniWidget instId={instId} />
         </Stack>
         <TimelinePanel entries={timeline.data} loading={timeline.isLoading} />
       </Box>

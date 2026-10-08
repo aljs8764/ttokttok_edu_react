@@ -30,6 +30,7 @@ import CampaignIcon from '@mui/icons-material/CampaignOutlined';
 import EventIcon from '@mui/icons-material/EventAvailableOutlined';
 import SettingsIcon from '@mui/icons-material/SettingsOutlined';
 import QrCodeIcon from '@mui/icons-material/QrCode2';
+import InsightsIcon from '@mui/icons-material/InsightsOutlined';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountIcon from '@mui/icons-material/AccountCircleOutlined';
 import { useSession, useSwitchInstitution, logout } from '@/lib/session';
@@ -70,6 +71,10 @@ const NAV: { group: string; items: NavItem[] }[] = [
       { href: '/notices', label: '알림장', icon: <CampaignIcon /> },
       { href: '/events', label: '행사(RSVP)', icon: <EventIcon /> },
     ],
+  },
+  {
+    group: '분석',
+    items: [{ href: '/stats', label: '통계·분석', icon: <InsightsIcon />, managerOnly: true }],
   },
   {
     group: '기관',
