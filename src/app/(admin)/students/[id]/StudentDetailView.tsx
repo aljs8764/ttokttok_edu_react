@@ -38,6 +38,7 @@ import { useSession } from '@/lib/session';
 import { LINK_STATUS, RELATIONS, STUDENT_STATUS, WITHDRAWAL_REASON, formatPhone, isMobile } from '@/lib/student';
 import type { Classroom, Guardian, StudentDetail, StudentStatus, WithdrawalReason } from '@/lib/types';
 import PageHeader from '@/components/PageHeader';
+import StudentExtras from '@/components/students/StudentExtras';
 
 /**
  * STU-006 원생 상세 — 기본정보·메모, 반 이력, 상태 이력, 형제.
@@ -201,6 +202,10 @@ export default function StudentDetailView({ id }: { id: string }) {
                 }))}
               />
             </Paper>
+          </Grid>
+
+          <Grid size={{ xs: 12 }}>
+            <StudentExtras studentId={s.id} />
           </Grid>
         </Grid>
       )}

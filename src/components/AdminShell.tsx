@@ -35,6 +35,11 @@ import PollIcon from '@mui/icons-material/PollOutlined';
 import PhotoIcon from '@mui/icons-material/PhotoLibraryOutlined';
 import EventBusyIcon from '@mui/icons-material/EventBusyOutlined';
 import ArticleIcon from '@mui/icons-material/ArticleOutlined';
+import ScheduleIcon from '@mui/icons-material/ScheduleOutlined';
+import HourglassIcon from '@mui/icons-material/HourglassEmptyOutlined';
+import EventNoteIcon from '@mui/icons-material/EventNoteOutlined';
+import RepeatIcon from '@mui/icons-material/EventRepeatOutlined';
+import TimerIcon from '@mui/icons-material/TimerOutlined';
 import InsightsIcon from '@mui/icons-material/InsightsOutlined';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountIcon from '@mui/icons-material/AccountCircleOutlined';
@@ -68,7 +73,10 @@ const NAV: { group: string; items: NavItem[] }[] = [
     items: [
       { href: '/students', label: '원생 관리', icon: <PeopleIcon /> },
       { href: '/classes', label: '반 관리', icon: <ClassIcon /> },
+      { href: '/timetable', label: '시간표', icon: <ScheduleIcon /> },
+      { href: '/waitlist', label: '대기자', icon: <HourglassIcon />, managerOnly: true },
       { href: '/staff', label: '교직원', icon: <BadgeIcon />, managerOnly: true },
+      { href: '/staff-attendance', label: '교직원 출퇴근', icon: <TimerIcon /> },
     ],
   },
   {
@@ -76,6 +84,8 @@ const NAV: { group: string; items: NavItem[] }[] = [
     items: [
       { href: '/notices', label: '알림장', icon: <CampaignIcon /> },
       { href: '/events', label: '행사(RSVP)', icon: <EventIcon /> },
+      { href: '/event-calendar', label: '행사 달력', icon: <EventNoteIcon /> },
+      { href: '/event-templates', label: '행사 템플릿', icon: <RepeatIcon /> },
       { href: '/messages', label: '메시지함', icon: <ChatIcon /> },
       { href: '/surveys', label: '설문', icon: <PollIcon /> },
       { href: '/albums', label: '앨범', icon: <PhotoIcon /> },
@@ -105,7 +115,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
   const { session, manager } = useSession();
   const switchInst = useSwitchInstitution();
 
-  const isActive = (href: string) => (href === '/attendance' ? pathname === href : pathname.startsWith(href));
+  const isActive = (href: string) => (href === '/attendance' ? pathname === href : pathname === href || pathname.startsWith(href + '/'));
 
   const nav = (
     <Box sx={{ py: 1 }}>
