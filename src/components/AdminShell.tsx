@@ -40,6 +40,7 @@ import HourglassIcon from '@mui/icons-material/HourglassEmptyOutlined';
 import EventNoteIcon from '@mui/icons-material/EventNoteOutlined';
 import RepeatIcon from '@mui/icons-material/EventRepeatOutlined';
 import TimerIcon from '@mui/icons-material/TimerOutlined';
+import ReceiptIcon from '@mui/icons-material/ReceiptLongOutlined';
 import InsightsIcon from '@mui/icons-material/InsightsOutlined';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountIcon from '@mui/icons-material/AccountCircleOutlined';
@@ -94,7 +95,10 @@ const NAV: { group: string; items: NavItem[] }[] = [
   },
   {
     group: '분석',
-    items: [{ href: '/stats', label: '통계·분석', icon: <InsightsIcon />, managerOnly: true }],
+    items: [
+      { href: '/invoices', label: '수납 관리', icon: <ReceiptIcon />, managerOnly: true },
+      { href: '/stats', label: '통계·분석', icon: <InsightsIcon />, managerOnly: true },
+    ],
   },
   {
     group: '기관',

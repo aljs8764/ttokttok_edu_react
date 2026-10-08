@@ -25,6 +25,7 @@ import { useRealtime } from '@/lib/realtime';
 import { useSession } from '@/lib/session';
 import type { Classroom, DashboardStudentItem, DashboardToday, ScheduleItem, TimelineEntry } from '@/lib/types';
 import { CongestionMiniWidget, LowReadNoticesWidget } from '@/components/InsightWidgets';
+import BillingWidget from '@/components/BillingWidget';
 import PageHeader from '@/components/PageHeader';
 import StatusChip from '@/components/StatusChip';
 
@@ -97,6 +98,7 @@ export default function DashboardView() {
           <SchedulePanel items={schedule.data} loading={schedule.isLoading} />
           <LowReadNoticesWidget instId={instId} />
           <CongestionMiniWidget instId={instId} />
+          {manager && <BillingWidget instId={instId} />}
         </Stack>
         <TimelinePanel entries={timeline.data} loading={timeline.isLoading} />
       </Box>
