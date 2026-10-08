@@ -30,6 +30,11 @@ import CampaignIcon from '@mui/icons-material/CampaignOutlined';
 import EventIcon from '@mui/icons-material/EventAvailableOutlined';
 import SettingsIcon from '@mui/icons-material/SettingsOutlined';
 import QrCodeIcon from '@mui/icons-material/QrCode2';
+import ChatIcon from '@mui/icons-material/ChatBubbleOutline';
+import PollIcon from '@mui/icons-material/PollOutlined';
+import PhotoIcon from '@mui/icons-material/PhotoLibraryOutlined';
+import EventBusyIcon from '@mui/icons-material/EventBusyOutlined';
+import ArticleIcon from '@mui/icons-material/ArticleOutlined';
 import InsightsIcon from '@mui/icons-material/InsightsOutlined';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountIcon from '@mui/icons-material/AccountCircleOutlined';
@@ -55,6 +60,7 @@ const NAV: { group: string; items: NavItem[] }[] = [
     items: [
       { href: '/attendance', label: '데일리 리포트', icon: <ChecklistIcon /> },
       { href: '/attendance/monthly', label: '월간 출석부', icon: <CalendarIcon /> },
+      { href: '/absence-requests', label: '결석·지각 신청', icon: <EventBusyIcon /> },
     ],
   },
   {
@@ -70,6 +76,10 @@ const NAV: { group: string; items: NavItem[] }[] = [
     items: [
       { href: '/notices', label: '알림장', icon: <CampaignIcon /> },
       { href: '/events', label: '행사(RSVP)', icon: <EventIcon /> },
+      { href: '/messages', label: '메시지함', icon: <ChatIcon /> },
+      { href: '/surveys', label: '설문', icon: <PollIcon /> },
+      { href: '/albums', label: '앨범', icon: <PhotoIcon /> },
+      { href: '/notice-templates', label: '알림장 템플릿', icon: <ArticleIcon /> },
     ],
   },
   {

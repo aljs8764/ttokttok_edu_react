@@ -25,6 +25,7 @@ import type { FileRef, Notice, NoticeKind, Target } from '@/lib/types';
 import AttachmentField from '@/components/AttachmentField';
 import PageHeader from '@/components/PageHeader';
 import TargetPicker, { toTargetRequest } from '@/components/TargetPicker';
+import TemplatePicker from '@/components/TemplatePicker';
 
 const MAX_TITLE = 100;
 const MAX_BODY = 5000;
@@ -113,6 +114,8 @@ export default function NoticeForm({ id }: { id?: string }) {
 
           <TargetPicker value={targets} onChange={setTargets} disabled={editingLocked} />
           <Divider />
+
+          {!editingLocked && <TemplatePicker kind={kind} title={title} body={body} onPick={(t) => (setTitle(t.title), setBody(t.body))} />}
 
           <TextField
             label="제목"

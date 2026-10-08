@@ -95,6 +95,11 @@ export default function NoticeDetailView({ id }: { id: string }) {
             <Button startIcon={<ArrowBackIcon />} component={NextLink} href="/notices">
               목록
             </Button>
+            {n?.status === 'SENT' && (
+              <Button variant="outlined" component={NextLink} href={`/messages?noticeId=${id}`}>
+                학부모 회신
+              </Button>
+            )}
             {n?.status === 'SCHEDULED' && (
               <>
                 <Button variant="outlined" component={NextLink} href={`/notices/${id}/edit`}>

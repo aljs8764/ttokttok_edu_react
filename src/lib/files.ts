@@ -1,15 +1,17 @@
 import { api } from './api';
 import type { FileRef } from './types';
 
-export type FilePurpose = 'LOGO' | 'SEAL' | 'ABSENCE_EVIDENCE' | 'NOTICE_ATTACHMENT';
+export type FilePurpose = 'LOGO' | 'SEAL' | 'ABSENCE_EVIDENCE' | 'NOTICE_ATTACHMENT' | 'ALBUM_MEDIA';
 
 export const MAX_FILE_BYTES = 20 * 1024 * 1024;
+const MAX_BY_PURPOSE: Partial<Record<FilePurpose, number>> = { ALBUM_MEDIA: 100 * 1024 * 1024 };
 
 const ALLOWED: Record<FilePurpose, string[]> = {
   LOGO: ['image/jpeg', 'image/png'],
   SEAL: ['image/jpeg', 'image/png'],
   ABSENCE_EVIDENCE: ['image/jpeg', 'image/png', 'image/heic', 'application/pdf'],
   NOTICE_ATTACHMENT: ['image/jpeg', 'image/png', 'image/heic', 'application/pdf'],
+  ALBUM_MEDIA: ['image/jpeg', 'image/png', 'image/heic', 'video/mp4', 'video/quicktime'],
 };
 
 export const acceptFor = (purpose: FilePurpose) => ALLOWED[purpose].join(',');
@@ -18,13 +20,15 @@ export const acceptFor = (purpose: FilePurpose) => ALLOWED[purpose].join(',');
 function mimeOf(file: File) {
   if (file.type) return file.type;
   if (/\.heic$/i.test(file.name)) return 'image/heic';
+  if (/\.mov$/i.test(file.name)) return 'video/quicktime';
   return 'application/octet-stream';
 }
 
 /** 업로드 전 검사. 문제가 없으면 null */
 export function checkFile(purpose: FilePurpose, file: File): string | null {
-  if (!ALLOWED[purpose].includes(mimeOf(file))) return 'jpg·png·heic·pdf 파일만 올릴 수 있습니다';
-  if (file.size > MAX_FILE_BYTES) return '20MB 이하 파일만 올릴 수 있습니다';
+  if (!ALLOWED[purpose].includes(mimeOf(file))) return purpose === 'ALBUM_MEDIA' ? 'jpg·png·heic 사진과 mp4·mov 영상만 올릴 수 있습니다' : 'jpg·png·heic·pdf 파일만 올릴 수 있습니다';
+  const max = MAX_BY_PURPOSE[purpose] ?? MAX_FILE_BYTES;
+  if (file.size > max) return `${Math.round(max / 1024 / 1024)}MB 이하 파일만 올릴 수 있습니다`;
   return null;
 }
 

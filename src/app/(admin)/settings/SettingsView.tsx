@@ -10,10 +10,12 @@ import DestinationsTab from './DestinationsTab';
 import TermsTab from './TermsTab';
 import AuditTab from './AuditTab';
 import AccountTab from './AccountTab';
+import NotificationChannelsTab from './NotificationChannelsTab';
 
 const TABS = [
   { key: 'institution', label: '기관 정보', menuId: 'SET-001' },
   { key: 'destinations', label: '하원 목적지', menuId: 'SET-002' },
+  { key: 'channels', label: '알림 채널', menuId: 'SET-004' },
   { key: 'terms', label: '약관', menuId: 'SET-005' },
   { key: 'audit', label: '감사 로그', menuId: 'SEC-002', ownerOnly: true },
   { key: 'account', label: '내 계정', menuId: 'AUTH-005' },
@@ -42,6 +44,7 @@ export default function SettingsView() {
       </Tabs>
       {current === 'institution' && <InstitutionTab />}
       {current === 'destinations' && <DestinationsTab />}
+      {current === 'channels' && <NotificationChannelsTab />}
       {current === 'terms' && <TermsTab />}
       {current === 'audit' && owner && <AuditTab />}
       {current === 'account' && <AccountTab />}
