@@ -45,6 +45,10 @@ import InsightsIcon from '@mui/icons-material/InsightsOutlined';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountIcon from '@mui/icons-material/AccountCircleOutlined';
 import { useSession, useSwitchInstitution, logout } from '@/lib/session';
+import { usePlatformAdmin } from '@/lib/platform';
+import PlatformNoticeBanner from '@/components/PlatformNoticeBanner';
+import SupportIcon from '@mui/icons-material/SupportAgentOutlined';
+import AdminPanelIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
 import { ROLE_LABEL } from '@/lib/format';
 import ChangePasswordDialog from './ChangePasswordDialog';
 import TermsGate from './TermsGate';
@@ -104,10 +108,16 @@ const NAV: { group: string; items: NavItem[] }[] = [
     group: '기관',
     items: [
       { href: '/qr-codes', label: '출석 QR', icon: <QrCodeIcon />, managerOnly: true },
+      { href: '/support', label: '문의하기', icon: <SupportIcon />, managerOnly: true },
       { href: '/settings', label: '설정', icon: <SettingsIcon /> },
     ],
   },
 ];
+
+const PLATFORM_GROUP: { group: string; items: NavItem[] } = {
+  group: '운영사',
+  items: [{ href: '/platform', label: '운영 콘솔', icon: <AdminPanelIcon /> }],
+};
 
 export default function AdminShell({ children }: { children: ReactNode }) {
   const theme = useTheme();
@@ -118,6 +128,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { session, manager } = useSession();
   const switchInst = useSwitchInstitution();
+  const platformAdmin = usePlatformAdmin();
 
   const isActive = (href: string) => (href === '/attendance' ? pathname === href : pathname === href || pathname.startsWith(href + '/'));
 
@@ -128,7 +139,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
           똑똑<Box component="span" sx={{ color: 'secondary.main' }}>.</Box>
         </Typography>
       </Toolbar>
-      {NAV.map((g) => {
+      {[...NAV, ...(platformAdmin ? [PLATFORM_GROUP] : [])].map((g) => {
         const items = g.items.filter((i) => !i.managerOnly || manager);
         if (items.length === 0) return null;
         return (
@@ -218,6 +229,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
       </Box>
 
       <Box component="main" sx={{ flexGrow: 1, minWidth: 0, p: { xs: 2, md: 3 }, mt: 8 }}>
+        <PlatformNoticeBanner />
         {children}
       </Box>
 
