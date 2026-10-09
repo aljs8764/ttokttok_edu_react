@@ -49,6 +49,7 @@ import { usePlatformAdmin } from '@/lib/platform';
 import PlatformNoticeBanner from '@/components/PlatformNoticeBanner';
 import SupportIcon from '@mui/icons-material/SupportAgentOutlined';
 import AdminPanelIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
+import BusIcon from '@mui/icons-material/DirectionsBusOutlined';
 import { ROLE_LABEL } from '@/lib/format';
 import ChangePasswordDialog from './ChangePasswordDialog';
 import TermsGate from './TermsGate';
@@ -71,6 +72,7 @@ const NAV: { group: string; items: NavItem[] }[] = [
       { href: '/attendance', label: '데일리 리포트', icon: <ChecklistIcon /> },
       { href: '/attendance/monthly', label: '월간 출석부', icon: <CalendarIcon /> },
       { href: '/absence-requests', label: '결석·지각 신청', icon: <EventBusyIcon /> },
+      { href: '/shuttle', label: '셔틀 관제', icon: <BusIcon /> },
     ],
   },
   {
