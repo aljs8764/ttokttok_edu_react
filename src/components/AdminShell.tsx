@@ -47,6 +47,8 @@ import AccountIcon from '@mui/icons-material/AccountCircleOutlined';
 import { useSession, useSwitchInstitution, logout } from '@/lib/session';
 import { usePlatformAdmin } from '@/lib/platform';
 import PlatformNoticeBanner from '@/components/PlatformNoticeBanner';
+import IdleLogout from '@/components/IdleLogout';
+import { useSampleInstitution, useStartSample } from '@/components/SampleModeBanner';
 import SupportIcon from '@mui/icons-material/SupportAgentOutlined';
 import AdminPanelIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
 import BusIcon from '@mui/icons-material/DirectionsBusOutlined';
@@ -131,6 +133,8 @@ export default function AdminShell({ children }: { children: ReactNode }) {
   const { session, manager } = useSession();
   const switchInst = useSwitchInstitution();
   const platformAdmin = usePlatformAdmin();
+  const sample = useSampleInstitution();
+  const startSample = useStartSample();
 
   const isActive = (href: string) => (href === '/attendance' ? pathname === href : pathname === href || pathname.startsWith(href + '/'));
 
@@ -212,6 +216,19 @@ export default function AdminShell({ children }: { children: ReactNode }) {
             >
               비밀번호 변경
             </MenuItem>
+            {manager && (
+              <MenuItem
+                disabled={startSample.isPending}
+                onClick={() => {
+                  setMenuAnchor(null);
+                  const mine = sample.data?.sample;
+                  if (mine) switchInst.mutate(mine.institutionId);
+                  else startSample.mutate();
+                }}
+              >
+                {sample.data?.sample ? '체험 기관으로 이동' : '샘플 데이터로 체험하기'}
+              </MenuItem>
+            )}
             <Divider />
             <MenuItem onClick={() => void logout()}>로그아웃</MenuItem>
           </Menu>
@@ -233,6 +250,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
       <Box component="main" sx={{ flexGrow: 1, minWidth: 0, p: { xs: 2, md: 3 }, mt: 8 }}>
         <PlatformNoticeBanner />
         {children}
+        <IdleLogout />
       </Box>
 
       {/* 임시 비밀번호로 들어온 경우 변경을 강제 (AUTH-005) */}

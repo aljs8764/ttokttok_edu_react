@@ -32,6 +32,7 @@ import { DAYS, DAY_LABEL, ROLE_LABEL, dayList, hm } from '@/lib/format';
 import { useSession } from '@/lib/session';
 import type { Classroom, StaffMember } from '@/lib/types';
 import PageHeader from '@/components/PageHeader';
+import ClassTemplateDialog from './ClassTemplateDialog';
 
 /**
  * CLS-001 반 목록·생성·수정, CLS-002 반 삭제(원생 0명일 때만), STF-003 담당 교사 배정.
@@ -44,6 +45,7 @@ export default function ClassesView() {
   const [editing, setEditing] = useState<Classroom | 'new' | null>(null);
   const [assigning, setAssigning] = useState<Classroom | null>(null);
   const [deleting, setDeleting] = useState<Classroom | null>(null);
+  const [templateOpen, setTemplateOpen] = useState(false);
 
   const classes = useQuery({ queryKey: ['classes', instId], queryFn: () => api.get<Classroom[]>('classes'), enabled: !!instId });
   const staff = useQuery({ queryKey: ['staff', instId], queryFn: () => api.get<StaffMember[]>('staff'), enabled: !!instId && manager });
@@ -61,13 +63,19 @@ export default function ClassesView() {
         description={manager ? '정원·요일·시간은 출결 대상과 지각 판정에 쓰입니다.' : '담당 반만 표시됩니다.'}
         actions={
           manager && (
-            <Button variant="contained" startIcon={<AddIcon />} onClick={() => setEditing('new')}>
-              반 만들기
-            </Button>
+            <>
+              <Button variant="outlined" onClick={() => setTemplateOpen(true)}>
+                템플릿으로 만들기
+              </Button>
+              <Button variant="contained" startIcon={<AddIcon />} onClick={() => setEditing('new')}>
+                반 만들기
+              </Button>
+            </>
           )
         }
       />
 
+      <ClassTemplateDialog open={templateOpen} onClose={() => setTemplateOpen(false)} onCreated={refresh} />
       {classes.isFetching && !classes.data && <LinearProgress />}
       {classes.isError && <Alert severity="error">{errorMessage(classes.error)}</Alert>}
       {classes.data?.length === 0 && (

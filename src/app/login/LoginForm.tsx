@@ -38,6 +38,9 @@ export default function LoginForm() {
   const [pending, setPending] = useState(false);
   const [memberships, setMemberships] = useState<Membership[] | null>(null);
   const [findOpen, setFindOpen] = useState(false);
+  // AUTH-007 2단계 인증
+  const [challengeId, setChallengeId] = useState<string | null>(null);
+  const [otpCode, setOtpCode] = useState('');
 
   useEffect(() => {
     try {
@@ -72,19 +75,53 @@ export default function LoginForm() {
         setError(res.status === 429 ? '시도가 너무 많습니다. 1분 뒤 다시 시도하세요' : body.message ?? '로그인에 실패했습니다');
         return;
       }
-      try {
-        if (saveId) localStorage.setItem(SAVED_ID, loginId.trim());
-        else localStorage.removeItem(SAVED_ID);
-      } catch {
-        /* 무시 */
+      if (body.otpRequired) {
+        setChallengeId(body.challengeId);
+        setOtpCode('');
+        return;
       }
-      if (body.needsInstitution) setMemberships(body.user.memberships);
-      else router.replace(next);
+      afterLogin(body);
     } catch {
       setError('서버에 연결할 수 없습니다');
     } finally {
       setPending(false);
     }
+  }
+
+  async function submitOtp(e: FormEvent) {
+    e.preventDefault();
+    setPending(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/auth/login/otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ challengeId, code: otpCode.trim(), rememberMe }),
+      });
+      const body = await res.json();
+      if (!res.ok) {
+        // 시간 초과·5회 실패면 처음으로
+        if (/처음부터/.test(body.message ?? '')) setChallengeId(null);
+        setError(res.status === 429 ? '시도가 너무 많습니다. 1분 뒤 다시 시도하세요' : body.message ?? '인증에 실패했습니다');
+        return;
+      }
+      afterLogin(body);
+    } catch {
+      setError('서버에 연결할 수 없습니다');
+    } finally {
+      setPending(false);
+    }
+  }
+
+  function afterLogin(body: { needsInstitution: boolean; user: { memberships: Membership[] } }) {
+    try {
+      if (saveId) localStorage.setItem(SAVED_ID, loginId.trim());
+      else localStorage.removeItem(SAVED_ID);
+    } catch {
+      /* 무시 */
+    }
+    if (body.needsInstitution) setMemberships(body.user.memberships);
+    else router.replace(next);
   }
 
   async function choose(institutionId: string) {
@@ -120,6 +157,31 @@ export default function LoginForm() {
               ))}
             </List>
           </>
+        ) : challengeId ? (
+          <Box component="form" onSubmit={submitOtp}>
+            <Stack spacing={2}>
+              <Typography variant="subtitle1">2단계 인증</Typography>
+              <Typography variant="body2" color="text.secondary">
+                인증 앱(Google Authenticator 등)에 표시된 6자리 숫자를 입력하세요. 휴대폰을 잃어버렸다면 복구 코드(XXXXX-XXXXX)를 입력할 수 있습니다.
+              </Typography>
+              <TextField
+                label="인증 코드"
+                value={otpCode}
+                onChange={(e) => setOtpCode(e.target.value)}
+                autoComplete="one-time-code"
+                inputProps={{ inputMode: 'text', maxLength: 11 }}
+                autoFocus
+                required
+              />
+              {error && <Alert severity="error">{error}</Alert>}
+              <Button type="submit" variant="contained" size="large" disabled={pending || otpCode.trim().length < 6}>
+                확인
+              </Button>
+              <Link component="button" type="button" variant="body2" onClick={() => { setChallengeId(null); setError(null); }} sx={{ alignSelf: 'center' }}>
+                처음으로
+              </Link>
+            </Stack>
+          </Box>
         ) : (
           <Box component="form" onSubmit={submit}>
             <Stack spacing={2}>

@@ -27,6 +27,7 @@ import type { Classroom, DashboardStudentItem, DashboardToday, ScheduleItem, Tim
 import { CongestionMiniWidget, LowReadNoticesWidget } from '@/components/InsightWidgets';
 import BillingWidget from '@/components/BillingWidget';
 import PageHeader from '@/components/PageHeader';
+import SampleModeBanner from '@/components/SampleModeBanner';
 import StatusChip from '@/components/StatusChip';
 
 /** DASH-001 투데이 KPI · DASH-002 실시간 타임라인 · DASH-003 주요 일정 · DASH-004 미열람 알림장 · DASH-005 결석/지각 위젯 · DASH-006 혼잡도 */
@@ -70,6 +71,7 @@ export default function DashboardView() {
         menuId="DASH-001"
         description={today.data ? `${dayjs(today.data.date).format('M월 D일 (dd)')} · ${time(today.data.asOf)} 기준${manager ? '' : ' · 담당 반'}` : undefined}
       />
+      <SampleModeBanner empty={owner && setupClasses.data?.length === 0} />
       {needsSetup && (
         <Alert
           severity="info"
