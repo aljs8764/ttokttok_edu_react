@@ -15,6 +15,8 @@ import SubscriptionTab from './SubscriptionTab';
 import SecurityTab from './SecurityTab';
 import MissingAlertTab from './MissingAlertTab';
 import DataExportTab from './DataExportTab';
+import { LanguageCard } from '@/components/LanguageSwitch';
+import { useT } from '@/lib/i18n';
 
 const TABS = [
   { key: 'institution', label: '기관 정보', menuId: 'SET-001' },
@@ -37,6 +39,7 @@ export default function SettingsView() {
   const owner = role === 'OWNER';
   const manager = role === 'OWNER' || role === 'ADMIN';
   const router = useRouter();
+  const tr = useT();
   const pathname = usePathname();
   const params = useSearchParams();
   const tabs = TABS.filter((t) => (!('ownerOnly' in t && t.ownerOnly) || owner) && (!('managerOnly' in t && t.managerOnly) || manager));
@@ -48,7 +51,7 @@ export default function SettingsView() {
       <PageHeader title="설정" menuId={meta.menuId} />
       <Tabs value={current} onChange={(_, v) => router.replace(`${pathname}?tab=${v}`)} variant="scrollable" sx={{ mb: 3 }}>
         {tabs.map((t) => (
-          <Tab key={t.key} value={t.key} label={t.label} />
+          <Tab key={t.key} value={t.key} label={tr(t.label)} />
         ))}
       </Tabs>
       {current === 'institution' && <InstitutionTab />}
@@ -60,7 +63,12 @@ export default function SettingsView() {
       {current === 'audit' && owner && <AuditTab />}
       {current === 'export' && owner && <DataExportTab />}
       {current === 'security' && <SecurityTab />}
-      {current === 'account' && <AccountTab />}
+      {current === 'account' && (
+        <>
+          <AccountTab />
+          <LanguageCard />
+        </>
+      )}
     </>
   );
 }

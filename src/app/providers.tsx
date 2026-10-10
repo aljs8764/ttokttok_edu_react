@@ -10,6 +10,7 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/ko';
 import { theme } from './theme';
 import { ApiError } from '@/lib/api';
+import { LocaleProvider, useLocale } from '@/lib/i18n';
 
 dayjs.locale('ko');
 
@@ -30,9 +31,21 @@ export default function Providers({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ko">
-        <QueryClientProvider client={client}>{children}</QueryClientProvider>
-      </LocalizationProvider>
+      <LocaleProvider>
+        <Pickers>
+          <QueryClientProvider client={client}>{children}</QueryClientProvider>
+        </Pickers>
+      </LocaleProvider>
     </ThemeProvider>
+  );
+}
+
+/** 날짜 선택기도 화면 언어를 따른다 (SET-007) */
+function Pickers({ children }: { children: ReactNode }) {
+  const { locale } = useLocale();
+  return (
+    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={locale}>
+      {children}
+    </LocalizationProvider>
   );
 }

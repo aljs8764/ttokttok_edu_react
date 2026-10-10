@@ -21,11 +21,14 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import type { Membership } from '@/lib/types';
 import { ROLE_LABEL } from '@/lib/format';
+import { useT } from '@/lib/i18n';
+import LanguageSwitch from '@/components/LanguageSwitch';
 
 const SAVED_ID = 'ttok.savedLoginId';
 
 /** AUTH-001 관리자 로그인 (아이디 저장 · 자동 로그인) + 여러 기관 소속이면 기관 선택 */
 export default function LoginForm() {
+  const t = useT();
   const router = useRouter();
   const params = useSearchParams();
   const next = params.get('next') || '/dashboard';
@@ -140,19 +143,22 @@ export default function LoginForm() {
         <Typography variant="h1" sx={{ letterSpacing: -0.5 }}>
           똑똑<Box component="span" sx={{ color: 'secondary.main' }}>.</Box>
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-          학원 운영 관리자
-        </Typography>
+        <Stack direction="row" alignItems="center" sx={{ mb: 3 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
+            {t('학원 운영 관리자')}
+          </Typography>
+          <LanguageSwitch />
+        </Stack>
 
         {memberships ? (
           <>
             <Typography variant="subtitle1" gutterBottom>
-              관리할 기관을 선택하세요
+              {t('관리할 기관을 선택하세요')}
             </Typography>
             <List disablePadding>
               {memberships.map((m) => (
                 <ListItemButton key={m.institutionId} onClick={() => void choose(m.institutionId)} sx={{ border: 1, borderColor: 'divider', borderRadius: 1, mb: 1 }}>
-                  <ListItemText primary={m.institutionName} secondary={ROLE_LABEL[m.role]} />
+                  <ListItemText primary={m.institutionName} secondary={t(ROLE_LABEL[m.role])} />
                 </ListItemButton>
               ))}
             </List>
@@ -160,12 +166,12 @@ export default function LoginForm() {
         ) : challengeId ? (
           <Box component="form" onSubmit={submitOtp}>
             <Stack spacing={2}>
-              <Typography variant="subtitle1">2단계 인증</Typography>
+              <Typography variant="subtitle1">{t('2단계 인증')}</Typography>
               <Typography variant="body2" color="text.secondary">
-                인증 앱(Google Authenticator 등)에 표시된 6자리 숫자를 입력하세요. 휴대폰을 잃어버렸다면 복구 코드(XXXXX-XXXXX)를 입력할 수 있습니다.
+                {t('인증 앱(Google Authenticator 등)에 표시된 6자리 숫자를 입력하세요. 휴대폰을 잃어버렸다면 복구 코드(XXXXX-XXXXX)를 입력할 수 있습니다.')}
               </Typography>
               <TextField
-                label="인증 코드"
+                label={t('인증 코드')}
                 value={otpCode}
                 onChange={(e) => setOtpCode(e.target.value)}
                 autoComplete="one-time-code"
@@ -173,32 +179,32 @@ export default function LoginForm() {
                 autoFocus
                 required
               />
-              {error && <Alert severity="error">{error}</Alert>}
+              {error && <Alert severity="error">{t(error)}</Alert>}
               <Button type="submit" variant="contained" size="large" disabled={pending || otpCode.trim().length < 6}>
-                확인
+                {t('확인')}
               </Button>
               <Link component="button" type="button" variant="body2" onClick={() => { setChallengeId(null); setError(null); }} sx={{ alignSelf: 'center' }}>
-                처음으로
+                {t('처음으로')}
               </Link>
             </Stack>
           </Box>
         ) : (
           <Box component="form" onSubmit={submit}>
             <Stack spacing={2}>
-              <TextField label="이메일" value={loginId} onChange={(e) => setLoginId(e.target.value)} autoComplete="username" autoFocus required />
-              <TextField label="비밀번호" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required />
+              <TextField label={t('이메일')} value={loginId} onChange={(e) => setLoginId(e.target.value)} autoComplete="username" autoFocus required />
+              <TextField label={t('비밀번호')} type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required />
               <Stack direction="row" justifyContent="space-between" alignItems="center">
                 <Box>
-                  <FormControlLabel control={<Checkbox size="small" checked={saveId} onChange={(e) => setSaveId(e.target.checked)} />} label="아이디 저장" />
-                  <FormControlLabel control={<Checkbox size="small" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />} label="자동 로그인" />
+                  <FormControlLabel control={<Checkbox size="small" checked={saveId} onChange={(e) => setSaveId(e.target.checked)} />} label={t('아이디 저장')} />
+                  <FormControlLabel control={<Checkbox size="small" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />} label={t('자동 로그인')} />
                 </Box>
               </Stack>
-              {error && <Alert severity="error">{error}</Alert>}
+              {error && <Alert severity="error">{t(error)}</Alert>}
               <Button type="submit" variant="contained" size="large" disabled={pending || !loginId || !password}>
-                로그인
+                {t('로그인')}
               </Button>
               <Link component="button" type="button" variant="body2" onClick={() => setFindOpen(true)} sx={{ alignSelf: 'center' }}>
-                비밀번호를 잊으셨나요?
+                {t('비밀번호를 잊으셨나요?')}
               </Link>
             </Stack>
           </Box>
@@ -211,6 +217,7 @@ export default function LoginForm() {
 
 /** AUTH-004 임시 비밀번호 메일 — 가입 여부와 관계없이 같은 안내 */
 function TempPasswordDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const t = useT();
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -236,24 +243,24 @@ function TempPasswordDialog({ open, onClose }: { open: boolean; onClose: () => v
       maxWidth="xs"
       fullWidth
     >
-      <DialogTitle>임시 비밀번호 받기</DialogTitle>
+      <DialogTitle>{t('임시 비밀번호 받기')}</DialogTitle>
       <DialogContent>
         {sent ? (
           <Alert severity="success" sx={{ mt: 1 }}>
-            가입된 이메일이면 임시 비밀번호를 보냈습니다. 로그인 후 바로 새 비밀번호로 바꿔 주세요.
+            {t('가입된 이메일이면 임시 비밀번호를 보냈습니다. 로그인 후 바로 새 비밀번호로 바꿔 주세요.')}
           </Alert>
         ) : (
           <Stack spacing={2} sx={{ mt: 1 }}>
-            <TextField label="가입한 이메일" value={email} onChange={(e) => setEmail(e.target.value)} type="email" />
-            {error && <Alert severity="error">{error}</Alert>}
+            <TextField label={t('가입한 이메일')} value={email} onChange={(e) => setEmail(e.target.value)} type="email" />
+            {error && <Alert severity="error">{t(error)}</Alert>}
           </Stack>
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>닫기</Button>
+        <Button onClick={onClose}>{t('닫기')}</Button>
         {!sent && (
           <Button variant="contained" disabled={!email.includes('@')} onClick={() => void send()}>
-            보내기
+            {t('보내기')}
           </Button>
         )}
       </DialogActions>

@@ -46,6 +46,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import AccountIcon from '@mui/icons-material/AccountCircleOutlined';
 import { useSession, useSwitchInstitution, logout } from '@/lib/session';
 import { usePlatformAdmin } from '@/lib/platform';
+import { useAccountLocaleSync, useLocale } from '@/lib/i18n';
 import PlatformNoticeBanner from '@/components/PlatformNoticeBanner';
 import IdleLogout from '@/components/IdleLogout';
 import ServiceStatusBanner from '@/components/ServiceStatusBanner';
@@ -138,6 +139,8 @@ export default function AdminShell({ children }: { children: ReactNode }) {
   const platformAdmin = usePlatformAdmin();
   const sample = useSampleInstitution();
   const startSample = useStartSample();
+  const { t, locale, setLocale } = useLocale();
+  useAccountLocaleSync(!!session);
 
   const isActive = (href: string) => (href === '/attendance' ? pathname === href : pathname === href || pathname.startsWith(href + '/'));
 
@@ -152,7 +155,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
         const items = g.items.filter((i) => !i.managerOnly || manager);
         if (items.length === 0) return null;
         return (
-          <List key={g.group} dense subheader={<ListSubheader sx={{ bgcolor: 'transparent', lineHeight: '32px' }}>{g.group}</ListSubheader>}>
+          <List key={g.group} dense subheader={<ListSubheader sx={{ bgcolor: 'transparent', lineHeight: '32px' }}>{t(g.group)}</ListSubheader>}>
             {items.map((i) => (
               <ListItemButton
                 key={i.href}
@@ -163,7 +166,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
                 sx={{ mx: 1, borderRadius: 1, '&.Mui-selected': { bgcolor: 'rgba(27,37,89,0.08)', fontWeight: 700 } }}
               >
                 <ListItemIcon sx={{ minWidth: 36 }}>{i.icon}</ListItemIcon>
-                <ListItemText primary={i.label} />
+                <ListItemText primary={t(i.label)} />
               </ListItemButton>
             ))}
           </List>
@@ -205,9 +208,9 @@ export default function AdminShell({ children }: { children: ReactNode }) {
           )}
           <Box sx={{ flex: 1 }} />
           <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
-            {session?.user.name} {session?.institution ? `· ${ROLE_LABEL[session.institution.role]}` : ''}
+            {session?.user.name} {session?.institution ? `· ${t(ROLE_LABEL[session.institution.role])}` : ''}
           </Typography>
-          <IconButton onClick={(e) => setMenuAnchor(e.currentTarget)} aria-label="계정">
+          <IconButton onClick={(e) => setMenuAnchor(e.currentTarget)} aria-label={t('계정')}>
             <AccountIcon />
           </IconButton>
           <Menu anchorEl={menuAnchor} open={!!menuAnchor} onClose={() => setMenuAnchor(null)}>
@@ -217,7 +220,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
                 setPwOpen(true);
               }}
             >
-              비밀번호 변경
+              {t('비밀번호 변경')}
             </MenuItem>
             {manager && (
               <MenuItem
@@ -229,11 +232,19 @@ export default function AdminShell({ children }: { children: ReactNode }) {
                   else startSample.mutate();
                 }}
               >
-                {sample.data?.sample ? '체험 기관으로 이동' : '샘플 데이터로 체험하기'}
+                {t(sample.data?.sample ? '체험 기관으로 이동' : '샘플 데이터로 체험하기')}
               </MenuItem>
             )}
+            <MenuItem
+              onClick={() => {
+                setMenuAnchor(null);
+                setLocale(locale === 'ko' ? 'en' : 'ko');
+              }}
+            >
+              {t('언어')}: {locale === 'ko' ? 'English로 바꾸기' : '한국어로 바꾸기'}
+            </MenuItem>
             <Divider />
-            <MenuItem onClick={() => void logout()}>로그아웃</MenuItem>
+            <MenuItem onClick={() => void logout()}>{t('로그아웃')}</MenuItem>
           </Menu>
         </Toolbar>
       </AppBar>
