@@ -14,6 +14,7 @@ import NotificationChannelsTab from './NotificationChannelsTab';
 import SubscriptionTab from './SubscriptionTab';
 import SecurityTab from './SecurityTab';
 import MissingAlertTab from './MissingAlertTab';
+import DataExportTab from './DataExportTab';
 
 const TABS = [
   { key: 'institution', label: '기관 정보', menuId: 'SET-001' },
@@ -23,6 +24,7 @@ const TABS = [
   { key: 'subscription', label: '구독·결제', menuId: 'SET-003', managerOnly: true },
   { key: 'terms', label: '약관', menuId: 'SET-005' },
   { key: 'audit', label: '감사 로그', menuId: 'SEC-002', ownerOnly: true },
+  { key: 'export', label: '데이터 내보내기', menuId: 'SET-006', ownerOnly: true },
   { key: 'security', label: '보안', menuId: 'AUTH-007' },
   { key: 'account', label: '내 계정', menuId: 'AUTH-005' },
 ] as const;
@@ -56,6 +58,7 @@ export default function SettingsView() {
       {current === 'subscription' && manager && <SubscriptionTab />}
       {current === 'terms' && <TermsTab />}
       {current === 'audit' && owner && <AuditTab />}
+      {current === 'export' && owner && <DataExportTab />}
       {current === 'security' && <SecurityTab />}
       {current === 'account' && <AccountTab />}
     </>
