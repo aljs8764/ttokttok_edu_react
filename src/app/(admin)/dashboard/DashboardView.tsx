@@ -24,7 +24,7 @@ import { dateTime, percent, time } from '@/lib/format';
 import { useRealtime } from '@/lib/realtime';
 import { useSession } from '@/lib/session';
 import type { Classroom, DashboardStudentItem, DashboardToday, ScheduleItem, TimelineEntry } from '@/lib/types';
-import { CongestionMiniWidget, LowReadNoticesWidget } from '@/components/InsightWidgets';
+import { CongestionMiniWidget, LowReadNoticesWidget, MissingAlertWidget } from '@/components/InsightWidgets';
 import BillingWidget from '@/components/BillingWidget';
 import PageHeader from '@/components/PageHeader';
 import SampleModeBanner from '@/components/SampleModeBanner';
@@ -96,6 +96,7 @@ export default function DashboardView() {
 
       <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', lg: '1.2fr 1fr' } }}>
         <Stack spacing={2}>
+          <MissingAlertWidget instId={instId} />
           <StudentWidgets data={today.data} loading={today.isLoading} />
           <SchedulePanel items={schedule.data} loading={schedule.isLoading} />
           <LowReadNoticesWidget instId={instId} />

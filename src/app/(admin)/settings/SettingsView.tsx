@@ -13,11 +13,13 @@ import AccountTab from './AccountTab';
 import NotificationChannelsTab from './NotificationChannelsTab';
 import SubscriptionTab from './SubscriptionTab';
 import SecurityTab from './SecurityTab';
+import MissingAlertTab from './MissingAlertTab';
 
 const TABS = [
   { key: 'institution', label: '기관 정보', menuId: 'SET-001' },
   { key: 'destinations', label: '하원 목적지', menuId: 'SET-002' },
   { key: 'channels', label: '알림 채널', menuId: 'SET-004' },
+  { key: 'missing', label: '미등원 경고', menuId: 'ATT-010' },
   { key: 'subscription', label: '구독·결제', menuId: 'SET-003', managerOnly: true },
   { key: 'terms', label: '약관', menuId: 'SET-005' },
   { key: 'audit', label: '감사 로그', menuId: 'SEC-002', ownerOnly: true },
@@ -50,6 +52,7 @@ export default function SettingsView() {
       {current === 'institution' && <InstitutionTab />}
       {current === 'destinations' && <DestinationsTab />}
       {current === 'channels' && <NotificationChannelsTab />}
+      {current === 'missing' && <MissingAlertTab />}
       {current === 'subscription' && manager && <SubscriptionTab />}
       {current === 'terms' && <TermsTab />}
       {current === 'audit' && owner && <AuditTab />}

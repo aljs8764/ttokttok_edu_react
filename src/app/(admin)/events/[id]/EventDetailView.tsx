@@ -40,6 +40,7 @@ import PageHeader from '@/components/PageHeader';
 import { targetSummary } from '@/components/TargetPicker';
 import { REMINDER_OPTIONS, eventTimeError } from '../EventForm';
 import { TallyBar } from '../EventsView';
+import EventFollowUpPanel from './EventFollowUpPanel';
 
 const ANSWER = { ATTEND: { label: '참석', color: 'success' as const }, ABSENT: { label: '불참', color: 'error' as const } };
 const REMIND_COOLDOWN_MIN = 30;
@@ -222,6 +223,8 @@ export default function EventDetailView({ id }: { id: string }) {
           </Grid>
         </Grid>
       )}
+
+      {e && !canceled && <EventFollowUpPanel eventId={id} instId={instId} />}
 
       {e && <EditEventDialog open={editOpen} event={e} onClose={() => setEditOpen(false)} />}
       <CancelDialog open={cancelOpen} id={id} onClose={() => setCancelOpen(false)} />

@@ -116,6 +116,12 @@ export default function NoticeForm({ id }: { id?: string }) {
           <Divider />
 
           {!editingLocked && <TemplatePicker kind={kind} title={title} body={body} onPick={(t) => (setTitle(t.title), setBody(t.body))} />}
+          {!editingLocked && (
+            <ProgressQuoteButton
+              classIds={targets.filter((t) => t.scope === 'CLASS' && t.id).map((t) => t.id as string)}
+              onQuote={(text) => setBody((b) => (b.trim() ? `${b.trimEnd()}\n\n${text}` : text).slice(0, MAX_BODY))}
+            />
+          )}
 
           <TextField
             label="제목"
@@ -175,5 +181,32 @@ export default function NoticeForm({ id }: { id?: string }) {
         </Stack>
       </Paper>
     </>
+  );
+}
+
+/** CLS-005 반별 최근 진도·숙제를 본문에 붙인다. 대상에서 반을 골라야 쓸 수 있다 */
+function ProgressQuoteButton({ classIds, onQuote }: { classIds: string[]; onQuote: (text: string) => void }) {
+  const [message, setMessage] = useState('');
+  const quote = useMutation({
+    mutationFn: () => api.post<{ text: string }>('curriculum/quote', { classroomIds: classIds }),
+    onSuccess: (r) => {
+      if (r.text.trim()) {
+        onQuote(r.text);
+        setMessage('');
+      } else {
+        setMessage('고른 반에 기록된 진도가 없습니다. 반 관리 > 교재·진도에서 먼저 기록하세요.');
+      }
+    },
+    onError: (e) => setMessage(errorMessage(e)),
+  });
+  return (
+    <Stack direction="row" spacing={1} alignItems="center">
+      <Button size="small" variant="outlined" disabled={classIds.length === 0 || quote.isPending} onClick={() => quote.mutate()}>
+        진도 불러오기
+      </Button>
+      <Typography variant="caption" color={message ? 'warning.main' : 'text.secondary'}>
+        {message || (classIds.length === 0 ? '대상에서 반을 고르면 그 반의 최근 진도·숙제를 본문에 붙일 수 있습니다.' : '반별 가장 최근 진도·숙제를 본문 끝에 붙입니다.')}
+      </Typography>
+    </Stack>
   );
 }

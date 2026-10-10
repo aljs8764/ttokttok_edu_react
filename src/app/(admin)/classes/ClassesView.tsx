@@ -33,6 +33,7 @@ import { useSession } from '@/lib/session';
 import type { Classroom, StaffMember } from '@/lib/types';
 import PageHeader from '@/components/PageHeader';
 import ClassTemplateDialog from './ClassTemplateDialog';
+import CurriculumDialog from './CurriculumDialog';
 
 /**
  * CLS-001 반 목록·생성·수정, CLS-002 반 삭제(원생 0명일 때만), STF-003 담당 교사 배정.
@@ -46,6 +47,7 @@ export default function ClassesView() {
   const [assigning, setAssigning] = useState<Classroom | null>(null);
   const [deleting, setDeleting] = useState<Classroom | null>(null);
   const [templateOpen, setTemplateOpen] = useState(false);
+  const [curriculum, setCurriculum] = useState<Classroom | null>(null);
 
   const classes = useQuery({ queryKey: ['classes', instId], queryFn: () => api.get<Classroom[]>('classes'), enabled: !!instId });
   const staff = useQuery({ queryKey: ['staff', instId], queryFn: () => api.get<StaffMember[]>('staff'), enabled: !!instId && manager });
@@ -76,6 +78,7 @@ export default function ClassesView() {
       />
 
       <ClassTemplateDialog open={templateOpen} onClose={() => setTemplateOpen(false)} onCreated={refresh} />
+      <CurriculumDialog classroom={curriculum} onClose={() => setCurriculum(null)} />
       {classes.isFetching && !classes.data && <LinearProgress />}
       {classes.isError && <Alert severity="error">{errorMessage(classes.error)}</Alert>}
       {classes.data?.length === 0 && (
@@ -116,6 +119,9 @@ export default function ClassesView() {
                 <CardActions sx={{ px: 2, pb: 2 }}>
                   <Button size="small" component={NextLink} href={`/students?classId=${c.id}`}>
                     원생 보기
+                  </Button>
+                  <Button size="small" onClick={() => setCurriculum(c)}>
+                    교재·진도
                   </Button>
                   {manager && (
                     <>

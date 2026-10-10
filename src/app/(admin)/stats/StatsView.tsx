@@ -39,6 +39,7 @@ import {
 } from '@/lib/stats';
 import { BarChart, Donut, Heatmap, LineChart } from '@/components/charts';
 import PageHeader from '@/components/PageHeader';
+import WorkTab from './WorkTab';
 
 type Section = 'KPI' | 'CLASSROOMS' | 'ENROLLMENT';
 const SECTION_LABEL: Record<Section, string> = { KPI: '기간 KPI', CLASSROOMS: '반별 비교', ENROLLMENT: '재원 현황' };
@@ -52,7 +53,7 @@ const GRAY = '#9aa0b4';
 export default function StatsView() {
   const { session, manager } = useSession();
   const instId = session?.institution?.institutionId;
-  const [tab, setTab] = useState<'kpi' | 'congestion' | 'classes' | 'enrollment'>('kpi');
+  const [tab, setTab] = useState<'kpi' | 'congestion' | 'classes' | 'enrollment' | 'work'>('kpi');
   const [from, setFrom] = useState<Dayjs>(dayjs().subtract(29, 'day'));
   const [to, setTo] = useState<Dayjs>(dayjs());
   const [sections, setSections] = useState<Section[]>(['KPI', 'CLASSROOMS', 'ENROLLMENT']);
@@ -139,12 +140,14 @@ export default function StatsView() {
         <Tab value="congestion" label="혼잡도" />
         <Tab value="classes" label="반별 분석" />
         <Tab value="enrollment" label="재원·증감" />
+        <Tab value="work" label="소통·업무" />
       </Tabs>
 
       {tab === 'kpi' && <KpiTab range={range} enabled={enabled} instId={instId} />}
       {tab === 'congestion' && <CongestionTab range={range} enabled={enabled} instId={instId} />}
       {tab === 'classes' && <ClassesTab range={range} enabled={enabled} instId={instId} />}
       {tab === 'enrollment' && <EnrollmentTab enabled={!!instId} instId={instId} />}
+      {tab === 'work' && <WorkTab range={range} enabled={enabled} instId={instId} />}
     </>
   );
 }

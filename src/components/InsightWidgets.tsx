@@ -13,7 +13,7 @@ import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import { dateTime } from '@/lib/format';
+import { dateTime, time } from '@/lib/format';
 import { ratioText, type CongestionToday, type LowReadNotices } from '@/lib/stats';
 import { BarChart } from '@/components/charts';
 
@@ -88,6 +88,73 @@ export function CongestionMiniWidget({ instId }: { instId?: string }) {
             통계에서 더 보기 →
           </Typography>
         </Box>
+      </Box>
+    </Paper>
+  );
+}
+
+interface MissingAlert {
+  attendanceDayId: string;
+  studentId: string;
+  studentName: string;
+  classroomId: string;
+  classroomName: string;
+  classStart: string;
+  previousInstitutionName: string | null;
+  previousCheckoutAt: string | null;
+  notifiedParent: boolean;
+  sentAt: string;
+  currentStatus: 'SCHEDULED' | 'IN' | 'OUT' | 'ABSENT';
+}
+
+/** ATT-010 미등원 초과 경고 — 오늘 경고가 나간 원생. 아직 미등원이면 빨간색 */
+export function MissingAlertWidget({ instId }: { instId?: string }) {
+  const q = useQuery({ queryKey: ['dashboard', 'missing-alerts', instId], queryFn: () => api.get<MissingAlert[]>('attendance-missing-alerts'), enabled: !!instId, refetchInterval: 60_000 });
+  const rows = q.data ?? [];
+  if (!q.isLoading && rows.length === 0) return null;
+  const still = rows.filter((r) => r.currentStatus === 'SCHEDULED').length;
+  return (
+    <Paper sx={{ borderColor: still > 0 ? 'error.main' : undefined }} variant={still > 0 ? 'outlined' : undefined}>
+      <Box sx={{ px: 2, py: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Typography variant="h4" sx={{ flex: 1 }}>
+          미등원 경고
+        </Typography>
+        {still > 0 && <Chip size="small" color="error" label={`확인 필요 ${still}명`} />}
+        <Chip size="small" variant="outlined" label="ATT-010" />
+      </Box>
+      <Divider />
+      {q.isLoading ? (
+        <Box sx={{ p: 2 }}>
+          <Skeleton />
+        </Box>
+      ) : (
+        <List dense disablePadding>
+          {rows.map((r) => (
+            <ListItem key={r.attendanceDayId} divider>
+              <ListItemText
+                primary={
+                  <>
+                    {r.studentName} · {r.classroomName} {r.classStart}
+                    {r.currentStatus === 'SCHEDULED' ? (
+                      <Chip size="small" color="error" label="미등원" sx={{ ml: 1 }} />
+                    ) : (
+                      <Chip size="small" color="success" variant="outlined" label={r.currentStatus === 'ABSENT' ? '결석 처리' : '등원함'} sx={{ ml: 1 }} />
+                    )}
+                  </>
+                }
+                secondary={
+                  `${time(r.sentAt)} 경고${r.notifiedParent ? ' · 보호자 알림' : ''}` +
+                  (r.previousInstitutionName ? ` · ${r.previousInstitutionName}에서 ${r.previousCheckoutAt ? time(r.previousCheckoutAt) : ''} 하원` : '')
+                }
+              />
+            </ListItem>
+          ))}
+        </List>
+      )}
+      <Box sx={{ px: 2, py: 1, textAlign: 'right' }}>
+        <Typography component={Link} href="/settings?tab=missing" variant="caption" color="text.secondary">
+          경고 기준 설정
+        </Typography>
       </Box>
     </Paper>
   );
