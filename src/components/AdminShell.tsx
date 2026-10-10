@@ -48,6 +48,7 @@ import { useSession, useSwitchInstitution, logout } from '@/lib/session';
 import { usePlatformAdmin } from '@/lib/platform';
 import PlatformNoticeBanner from '@/components/PlatformNoticeBanner';
 import IdleLogout from '@/components/IdleLogout';
+import ServiceStatusBanner from '@/components/ServiceStatusBanner';
 import { useSampleInstitution, useStartSample } from '@/components/SampleModeBanner';
 import SupportIcon from '@mui/icons-material/SupportAgentOutlined';
 import AdminPanelIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
@@ -250,6 +251,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
       </Box>
 
       <Box component="main" sx={{ flexGrow: 1, minWidth: 0, p: { xs: 2, md: 3 }, mt: 8 }}>
+        <ServiceStatusBanner />
         <PlatformNoticeBanner />
         {children}
         <IdleLogout />
