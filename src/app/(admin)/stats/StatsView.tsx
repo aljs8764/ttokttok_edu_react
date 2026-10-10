@@ -89,7 +89,7 @@ export default function StatsView() {
       <PageHeader
         title="통계·분석"
         menuId="STAT-001"
-        description="등원율·열람률 추이, 시간대 혼잡도, 반별 비교, 재원 현황을 확인하고 엑셀 리포트로 내려받습니다."
+        description="등원율·열람률 추이, 시간대 혼잡도, 반별 비교, 재원 현황을 확인하고 엑셀·PDF 리포트로 내려받습니다(PDF는 인쇄 창에서 'PDF로 저장')."
       />
       <Paper sx={{ p: 2, mb: 2 }}>
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} alignItems={{ md: 'center' }} flexWrap="wrap" useFlexGap>
@@ -111,7 +111,14 @@ export default function StatsView() {
               />
             ))}
             <Button variant="outlined" startIcon={<DownloadIcon />} disabled={!rangeValid || sections.length === 0 || downloading} onClick={exportReport}>
-              엑셀 리포트 <Chip size="small" label="STAT-007" sx={{ ml: 1 }} />
+              엑셀 리포트 <Chip size="small" label="STAT-008" sx={{ ml: 1 }} />
+            </Button>
+            <Button
+              variant="outlined"
+              disabled={!rangeValid || sections.length === 0}
+              onClick={() => window.open(`/print/stats?from=${range.from}&to=${range.to}&sections=${sections.join(',')}`, '_blank')}
+            >
+              PDF 리포트
             </Button>
           </Stack>
         </Stack>
