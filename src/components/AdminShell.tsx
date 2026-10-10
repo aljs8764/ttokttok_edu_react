@@ -52,6 +52,7 @@ import { useSampleInstitution, useStartSample } from '@/components/SampleModeBan
 import SupportIcon from '@mui/icons-material/SupportAgentOutlined';
 import AdminPanelIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
 import BusIcon from '@mui/icons-material/DirectionsBusOutlined';
+import ConsultIcon from '@mui/icons-material/EventAvailableOutlined';
 import { ROLE_LABEL } from '@/lib/format';
 import ChangePasswordDialog from './ChangePasswordDialog';
 import TermsGate from './TermsGate';
@@ -96,6 +97,7 @@ const NAV: { group: string; items: NavItem[] }[] = [
       { href: '/event-calendar', label: '행사 달력', icon: <EventNoteIcon /> },
       { href: '/event-templates', label: '행사 템플릿', icon: <RepeatIcon /> },
       { href: '/messages', label: '메시지함', icon: <ChatIcon /> },
+      { href: '/consults', label: '상담 예약', icon: <ConsultIcon /> },
       { href: '/surveys', label: '설문', icon: <PollIcon /> },
       { href: '/albums', label: '앨범', icon: <PhotoIcon /> },
       { href: '/notice-templates', label: '알림장 템플릿', icon: <ArticleIcon /> },
