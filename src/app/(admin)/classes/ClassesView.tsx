@@ -34,12 +34,14 @@ import type { Classroom, StaffMember } from '@/lib/types';
 import PageHeader from '@/components/PageHeader';
 import ClassTemplateDialog from './ClassTemplateDialog';
 import CurriculumDialog from './CurriculumDialog';
+import { useT } from '@/lib/i18n';
 
 /**
  * CLS-001 반 목록·생성·수정, CLS-002 반 삭제(원생 0명일 때만), STF-003 담당 교사 배정.
  * 교사는 담당 반만 보이고 읽기 전용.
  */
 export default function ClassesView() {
+  const t = useT();
   const qc = useQueryClient();
   const { session, manager } = useSession();
   const instId = session?.institution?.institutionId;
@@ -60,17 +62,17 @@ export default function ClassesView() {
   return (
     <>
       <PageHeader
-        title="반 관리"
+        title={t('반 관리')}
         menuId="CLS-001"
-        description={manager ? '정원·요일·시간은 출결 대상과 지각 판정에 쓰입니다.' : '담당 반만 표시됩니다.'}
+        description={manager ? t('정원·요일·시간은 출결 대상과 지각 판정에 쓰입니다.') : t('담당 반만 표시됩니다.')}
         actions={
           manager && (
             <>
               <Button variant="outlined" onClick={() => setTemplateOpen(true)}>
-                템플릿으로 만들기
+                {t('템플릿으로 만들기')}
               </Button>
               <Button variant="contained" startIcon={<AddIcon />} onClick={() => setEditing('new')}>
-                반 만들기
+                {t('반 만들기')}
               </Button>
             </>
           )
@@ -82,7 +84,7 @@ export default function ClassesView() {
       {classes.isFetching && !classes.data && <LinearProgress />}
       {classes.isError && <Alert severity="error">{errorMessage(classes.error)}</Alert>}
       {classes.data?.length === 0 && (
-        <Alert severity="info">{manager ? '아직 반이 없습니다. 반을 먼저 만들어야 원생을 등록할 수 있습니다.' : '담당 반이 없습니다. 원장님께 배정을 요청하세요.'}</Alert>
+        <Alert severity="info">{manager ? t('아직 반이 없습니다. 반을 먼저 만들어야 원생을 등록할 수 있습니다.') : t('담당 반이 없습니다. 원장님께 배정을 요청하세요.')}</Alert>
       )}
 
       <Grid container spacing={2}>
@@ -101,16 +103,16 @@ export default function ClassesView() {
                   </Typography>
                   <Box sx={{ mt: 2 }}>
                     <Stack direction="row" justifyContent="space-between">
-                      <Typography variant="body2">인원</Typography>
+                      <Typography variant="body2">{t('인원')}</Typography>
                       <Typography variant="body2" sx={{ fontWeight: 600, color: count >= c.capacity ? 'error.main' : undefined }}>
-                        {count} / {c.capacity}명
+                        {t('{0} / {1}명', { 0: count, 1: c.capacity })}
                       </Typography>
                     </Stack>
                     <LinearProgress variant="determinate" value={ratio} color={count >= c.capacity ? 'error' : 'primary'} sx={{ mt: 0.5, height: 6, borderRadius: 3 }} />
                   </Box>
                   <Stack direction="row" spacing={0.5} sx={{ mt: 2, flexWrap: 'wrap', gap: 0.5 }}>
                     {(c.teacherNames ?? []).length === 0 ? (
-                      <Chip size="small" label="담당 교사 없음" variant="outlined" color="warning" />
+                      <Chip size="small" label={t('담당 교사 없음')} variant="outlined" color="warning" />
                     ) : (
                       c.teacherNames!.map((n) => <Chip key={n} size="small" label={n} />)
                     )}
@@ -118,21 +120,21 @@ export default function ClassesView() {
                 </CardContent>
                 <CardActions sx={{ px: 2, pb: 2 }}>
                   <Button size="small" component={NextLink} href={`/students?classId=${c.id}`}>
-                    원생 보기
+                    {t('원생 보기')}
                   </Button>
                   <Button size="small" onClick={() => setCurriculum(c)}>
-                    교재·진도
+                    {t('교재·진도')}
                   </Button>
                   {manager && (
                     <>
                       <Button size="small" onClick={() => setAssigning(c)}>
-                        교사 배정
+                        {t('교사 배정')}
                       </Button>
                       <Button size="small" onClick={() => setEditing(c)}>
-                        수정
+                        {t('수정')}
                       </Button>
                       <Button size="small" color="error" onClick={() => setDeleting(c)} sx={{ ml: 'auto !important' }}>
-                        삭제
+                        {t('삭제')}
                       </Button>
                     </>
                   )}
@@ -156,6 +158,7 @@ export default function ClassesView() {
 
 /** CLS-001 생성·수정. 담당 교사는 생성 때만 함께 지정하고, 이후엔 교사 배정으로 바꾼다. */
 function ClassDialog({ target, teachers, onClose, onDone }: { target: Classroom | 'new' | null; teachers: StaffMember[]; onClose: () => void; onDone: () => void }) {
+  const t = useT();
   const isNew = target === 'new';
   const [name, setName] = useState('');
   const [capacity, setCapacity] = useState('20');
@@ -195,32 +198,32 @@ function ClassDialog({ target, teachers, onClose, onDone }: { target: Classroom 
 
   const cap = Number(capacity);
   const headcount = target && target !== 'new' ? (target.headcount ?? 0) : 0;
-  const capError = !Number.isInteger(cap) || cap < 1 ? '1 이상 숫자' : cap < headcount ? `현재 인원(${headcount}명)보다 작을 수 없습니다` : '';
-  const timeError = start >= end ? '끝나는 시간이 시작보다 늦어야 합니다' : '';
+  const capError = !Number.isInteger(cap) || cap < 1 ? t('1 이상 숫자') : cap < headcount ? t('현재 인원({0}명)보다 작을 수 없습니다', { 0: headcount }) : '';
+  const timeError = start >= end ? t('끝나는 시간이 시작보다 늦어야 합니다') : '';
   const valid = name.trim() && !capError && days.length > 0 && !timeError;
 
   return (
     <Dialog open={!!target} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>{isNew ? '반 만들기' : '반 수정'}</DialogTitle>
+      <DialogTitle>{isNew ? t('반 만들기') : t('반 수정')}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
-          <TextField label="반 이름" required value={name} onChange={(e) => setName(e.target.value)} inputProps={{ maxLength: 50 }} helperText="엑셀 일괄 등록의 반명과 같아야 합니다" />
-          <TextField label="정원" required type="number" value={capacity} onChange={(e) => setCapacity(e.target.value)} error={!!capError} helperText={capError || ' '} inputProps={{ min: 1 }} />
+          <TextField label={t('반 이름')} required value={name} onChange={(e) => setName(e.target.value)} inputProps={{ maxLength: 50 }} helperText={t('엑셀 일괄 등록의 반명과 같아야 합니다')} />
+          <TextField label={t('정원')} required type="number" value={capacity} onChange={(e) => setCapacity(e.target.value)} error={!!capError} helperText={capError || ' '} inputProps={{ min: 1 }} />
           <Box>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-              수업 요일
+              {t('수업 요일')}
             </Typography>
             <ToggleButtonGroup size="small" value={days} onChange={(_, v: string[]) => setDays(v)} fullWidth>
               {DAYS.map((d) => (
                 <ToggleButton key={d} value={d}>
-                  {DAY_LABEL[d]}
+                  {t(DAY_LABEL[d])}
                 </ToggleButton>
               ))}
             </ToggleButtonGroup>
           </Box>
           <Stack direction="row" spacing={1.5}>
-            <TextField label="시작" type="time" value={start} onChange={(e) => setStart(e.target.value)} fullWidth InputLabelProps={{ shrink: true }} />
-            <TextField label="끝" type="time" value={end} onChange={(e) => setEnd(e.target.value)} fullWidth InputLabelProps={{ shrink: true }} error={!!timeError} helperText={timeError} />
+            <TextField label={t('시작')} type="time" value={start} onChange={(e) => setStart(e.target.value)} fullWidth InputLabelProps={{ shrink: true }} />
+            <TextField label={t('끝')} type="time" value={end} onChange={(e) => setEnd(e.target.value)} fullWidth InputLabelProps={{ shrink: true }} error={!!timeError} helperText={timeError} />
           </Stack>
           {isNew && teachers.length > 0 && (
             <TeacherPicker staff={teachers} value={teacherIds} onChange={setTeacherIds} />
@@ -229,9 +232,9 @@ function ClassDialog({ target, teachers, onClose, onDone }: { target: Classroom 
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>취소</Button>
+        <Button onClick={onClose}>{t('취소')}</Button>
         <Button variant="contained" disabled={!valid || save.isPending} onClick={() => save.mutate()}>
-          {isNew ? '만들기' : '저장'}
+          {isNew ? t('만들기') : t('저장')}
         </Button>
       </DialogActions>
     </Dialog>
@@ -239,12 +242,13 @@ function ClassDialog({ target, teachers, onClose, onDone }: { target: Classroom 
 }
 
 function TeacherPicker({ staff, value, onChange }: { staff: StaffMember[]; value: string[]; onChange: (v: string[]) => void }) {
+  const t = useT();
   const toggle = (id: string) => onChange(value.includes(id) ? value.filter((x) => x !== id) : [...value, id]);
   const candidates = staff.filter((s) => s.role !== 'PARENT');
   return (
     <Box>
       <Typography variant="body2" color="text.secondary">
-        담당 교사
+        {t('담당 교사')}
       </Typography>
       <List dense sx={{ maxHeight: 240, overflow: 'auto', border: 1, borderColor: 'divider', borderRadius: 1, mt: 0.5 }}>
         {candidates.map((s) => (
@@ -252,7 +256,7 @@ function TeacherPicker({ staff, value, onChange }: { staff: StaffMember[]; value
             <ListItemIcon sx={{ minWidth: 36 }}>
               <Checkbox edge="start" size="small" checked={value.includes(s.userId)} tabIndex={-1} disableRipple />
             </ListItemIcon>
-            <ListItemText primary={`${s.name} · ${ROLE_LABEL[s.role]}`} secondary={s.classrooms.map((c) => c.name).join(', ') || '담당 반 없음'} />
+            <ListItemText primary={`${s.name} · ${t(ROLE_LABEL[s.role])}`} secondary={s.classrooms.map((c) => c.name).join(', ') || t('담당 반 없음')} />
           </ListItemButton>
         ))}
       </List>
@@ -262,6 +266,7 @@ function TeacherPicker({ staff, value, onChange }: { staff: StaffMember[]; value
 
 /** STF-003 담당 교사 배정 (전체 교체) */
 function AssignTeachersDialog({ target, staff, onClose, onDone }: { target: Classroom | null; staff: StaffMember[]; onClose: () => void; onDone: () => void }) {
+  const t = useT();
   const [ids, setIds] = useState<string[]>([]);
   useEffect(() => {
     if (target) setIds(target.teacherIds);
@@ -277,20 +282,20 @@ function AssignTeachersDialog({ target, staff, onClose, onDone }: { target: Clas
 
   return (
     <Dialog open={!!target} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>담당 교사 배정 · STF-003</DialogTitle>
+      <DialogTitle>{t('담당 교사 배정 · STF-003')}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
           <Typography variant="body2">
-            <b>{target?.name}</b> — 선택한 교사만 이 반의 출결·알림장을 다룰 수 있습니다.
+            <b>{target?.name}</b>{' '}{t('— 선택한 교사만 이 반의 출결·알림장을 다룰 수 있습니다.')}
           </Typography>
-          {staff.length === 0 ? <Alert severity="info">교직원이 없습니다. 교직원 메뉴에서 먼저 초대하세요.</Alert> : <TeacherPicker staff={staff} value={ids} onChange={setIds} />}
+          {staff.length === 0 ? <Alert severity="info">{t('교직원이 없습니다. 교직원 메뉴에서 먼저 초대하세요.')}</Alert> : <TeacherPicker staff={staff} value={ids} onChange={setIds} />}
           {save.isError && <Alert severity="error">{errorMessage(save.error)}</Alert>}
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>취소</Button>
+        <Button onClick={onClose}>{t('취소')}</Button>
         <Button variant="contained" disabled={save.isPending} onClick={() => save.mutate()}>
-          저장
+          {t('저장')}
         </Button>
       </DialogActions>
     </Dialog>
@@ -299,6 +304,7 @@ function AssignTeachersDialog({ target, staff, onClose, onDone }: { target: Clas
 
 /** CLS-002 반 삭제 — 소속 원생이 있으면 백엔드가 409(CLASS_NOT_EMPTY) */
 function DeleteDialog({ target, onClose, onDone }: { target: Classroom | null; onClose: () => void; onDone: () => void }) {
+  const t = useT();
   const del = useMutation({
     mutationFn: () => api.delete(`classes/${target!.id}`),
     onSuccess: () => {
@@ -311,23 +317,23 @@ function DeleteDialog({ target, onClose, onDone }: { target: Classroom | null; o
 
   return (
     <Dialog open={!!target} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>반 삭제 · CLS-002</DialogTitle>
+      <DialogTitle>{t('반 삭제 · CLS-002')}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
           {hasStudents ? (
             <Alert severity="warning">
-              {target?.name}에 원생 {target?.headcount}명이 있어 삭제할 수 없습니다. 원생을 다른 반으로 옮긴 뒤 삭제하세요.
+              {t('{0}에 원생 {1}명이 있어 삭제할 수 없습니다. 원생을 다른 반으로 옮긴 뒤 삭제하세요.', { 0: target?.name, 1: target?.headcount })}
             </Alert>
           ) : (
-            <Typography variant="body2">{target?.name}을(를) 삭제합니다. 지난 출결 기록은 남습니다.</Typography>
+            <Typography variant="body2">{t('{0}을(를) 삭제합니다. 지난 출결 기록은 남습니다.', { 0: target?.name })}</Typography>
           )}
           {del.isError && <Alert severity="error">{errorMessage(del.error)}</Alert>}
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>취소</Button>
+        <Button onClick={onClose}>{t('취소')}</Button>
         <Button variant="contained" color="error" disabled={hasStudents || del.isPending} onClick={() => del.mutate()}>
-          삭제
+          {t('삭제')}
         </Button>
       </DialogActions>
     </Dialog>

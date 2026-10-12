@@ -24,6 +24,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, errorMessage } from '@/lib/api';
 import { RELATIONS, formatPhone, isMobile } from '@/lib/student';
 import type { Classroom, Student } from '@/lib/types';
+import { useT } from '@/lib/i18n';
 
 interface GuardianInput {
   phone: string;
@@ -47,6 +48,7 @@ export default function RegisterStudentDialog({
   onClose: () => void;
   onCreated?: (s: Student) => void;
 }) {
+  const t = useT();
   const qc = useQueryClient();
   const [name, setName] = useState('');
   const [birthDate, setBirthDate] = useState<Dayjs | null>(null);
@@ -101,13 +103,13 @@ export default function RegisterStudentDialog({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>원생 등록 · STU-003</DialogTitle>
+      <DialogTitle>{t('원생 등록 · STU-003')}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-            <TextField label="이름" required fullWidth value={name} onChange={(e) => setName(e.target.value)} inputProps={{ maxLength: 50 }} />
+            <TextField label={t('이름')} required fullWidth value={name} onChange={(e) => setName(e.target.value)} inputProps={{ maxLength: 50 }} />
             <DatePicker
-              label="생년월일 *"
+              label={t('생년월일 *')}
               value={birthDate}
               onChange={setBirthDate}
               disableFuture
@@ -120,13 +122,13 @@ export default function RegisterStudentDialog({
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
             <TextField
               select
-              label="반"
+              label={t('반')}
               required
               fullWidth
               value={classroomId}
               onChange={(e) => setClassroomId(e.target.value)}
               error={!!full}
-              helperText={full ? '정원이 찼습니다. 반 관리에서 정원을 늘리거나 다른 반을 선택하세요' : selected ? `현재 ${selected.headcount ?? '-'} / 정원 ${selected.capacity}명` : ' '}
+              helperText={full ? t('정원이 찼습니다. 반 관리에서 정원을 늘리거나 다른 반을 선택하세요') : selected ? t('현재 {0} / 정원 {1}명', { 0: selected.headcount ?? '-', 1: selected.capacity }) : ' '}
             >
               {classes.map((c) => (
                 <MenuItem key={c.id} value={c.id}>
@@ -134,55 +136,55 @@ export default function RegisterStudentDialog({
                 </MenuItem>
               ))}
             </TextField>
-            <TextField label="학년" fullWidth value={grade} onChange={(e) => setGrade(e.target.value)} placeholder="예: 초3" helperText=" " inputProps={{ maxLength: 20 }} />
+            <TextField label={t('학년')} fullWidth value={grade} onChange={(e) => setGrade(e.target.value)} placeholder={t('예: 초3')} helperText=" " inputProps={{ maxLength: 20 }} />
           </Stack>
 
           <Divider />
           <Stack direction="row" alignItems="center" justifyContent="space-between">
-            <Typography variant="subtitle2">보호자</Typography>
+            <Typography variant="subtitle2">{t('보호자')}</Typography>
             <Button size="small" startIcon={<AddIcon />} disabled={guardians.length >= 4} onClick={() => setGuardians((gs) => [...gs, emptyGuardian()])}>
-              보호자 추가
+              {t('보호자 추가')}
             </Button>
           </Stack>
           {guardians.map((g, i) => (
             <Stack key={i} direction="row" spacing={1} alignItems="flex-start">
               <TextField
-                label="휴대폰 번호"
+                label={t('휴대폰 번호')}
                 required
                 size="small"
                 value={g.phone}
                 onChange={(e) => setGuardian(i, { phone: formatPhone(e.target.value) })}
                 error={!!g.phone && !isMobile(g.phone)}
-                helperText={g.phone && !isMobile(g.phone) ? '휴대폰 번호 형식이 아닙니다' : ' '}
+                helperText={g.phone && !isMobile(g.phone) ? t('휴대폰 번호 형식이 아닙니다') : ' '}
                 sx={{ flex: 1 }}
                 inputProps={{ inputMode: 'numeric' }}
               />
-              <TextField select label="관계" size="small" value={g.relation} onChange={(e) => setGuardian(i, { relation: e.target.value })} sx={{ width: 120 }}>
+              <TextField select label={t('관계')} size="small" value={g.relation} onChange={(e) => setGuardian(i, { relation: e.target.value })} sx={{ width: 120 }}>
                 {RELATIONS.map((r) => (
                   <MenuItem key={r} value={r}>
-                    {r}
+                    {t(r)}
                   </MenuItem>
                 ))}
               </TextField>
-              <FormControlLabel control={<Radio size="small" checked={primary === i} onChange={() => setPrimary(i)} />} label="대표" sx={{ mr: 0, mt: 0.5 }} />
-              <IconButton size="small" disabled={guardians.length === 1} onClick={() => removeGuardian(i)} sx={{ mt: 0.5 }} aria-label="보호자 삭제">
+              <FormControlLabel control={<Radio size="small" checked={primary === i} onChange={() => setPrimary(i)} />} label={t('대표')} sx={{ mr: 0, mt: 0.5 }} />
+              <IconButton size="small" disabled={guardians.length === 1} onClick={() => removeGuardian(i)} sx={{ mt: 0.5 }} aria-label={t('보호자 삭제')}>
                 <DeleteIcon fontSize="small" />
               </IconButton>
             </Stack>
           ))}
 
-          <TextField label="메모 (교직원만 보임)" multiline minRows={2} value={memo} onChange={(e) => setMemo(e.target.value)} inputProps={{ maxLength: 500 }} />
+          <TextField label={t('메모 (교직원만 보임)')} multiline minRows={2} value={memo} onChange={(e) => setMemo(e.target.value)} inputProps={{ maxLength: 500 }} />
           <FormControlLabel
             control={<Checkbox checked={sendGuide} onChange={(e) => setSendGuide(e.target.checked)} />}
-            label="보호자에게 앱 설치 안내 알림톡 보내기"
+            label={t('보호자에게 앱 설치 안내 알림톡 보내기')}
           />
           {save.isError && <Alert severity="error">{errorMessage(save.error)}</Alert>}
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>취소</Button>
+        <Button onClick={onClose}>{t('취소')}</Button>
         <Button variant="contained" disabled={!valid || save.isPending} onClick={() => save.mutate()}>
-          등록
+          {t('등록')}
         </Button>
       </DialogActions>
     </Dialog>

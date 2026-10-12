@@ -11,6 +11,7 @@ import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { errorMessage } from '@/lib/api';
 import { acceptFor, checkFile, fileSize, openFile, uploadFile, type FilePurpose } from '@/lib/files';
 import type { FileRef } from '@/lib/types';
+import { useT } from '@/lib/i18n';
 
 /** 첨부 파일 (jpg·png·heic·pdf, 20MB, 최대 max 개). 고르는 즉시 업로드하고 fileId 만 폼에 남긴다. */
 export default function AttachmentField({
@@ -26,6 +27,7 @@ export default function AttachmentField({
   max?: number;
   disabled?: boolean;
 }) {
+  const t = useT();
   const ref = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(0);
   const [error, setError] = useState('');
@@ -34,7 +36,7 @@ export default function AttachmentField({
     if (!list) return;
     setError('');
     const files = Array.from(list).slice(0, Math.max(0, max - value.length));
-    if (list.length > files.length) setError(`첨부는 최대 ${max}개입니다`);
+    if (list.length > files.length) setError(t('첨부는 최대 {0}개입니다', { 0: max }));
     const bad = files.map((f) => checkFile(purpose, f)).find(Boolean);
     if (bad) return setError(bad);
 
@@ -56,7 +58,7 @@ export default function AttachmentField({
       <input ref={ref} type="file" hidden multiple accept={acceptFor(purpose)} onChange={(e) => (void add(e.target.files), (e.target.value = ''))} />
       <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }} alignItems="center">
         <Button size="small" variant="outlined" startIcon={<AttachFileIcon />} disabled={disabled || uploading > 0 || value.length >= max} onClick={() => ref.current?.click()}>
-          파일 첨부
+          {t('파일 첨부')}
         </Button>
         {value.map((f) => (
           <Chip

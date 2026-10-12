@@ -16,9 +16,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, errorMessage } from '@/lib/api';
 import type { ChannelSetting } from '@/lib/comm';
 import { useSession } from '@/lib/session';
+import { useT } from '@/lib/i18n';
 
 /** SET-004 알림 종류별 채널(앱 푸시 / 알림톡) 켜기·끄기. 원장·실장만 바꿀 수 있다 */
 export default function NotificationChannelsTab() {
+  const t = useT();
   const qc = useQueryClient();
   const { session, manager } = useSession();
   const instId = session?.institution?.institutionId;
@@ -38,24 +40,24 @@ export default function NotificationChannelsTab() {
   return (
     <Stack spacing={2} sx={{ maxWidth: 720 }}>
       <Typography variant="body2" color="text.secondary">
-        알림 종류마다 학부모에게 앱 푸시와 알림톡을 보낼지 정합니다. 알림톡은 앱을 설치하지 않았거나 푸시를 꺼 둔 보호자에게 대신 갑니다.
+        {t('알림 종류마다 학부모에게 앱 푸시와 알림톡을 보낼지 정합니다. 알림톡은 앱을 설치하지 않았거나 푸시를 꺼 둔 보호자에게 대신 갑니다.')}
       </Typography>
       {q.isError && <Alert severity="error">{errorMessage(q.error)}</Alert>}
       {save.isError && <Alert severity="error">{errorMessage(save.error)}</Alert>}
-      {save.isSuccess && <Alert severity="success">저장했습니다</Alert>}
+      {save.isSuccess && <Alert severity="success">{t('저장했습니다')}</Alert>}
       <Paper>
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell>알림 종류</TableCell>
-              <TableCell align="center">앱 푸시</TableCell>
-              <TableCell align="center">알림톡</TableCell>
+              <TableCell>{t('알림 종류')}</TableCell>
+              <TableCell align="center">{t('앱 푸시')}</TableCell>
+              <TableCell align="center">{t('알림톡')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {rows.map((r) => (
               <TableRow key={r.category}>
-                <TableCell>{r.label}</TableCell>
+                <TableCell>{t(r.label)}</TableCell>
                 <TableCell align="center">
                   <Switch checked={r.push} disabled={!manager} onChange={(e) => set(r.category, { push: e.target.checked })} />
                 </TableCell>
@@ -69,7 +71,7 @@ export default function NotificationChannelsTab() {
       </Paper>
       {manager && (
         <Button variant="contained" sx={{ alignSelf: 'flex-end' }} disabled={save.isPending || rows.length === 0} onClick={() => save.mutate()}>
-          저장
+          {t('저장')}
         </Button>
       )}
     </Stack>

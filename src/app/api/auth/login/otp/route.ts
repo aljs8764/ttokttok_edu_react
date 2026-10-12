@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { BACKEND_URL } from '@/lib/server/session';
+import { BACKEND_URL, languageOf } from '@/lib/server/session';
 import { finishLogin } from '@/lib/server/finishLogin';
 
 /** AUTH-007 로그인 2단계 — 인증 앱 6자리 또는 복구 코드 */
 export async function POST(req: Request) {
   const { challengeId, code, rememberMe } = (await req.json()) as { challengeId: string; code: string; rememberMe?: boolean };
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const headers: Record<string, string> = { 'Content-Type': 'application/json', 'Accept-Language': languageOf(req) };
   const forwarded = req.headers.get('x-forwarded-for');
   if (forwarded) headers['X-Forwarded-For'] = forwarded;
 

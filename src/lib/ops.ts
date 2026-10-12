@@ -1,3 +1,4 @@
+import { translate } from '@/lib/i18n';
 // Phase 2 ③ 원생·학급·일정 응답 타입 (STU-009~011, CLS-003·004, STF-004, EVT-002·006)
 
 export interface Health {
@@ -115,4 +116,4 @@ export interface CalendarEvent {
 }
 
 export const WEEKDAY = ['', '월', '화', '수', '목', '금', '토', '일'];
-export const hours = (min: number) => `${Math.floor(min / 60)}시간 ${min % 60}분`;
+export const hours = (min: number) => translate('{0}시간 {1}분', { 0: Math.floor(min / 60), 1: min % 60 });

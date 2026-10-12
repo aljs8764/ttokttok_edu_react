@@ -34,12 +34,14 @@ import { LINK_STATUS, STUDENT_STATUS } from '@/lib/student';
 import RegisterStudentDialog from '@/components/students/RegisterStudentDialog';
 import InviteParentDialog from '@/components/students/InviteParentDialog';
 import PageHeader from '@/components/PageHeader';
+import { useT } from '@/lib/i18n';
 
 /**
  * STU-001 원생 목록 — 반·재원상태 필터, 이름/보호자 번호 뒷 4자리 검색, 20개씩.
  * 원장·실장은 등록(STU-003)·엑셀 업로드(STU-002)·가입 승인(STU-004)·초대(STU-005)로 이어진다.
  */
 export default function StudentsView() {
+  const tr = useT();
   const { session, manager } = useSession();
   const instId = session?.institution?.institutionId;
   const searchParams = useSearchParams();
@@ -80,25 +82,25 @@ export default function StudentsView() {
   return (
     <>
       <PageHeader
-        title="원생 관리"
+        title={tr('원생 관리')}
         menuId="STU-001"
-        description={manager ? '행을 누르면 상세(반 이동·상태 변경·보호자 관리)로 이동합니다.' : '담당 반 원생만 보이며, 생년월일·연락처는 마스킹됩니다.'}
+        description={manager ? tr('행을 누르면 상세(반 이동·상태 변경·보호자 관리)로 이동합니다.') : tr('담당 반 원생만 보이며, 생년월일·연락처는 마스킹됩니다.')}
         actions={
           manager && (
             <>
               <Badge color="secondary" badgeContent={pending.data?.length ?? 0}>
                 <Button variant="outlined" startIcon={<HowToRegIcon />} component={NextLink} href="/students/join-requests">
-                  가입 승인
+                  {tr('가입 승인')}
                 </Button>
               </Badge>
               <Button variant="outlined" startIcon={<SendIcon />} onClick={() => setInviteOpen(true)}>
-                학부모 초대
+                {tr('학부모 초대')}
               </Button>
               <Button variant="outlined" startIcon={<UploadIcon />} component={NextLink} href="/students/import">
-                엑셀 일괄 등록
+                {tr('엑셀 일괄 등록')}
               </Button>
               <Button variant="contained" startIcon={<PersonAddIcon />} onClick={() => setRegisterOpen(true)}>
-                원생 등록
+                {tr('원생 등록')}
               </Button>
             </>
           )
@@ -108,7 +110,7 @@ export default function StudentsView() {
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mb: 2 }}>
         <TextField
           size="small"
-          placeholder="이름 또는 보호자 번호 뒷 4자리"
+          placeholder={tr('이름 또는 보호자 번호 뒷 4자리')}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           sx={{ minWidth: 260 }}
@@ -120,19 +122,19 @@ export default function StudentsView() {
             ),
           }}
         />
-        <TextField select size="small" label="반" value={classId} onChange={(e) => (setClassId(e.target.value), setPage(0))} sx={{ minWidth: 150 }}>
-          <MenuItem value="">전체</MenuItem>
+        <TextField select size="small" label={tr('반')} value={classId} onChange={(e) => (setClassId(e.target.value), setPage(0))} sx={{ minWidth: 150 }}>
+          <MenuItem value="">{tr('전체')}</MenuItem>
           {(classes.data ?? []).map((c) => (
             <MenuItem key={c.id} value={c.id}>
               {c.name}
             </MenuItem>
           ))}
         </TextField>
-        <TextField select size="small" label="상태" value={status} onChange={(e) => (setStatus(e.target.value as StudentStatus | ''), setPage(0))} sx={{ minWidth: 120 }}>
-          <MenuItem value="">전체</MenuItem>
+        <TextField select size="small" label={tr('상태')} value={status} onChange={(e) => (setStatus(e.target.value as StudentStatus | ''), setPage(0))} sx={{ minWidth: 120 }}>
+          <MenuItem value="">{tr('전체')}</MenuItem>
           {(Object.keys(STUDENT_STATUS) as StudentStatus[]).map((s) => (
             <MenuItem key={s} value={s}>
-              {STUDENT_STATUS[s].label}
+              {tr(STUDENT_STATUS[s].label)}
             </MenuItem>
           ))}
         </TextField>
@@ -146,19 +148,19 @@ export default function StudentsView() {
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>이름</TableCell>
-                <TableCell>반</TableCell>
-                <TableCell>보호자</TableCell>
-                <TableCell>생년월일</TableCell>
-                <TableCell>학년</TableCell>
-                <TableCell>상태</TableCell>
+                <TableCell>{tr('이름')}</TableCell>
+                <TableCell>{tr('반')}</TableCell>
+                <TableCell>{tr('보호자')}</TableCell>
+                <TableCell>{tr('생년월일')}</TableCell>
+                <TableCell>{tr('학년')}</TableCell>
+                <TableCell>{tr('상태')}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {list.data?.items.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} align="center" sx={{ py: 4, color: 'text.secondary' }}>
-                    조건에 맞는 원생이 없습니다
+                    {tr('조건에 맞는 원생이 없습니다')}
                   </TableCell>
                 </TableRow>
               )}
@@ -174,7 +176,7 @@ export default function StudentsView() {
                             {g.phone}
                             {g.relation ? ` (${g.relation})` : ''}
                           </Typography>
-                          <Chip size="small" variant="outlined" color={LINK_STATUS[g.linkStatus]?.color} label={LINK_STATUS[g.linkStatus]?.label ?? g.linkStatus} />
+                          <Chip size="small" variant="outlined" color={LINK_STATUS[g.linkStatus]?.color} label={tr(LINK_STATUS[g.linkStatus]?.label ?? g.linkStatus)} />
                         </Stack>
                       ))}
                     </Stack>
@@ -182,7 +184,7 @@ export default function StudentsView() {
                   <TableCell>{s.birthDate ?? '••••-••-••'}</TableCell>
                   <TableCell>{s.grade ?? '-'}</TableCell>
                   <TableCell>
-                    <Chip size="small" label={STUDENT_STATUS[s.status].label} color={STUDENT_STATUS[s.status].color} variant={s.status === 'WITHDRAWN' ? 'outlined' : 'filled'} />
+                    <Chip size="small" label={tr(STUDENT_STATUS[s.status].label)} color={STUDENT_STATUS[s.status].color} variant={s.status === 'WITHDRAWN' ? 'outlined' : 'filled'} />
                   </TableCell>
                 </TableRow>
               ))}
@@ -196,7 +198,7 @@ export default function StudentsView() {
           onPageChange={(_, p) => setPage(p)}
           rowsPerPage={20}
           rowsPerPageOptions={[20]}
-          labelDisplayedRows={({ from, to, count }) => `${from}–${to} / 총 ${count}명`}
+          labelDisplayedRows={({ from, to, count }) => tr('{0}–{1} / 총 {2}명', { 0: from, 1: to, 2: count })}
         />
       </Paper>
 

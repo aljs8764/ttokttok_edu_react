@@ -20,9 +20,11 @@ import type { Survey } from '@/lib/comm';
 import { dateTime } from '@/lib/format';
 import { useSession } from '@/lib/session';
 import PageHeader from '@/components/PageHeader';
+import { useT } from '@/lib/i18n';
 
 /** NTC-010 설문 목록 */
 export default function SurveysView() {
+  const t = useT();
   const router = useRouter();
   const { session } = useSession();
   const instId = session?.institution?.institutionId;
@@ -31,12 +33,12 @@ export default function SurveysView() {
   return (
     <>
       <PageHeader
-        title="설문"
+        title={t('설문')}
         menuId="NTC-010"
-        description="학부모에게 설문을 보내고 응답을 모아 봅니다. 응답은 원생(자녀)별로 한 번씩 받습니다."
+        description={t('학부모에게 설문을 보내고 응답을 모아 봅니다. 응답은 원생(자녀)별로 한 번씩 받습니다.')}
         actions={
           <Button variant="contained" startIcon={<AddIcon />} component={NextLink} href="/surveys/new">
-            설문 만들기
+            {t('설문 만들기')}
           </Button>
         }
       />
@@ -46,18 +48,18 @@ export default function SurveysView() {
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell>제목</TableCell>
-              <TableCell>상태</TableCell>
-              <TableCell>마감</TableCell>
-              <TableCell sx={{ width: 180 }}>응답</TableCell>
-              <TableCell>작성</TableCell>
+              <TableCell>{t('제목')}</TableCell>
+              <TableCell>{t('상태')}</TableCell>
+              <TableCell>{t('마감')}</TableCell>
+              <TableCell sx={{ width: 180 }}>{t('응답')}</TableCell>
+              <TableCell>{t('작성')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {list.data?.length === 0 && (
               <TableRow>
                 <TableCell colSpan={5} align="center" sx={{ py: 4, color: 'text.secondary' }}>
-                  만든 설문이 없습니다
+                  {t('만든 설문이 없습니다')}
                 </TableCell>
               </TableRow>
             )}
@@ -65,12 +67,12 @@ export default function SurveysView() {
               <TableRow key={s.id} hover sx={{ cursor: 'pointer' }} onClick={() => router.push(`/surveys/${s.id}`)}>
                 <TableCell sx={{ fontWeight: 600 }}>{s.title}</TableCell>
                 <TableCell>
-                  <Chip size="small" label={s.status === 'OPEN' ? '진행 중' : '마감'} color={s.status === 'OPEN' ? 'primary' : 'default'} />
+                  <Chip size="small" label={s.status === 'OPEN' ? t('진행 중') : t('마감')} color={s.status === 'OPEN' ? 'primary' : 'default'} />
                 </TableCell>
                 <TableCell>{s.closesAt ? dateTime(s.closesAt) : '-'}</TableCell>
                 <TableCell>
                   <Typography variant="caption">
-                    {s.responses}/{s.recipients}명 · {s.recipients ? Math.round((s.responses / s.recipients) * 100) : 0}%
+                    {t('{0}/{1}명 · {2}%', { 0: s.responses, 1: s.recipients, 2: s.recipients ? Math.round((s.responses / s.recipients) * 100) : 0 })}
                   </Typography>
                   <LinearProgress variant="determinate" value={s.recipients ? Math.min(100, (s.responses / s.recipients) * 100) : 0} sx={{ height: 5, borderRadius: 3 }} />
                 </TableCell>

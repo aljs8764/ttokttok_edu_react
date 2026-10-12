@@ -48,7 +48,7 @@ export default function SettingsView() {
 
   return (
     <>
-      <PageHeader title="설정" menuId={meta.menuId} />
+      <PageHeader title={tr('설정')} menuId={meta.menuId} />
       <Tabs value={current} onChange={(_, v) => router.replace(`${pathname}?tab=${v}`)} variant="scrollable" sx={{ mb: 3 }}>
         {tabs.map((t) => (
           <Tab key={t.key} value={t.key} label={tr(t.label)} />

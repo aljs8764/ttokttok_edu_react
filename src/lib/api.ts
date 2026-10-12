@@ -1,4 +1,5 @@
 import type { ApiErrorBody } from './types';
+import { translate } from '@/lib/i18n';
 
 /** 백엔드 오류 {code, message, details} */
 export class ApiError extends Error {
@@ -36,7 +37,7 @@ async function request<T>(method: string, path: string, opts: { query?: Query; b
   }
   if (!res.ok) {
     const err = (await res.json().catch(() => null)) as ApiErrorBody | null;
-    throw new ApiError(res.status, err?.code ?? 'ERROR', err?.message ?? `요청에 실패했습니다 (${res.status})`, err?.details);
+    throw new ApiError(res.status, err?.code ?? 'ERROR', err?.message ?? translate('요청에 실패했습니다 ({0})', { 0: res.status }), err?.details);
   }
   if (res.status === 204) return undefined as T;
   return (await res.json()) as T;
@@ -55,7 +56,7 @@ export async function upload<T>(path: string, form: FormData): Promise<T> {
   const res = await fetch(`/api/proxy/${path.replace(/^\//, '')}`, { method: 'POST', body: form, headers: { Accept: 'application/json' } });
   if (!res.ok) {
     const err = (await res.json().catch(() => null)) as ApiErrorBody | null;
-    throw new ApiError(res.status, err?.code ?? 'ERROR', err?.message ?? `업로드에 실패했습니다 (${res.status})`, err?.details);
+    throw new ApiError(res.status, err?.code ?? 'ERROR', err?.message ?? translate('업로드에 실패했습니다 ({0})', { 0: res.status }), err?.details);
   }
   return (await res.json()) as T;
 }
@@ -69,7 +70,7 @@ export async function download(method: 'GET' | 'POST', path: string, body?: unkn
   });
   if (!res.ok) {
     const err = (await res.json().catch(() => null)) as ApiErrorBody | null;
-    throw new ApiError(res.status, err?.code ?? 'ERROR', err?.message ?? '다운로드에 실패했습니다');
+    throw new ApiError(res.status, err?.code ?? 'ERROR', err?.message ?? translate('다운로드에 실패했습니다'));
   }
   const blob = await res.blob();
   const name = filenameFrom(res.headers.get('content-disposition')) ?? fallbackName;
@@ -89,10 +90,11 @@ function filenameFrom(disposition: string | null) {
   return plain ? plain[1] : null;
 }
 
+/** 화면에 보일 오류 문장. 백엔드 문장은 이미 요청 언어로 오고, BFF(Next) 가 만든 한국어 문장은 사전으로 바꾼다 */
 export function errorMessage(e: unknown) {
-  if (e instanceof ApiError) return e.message;
-  if (e instanceof Error) return e.message;
-  return '알 수 없는 오류가 발생했습니다';
+  if (e instanceof ApiError) return translate(e.message);
+  if (e instanceof Error) return translate(e.message);
+  return translate('알 수 없는 오류가 발생했습니다');
 }
 
 export function newIdempotencyKey() {

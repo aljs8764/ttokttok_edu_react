@@ -21,6 +21,7 @@ import { api, errorMessage } from '@/lib/api';
 import type { SchoolEvent, Target } from '@/lib/types';
 import PageHeader from '@/components/PageHeader';
 import TargetPicker, { toTargetRequest } from '@/components/TargetPicker';
+import { useT, translate } from '@/lib/i18n';
 
 export const REMINDER_OPTIONS = [
   { value: 6, label: '마감 6시간 전' },
@@ -33,13 +34,13 @@ export const REMINDER_OPTIONS = [
 /** 행사 시각 검사 (생성·수정 공용). 문제가 없으면 '' */
 export function eventTimeError(startsAt: Dayjs | null, endsAt: Dayjs | null, rsvp: boolean, deadline: Dayjs | null, isNew: boolean) {
   const now = dayjs();
-  if (!startsAt?.isValid()) return '시작 시각을 고르세요';
-  if (isNew && !startsAt.isAfter(now)) return '행사 시작은 현재 이후여야 합니다';
-  if (endsAt && !endsAt.isAfter(startsAt)) return '종료는 시작 이후여야 합니다';
+  if (!startsAt?.isValid()) return translate('시작 시각을 고르세요');
+  if (isNew && !startsAt.isAfter(now)) return translate('행사 시작은 현재 이후여야 합니다');
+  if (endsAt && !endsAt.isAfter(startsAt)) return translate('종료는 시작 이후여야 합니다');
   if (rsvp) {
-    if (!deadline?.isValid()) return '응답 마감 시각을 고르세요';
-    if (deadline.isAfter(startsAt)) return '응답 마감은 행사 시작 전이어야 합니다';
-    if (isNew && !deadline.isAfter(now)) return '응답 마감은 현재 이후여야 합니다';
+    if (!deadline?.isValid()) return translate('응답 마감 시각을 고르세요');
+    if (deadline.isAfter(startsAt)) return translate('응답 마감은 행사 시작 전이어야 합니다');
+    if (isNew && !deadline.isAfter(now)) return translate('응답 마감은 현재 이후여야 합니다');
   }
   return '';
 }
@@ -49,6 +50,7 @@ export function eventTimeError(startsAt: Dayjs | null, endsAt: Dayjs | null, rsv
  * 마감 전 설정한 시점에 미응답 보호자에게 자동 독촉 푸시가 한 번 간다 (5분 주기 스케줄러).
  */
 export default function EventForm() {
+  const t = useT();
   const qc = useQueryClient();
   const router = useRouter();
   const [title, setTitle] = useState('');
@@ -87,33 +89,33 @@ export default function EventForm() {
   return (
     <>
       <PageHeader
-        title="행사 만들기"
+        title={t('행사 만들기')}
         menuId="EVT-001"
         actions={
           <Button startIcon={<ArrowBackIcon />} component={NextLink} href="/events">
-            목록
+            {t('목록')}
           </Button>
         }
       />
       <Paper sx={{ p: 3, maxWidth: 820 }}>
         <Stack spacing={2.5}>
-          <TextField label="행사명" required value={title} onChange={(e) => setTitle(e.target.value)} inputProps={{ maxLength: 100 }} placeholder="예: 가을 소풍" />
+          <TextField label={t('행사명')} required value={title} onChange={(e) => setTitle(e.target.value)} inputProps={{ maxLength: 100 }} placeholder={t('예: 가을 소풍')} />
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-            <DateTimePicker label="시작 *" value={startsAt} onChange={setStartsAt} disablePast format="YYYY-MM-DD HH:mm" ampm={false} slotProps={{ textField: { fullWidth: true } }} />
-            <DateTimePicker label="종료 (선택)" value={endsAt} onChange={setEndsAt} minDateTime={startsAt ?? undefined} format="YYYY-MM-DD HH:mm" ampm={false} slotProps={{ textField: { fullWidth: true }, field: { clearable: true } }} />
+            <DateTimePicker label={t('시작 *')} value={startsAt} onChange={setStartsAt} disablePast format="YYYY-MM-DD HH:mm" ampm={false} slotProps={{ textField: { fullWidth: true } }} />
+            <DateTimePicker label={t('종료 (선택)')} value={endsAt} onChange={setEndsAt} minDateTime={startsAt ?? undefined} format="YYYY-MM-DD HH:mm" ampm={false} slotProps={{ textField: { fullWidth: true }, field: { clearable: true } }} />
           </Stack>
-          <TextField label="장소" value={location} onChange={(e) => setLocation(e.target.value)} inputProps={{ maxLength: 200 }} />
-          <TextField label="안내 내용" multiline minRows={5} value={body} onChange={(e) => setBody(e.target.value)} inputProps={{ maxLength: 5000 }} helperText={`${body.length}/5000 · 준비물, 회비, 복장 등`} />
+          <TextField label={t('장소')} value={location} onChange={(e) => setLocation(e.target.value)} inputProps={{ maxLength: 200 }} />
+          <TextField label={t('안내 내용')} multiline minRows={5} value={body} onChange={(e) => setBody(e.target.value)} inputProps={{ maxLength: 5000 }} helperText={t('{0}/5000 · 준비물, 회비, 복장 등', { 0: body.length })} />
 
           <Divider />
           <TargetPicker value={targets} onChange={setTargets} />
 
           <Divider />
-          <FormControlLabel control={<Switch checked={rsvp} onChange={(e) => setRsvp(e.target.checked)} />} label="참석 여부 받기 (RSVP)" />
+          <FormControlLabel control={<Switch checked={rsvp} onChange={(e) => setRsvp(e.target.checked)} />} label={t('참석 여부 받기 (RSVP)')} />
           {rsvp && (
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
               <DateTimePicker
-                label="응답 마감 *"
+                label={t('응답 마감 *')}
                 value={deadline}
                 onChange={setDeadline}
                 disablePast
@@ -122,10 +124,10 @@ export default function EventForm() {
                 ampm={false}
                 slotProps={{ textField: { fullWidth: true } }}
               />
-              <TextField select label="자동 독촉" value={reminder} onChange={(e) => setReminder(Number(e.target.value))} fullWidth helperText="미응답 보호자에게 한 번 푸시">
+              <TextField select label={t('자동 독촉')} value={reminder} onChange={(e) => setReminder(Number(e.target.value))} fullWidth helperText={t('미응답 보호자에게 한 번 푸시')}>
                 {REMINDER_OPTIONS.map((o) => (
                   <MenuItem key={o.value} value={o.value}>
-                    {o.label}
+                    {t(o.label)}
                   </MenuItem>
                 ))}
               </TextField>
@@ -139,10 +141,10 @@ export default function EventForm() {
           {save.isError && <Alert severity="error">{errorMessage(save.error)}</Alert>}
           <Stack direction="row" justifyContent="flex-end" spacing={1}>
             <Button component={NextLink} href="/events">
-              취소
+              {t('취소')}
             </Button>
             <Button variant="contained" disabled={!valid || save.isPending} onClick={() => save.mutate()}>
-              만들고 알리기
+              {t('만들고 알리기')}
             </Button>
           </Stack>
         </Stack>

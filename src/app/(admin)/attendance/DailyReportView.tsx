@@ -28,11 +28,13 @@ import type { Attendance, AttendanceStatus, Classroom, ClassDailySummary, DailyR
 import PageHeader from '@/components/PageHeader';
 import StatusChip from '@/components/StatusChip';
 import ChangeStatusDialog from '@/components/ChangeStatusDialog';
+import { useT } from '@/lib/i18n';
 
 type Filter = 'ALL' | 'NOT_ARRIVED' | 'ABSENT' | 'LATE';
 
 /** ATT-001 데일리 리포트 + ATT-002 상태 수동 변경 */
 export default function DailyReportView() {
+  const t = useT();
   const qc = useQueryClient();
   const { session, manager } = useSession();
   const instId = session?.institution?.institutionId;
@@ -62,21 +64,21 @@ export default function DailyReportView() {
   return (
     <>
       <PageHeader
-        title="데일리 리포트"
+        title={t('데일리 리포트')}
         menuId="ATT-001"
-        description="날짜·반별 출결 현황. 기기 미소지·오류는 [변경]으로 바로잡고 사유를 남깁니다 (ATT-002)."
+        description={t('날짜·반별 출결 현황. 기기 미소지·오류는 [변경]으로 바로잡고 사유를 남깁니다 (ATT-002).')}
         actions={
           <>
             <DatePicker
-              label="날짜"
+              label={t('날짜')}
               value={date}
               onChange={(v) => v && setDate(v)}
               format="YYYY-MM-DD (dd)"
               maxDate={dayjs()}
               slotProps={{ textField: { size: 'small', sx: { width: 190 } } }}
             />
-            <TextField select size="small" label="반" value={classId} onChange={(e) => setClassId(e.target.value)} sx={{ minWidth: 160 }}>
-              <MenuItem value="">{manager ? '전체 반' : '담당 반 전체'}</MenuItem>
+            <TextField select size="small" label={t('반')} value={classId} onChange={(e) => setClassId(e.target.value)} sx={{ minWidth: 160 }}>
+              <MenuItem value="">{manager ? t('전체 반') : t('담당 반 전체')}</MenuItem>
               {(classes.data ?? []).map((c) => (
                 <MenuItem key={c.id} value={c.id}>
                   {c.name}
@@ -96,7 +98,7 @@ export default function DailyReportView() {
             ['ABSENT', '결석'],
           ] as [Filter, string][]
         ).map(([v, l]) => (
-          <Chip key={v} label={l} color={filter === v ? 'primary' : 'default'} variant={filter === v ? 'filled' : 'outlined'} onClick={() => setFilter(v)} />
+          <Chip key={v} label={t(l)} color={filter === v ? 'primary' : 'default'} variant={filter === v ? 'filled' : 'outlined'} onClick={() => setFilter(v)} />
         ))}
       </Stack>
 
@@ -104,7 +106,7 @@ export default function DailyReportView() {
       {report.isLoading && <Skeleton variant="rounded" height={240} />}
       {report.data?.classes.length === 0 && (
         <Paper sx={{ p: 4, textAlign: 'center' }}>
-          <Typography color="text.secondary">볼 수 있는 반이 없습니다</Typography>
+          <Typography color="text.secondary">{t('볼 수 있는 반이 없습니다')}</Typography>
         </Paper>
       )}
       <Stack spacing={2}>
@@ -132,6 +134,7 @@ function matches(a: Attendance, f: Filter, notArrivedIds: Set<string>) {
 }
 
 function ClassSection({ date, summary, filter, onEdit }: { date: string; summary: ClassDailySummary; filter: Filter; onEdit: (a: Attendance) => void }) {
+  const t = useT();
   const c = summary.counts;
   // 미등원 = 예정 상태로 수업 시작이 지난 원생 (오늘 화면 기준 근사; 정확한 기준은 대시보드 KPI)
   const started = dayjs(`${date}T${summary.startTime}`).isBefore(dayjs());
@@ -145,24 +148,24 @@ function ClassSection({ date, summary, filter, onEdit }: { date: string; summary
         <Typography variant="body2" color="text.secondary">
           {summary.startTime.slice(0, 5)}~{summary.endTime.slice(0, 5)}
         </Typography>
-        {!summary.heldToday && <Chip size="small" label="수업 없는 날" />}
+        {!summary.heldToday && <Chip size="small" label={t('수업 없는 날')} />}
         <Box sx={{ flex: 1 }} />
-        <Count label="등원율" value={percent(c.attendanceRate)} />
-        <Count label="등원" value={c.present} />
-        <Count label="하원" value={c.checkedOut} />
-        <Count label="지각" value={c.late} />
-        <Count label="결석" value={c.absent} tone="error" />
-        <Count label="예정" value={c.scheduled} />
+        <Count label={t('등원율')} value={percent(c.attendanceRate)} />
+        <Count label={t('등원')} value={c.present} />
+        <Count label={t('하원')} value={c.checkedOut} />
+        <Count label={t('지각')} value={c.late} />
+        <Count label={t('결석')} value={c.absent} tone="error" />
+        <Count label={t('예정')} value={c.scheduled} />
       </Box>
       <TableContainer>
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell>이름</TableCell>
-              <TableCell>상태</TableCell>
-              <TableCell>등원</TableCell>
-              <TableCell>하원 · 목적지</TableCell>
-              <TableCell>결석 사유</TableCell>
+              <TableCell>{t('이름')}</TableCell>
+              <TableCell>{t('상태')}</TableCell>
+              <TableCell>{t('등원')}</TableCell>
+              <TableCell>{t('하원 · 목적지')}</TableCell>
+              <TableCell>{t('결석 사유')}</TableCell>
               <TableCell align="right" />
             </TableRow>
           </TableHead>
@@ -170,7 +173,7 @@ function ClassSection({ date, summary, filter, onEdit }: { date: string; summary
             {rows.length === 0 && (
               <TableRow>
                 <TableCell colSpan={6} align="center" sx={{ color: 'text.secondary', py: 3 }}>
-                  해당 원생이 없습니다
+                  {t('해당 원생이 없습니다')}
                 </TableCell>
               </TableRow>
             )}
@@ -187,8 +190,8 @@ function ClassSection({ date, summary, filter, onEdit }: { date: string; summary
                 </TableCell>
                 <TableCell sx={{ color: 'text.secondary', maxWidth: 240 }}>{r.absenceReason ?? ''}</TableCell>
                 <TableCell align="right">
-                  <Button size="small" disabled={!r.dayId} onClick={() => onEdit(r)} title={r.dayId ? '' : '출결 기록이 아직 없습니다 (수업 없는 날·배치 전)'}>
-                    변경
+                  <Button size="small" disabled={!r.dayId} onClick={() => onEdit(r)} title={r.dayId ? '' : t('출결 기록이 아직 없습니다 (수업 없는 날·배치 전)')}>
+                    {t('변경')}
                   </Button>
                 </TableCell>
               </TableRow>

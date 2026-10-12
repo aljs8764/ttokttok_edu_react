@@ -25,6 +25,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { api, errorMessage } from '@/lib/api';
 import { useSession } from '@/lib/session';
 import type { AuditLog, Page } from '@/lib/types';
+import { useT } from '@/lib/i18n';
 
 /** 백엔드가 남기는 감사 액션 (AuditEntry.action) */
 const ACTIONS: Record<string, string> = {
@@ -38,6 +39,7 @@ const ACTIONS: Record<string, string> = {
 
 /** SEC-002 감사 로그 (원장 전용, 최신순 50건씩). 개인정보 다운로드·출결 정정·기준 변경 이력 */
 export default function AuditTab() {
+  const t = useT();
   const { session } = useSession();
   const instId = session?.institution?.institutionId;
   const [action, setAction] = useState('');
@@ -63,16 +65,16 @@ export default function AuditTab() {
   return (
     <>
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mb: 2 }}>
-        <TextField select size="small" label="작업" value={action} onChange={(e) => (setAction(e.target.value), setPage(0))} sx={{ minWidth: 200 }}>
-          <MenuItem value="">전체</MenuItem>
+        <TextField select size="small" label={t('작업')} value={action} onChange={(e) => (setAction(e.target.value), setPage(0))} sx={{ minWidth: 200 }}>
+          <MenuItem value="">{t('전체')}</MenuItem>
           {Object.entries(ACTIONS).map(([k, v]) => (
             <MenuItem key={k} value={k}>
-              {v}
+              {t(v)}
             </MenuItem>
           ))}
         </TextField>
-        <DatePicker label="시작일" value={from} onChange={(v) => (setFrom(v), setPage(0))} format="YYYY-MM-DD" maxDate={to ?? undefined} slotProps={{ textField: { size: 'small' } }} />
-        <DatePicker label="종료일" value={to} onChange={(v) => (setTo(v), setPage(0))} format="YYYY-MM-DD" minDate={from ?? undefined} disableFuture slotProps={{ textField: { size: 'small' } }} />
+        <DatePicker label={t('시작일')} value={from} onChange={(v) => (setFrom(v), setPage(0))} format="YYYY-MM-DD" maxDate={to ?? undefined} slotProps={{ textField: { size: 'small' } }} />
+        <DatePicker label={t('종료일')} value={to} onChange={(v) => (setTo(v), setPage(0))} format="YYYY-MM-DD" minDate={from ?? undefined} disableFuture slotProps={{ textField: { size: 'small' } }} />
       </Stack>
 
       {logs.isError && <Alert severity="error" sx={{ mb: 2 }}>{errorMessage(logs.error)}</Alert>}
@@ -83,10 +85,10 @@ export default function AuditTab() {
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell width={150}>시각</TableCell>
-                <TableCell>작업</TableCell>
-                <TableCell>한 사람</TableCell>
-                <TableCell>대상</TableCell>
+                <TableCell width={150}>{t('시각')}</TableCell>
+                <TableCell>{t('작업')}</TableCell>
+                <TableCell>{t('한 사람')}</TableCell>
+                <TableCell>{t('대상')}</TableCell>
                 <TableCell width={48} />
               </TableRow>
             </TableHead>
@@ -94,7 +96,7 @@ export default function AuditTab() {
               {logs.data?.items.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={5} align="center" sx={{ py: 4, color: 'text.secondary' }}>
-                    기록이 없습니다
+                    {t('기록이 없습니다')}
                   </TableCell>
                 </TableRow>
               )}
@@ -102,7 +104,7 @@ export default function AuditTab() {
                 <Fragment key={l.id}>
                   <TableRow hover>
                     <TableCell>{dayjs(l.at).format('YYYY-MM-DD HH:mm')}</TableCell>
-                    <TableCell>{ACTIONS[l.action] ?? l.action}</TableCell>
+                    <TableCell>{t(ACTIONS[l.action] ?? l.action)}</TableCell>
                     <TableCell>{l.actor.name}</TableCell>
                     <TableCell>
                       <Typography variant="body2" color="text.secondary" noWrap sx={{ maxWidth: 320 }}>
@@ -110,7 +112,7 @@ export default function AuditTab() {
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <IconButton size="small" onClick={() => setOpen(open === l.id ? null : l.id)} aria-label="자세히">
+                      <IconButton size="small" onClick={() => setOpen(open === l.id ? null : l.id)} aria-label={t('자세히')}>
                         {open === l.id ? <CollapseIcon fontSize="small" /> : <ExpandIcon fontSize="small" />}
                       </IconButton>
                     </TableCell>
@@ -136,7 +138,7 @@ export default function AuditTab() {
           onPageChange={(_, p) => setPage(p)}
           rowsPerPage={50}
           rowsPerPageOptions={[50]}
-          labelDisplayedRows={({ from: a, to: b, count }) => `${a}–${b} / 총 ${count}건`}
+          labelDisplayedRows={({ from: a, to: b, count }) => t('{0}–{1} / 총 {2}건', { 0: a, 1: b, 2: count })}
         />
       </Paper>
     </>

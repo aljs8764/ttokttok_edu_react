@@ -21,6 +21,7 @@ import { QUESTION_TYPE, type QuestionType, type Survey } from '@/lib/comm';
 import type { Target } from '@/lib/types';
 import PageHeader from '@/components/PageHeader';
 import TargetPicker, { toTargetRequest } from '@/components/TargetPicker';
+import { useT } from '@/lib/i18n';
 
 interface Q {
   type: QuestionType;
@@ -33,6 +34,7 @@ const hasOptions = (t: QuestionType) => t === 'SINGLE' || t === 'MULTI';
 
 /** NTC-010 설문 작성 — 질문 최대 20개, 선택지 최대 10개 */
 export default function SurveyForm() {
+  const tr = useT();
   const router = useRouter();
   const qc = useQueryClient();
   const [title, setTitle] = useState('');
@@ -62,14 +64,14 @@ export default function SurveyForm() {
 
   return (
     <>
-      <PageHeader title="설문 만들기" menuId="NTC-010" />
+      <PageHeader title={tr('설문 만들기')} menuId="NTC-010" />
       <Paper sx={{ p: 3, maxWidth: 820 }}>
         <Stack spacing={2.5}>
           <TargetPicker value={targets} onChange={setTargets} />
           <Divider />
-          <TextField label="설문 제목" required value={title} onChange={(e) => setTitle(e.target.value)} inputProps={{ maxLength: 100 }} />
-          <TextField label="안내 문구" multiline minRows={2} value={description} onChange={(e) => setDescription(e.target.value)} inputProps={{ maxLength: 1000 }} />
-          <TextField label="마감 일시 (선택)" type="datetime-local" value={closesAt} onChange={(e) => setClosesAt(e.target.value)} InputLabelProps={{ shrink: true }} sx={{ maxWidth: 260 }} />
+          <TextField label={tr('설문 제목')} required value={title} onChange={(e) => setTitle(e.target.value)} inputProps={{ maxLength: 100 }} />
+          <TextField label={tr('안내 문구')} multiline minRows={2} value={description} onChange={(e) => setDescription(e.target.value)} inputProps={{ maxLength: 1000 }} />
+          <TextField label={tr('마감 일시 (선택)')} type="datetime-local" value={closesAt} onChange={(e) => setClosesAt(e.target.value)} InputLabelProps={{ shrink: true }} sx={{ maxWidth: 260 }} />
           <Divider />
           {qs.map((q, i) => (
             <Paper key={i} variant="outlined" sx={{ p: 2 }}>
@@ -81,54 +83,54 @@ export default function SurveyForm() {
                   <TextField select size="small" value={q.type} onChange={(e) => patch(i, { type: e.target.value as QuestionType })} sx={{ minWidth: 140 }}>
                     {(Object.keys(QUESTION_TYPE) as QuestionType[]).map((t) => (
                       <MenuItem key={t} value={t}>
-                        {QUESTION_TYPE[t]}
+                        {tr(QUESTION_TYPE[t])}
                       </MenuItem>
                     ))}
                   </TextField>
-                  <FormControlLabel control={<Checkbox checked={q.required} onChange={(e) => patch(i, { required: e.target.checked })} />} label="필수" />
+                  <FormControlLabel control={<Checkbox checked={q.required} onChange={(e) => patch(i, { required: e.target.checked })} />} label={tr('필수')} />
                   <span style={{ flex: 1 }} />
-                  <IconButton aria-label="질문 삭제" disabled={qs.length === 1} onClick={() => setQs((l) => l.filter((_, j) => j !== i))}>
+                  <IconButton aria-label={tr('질문 삭제')} disabled={qs.length === 1} onClick={() => setQs((l) => l.filter((_, j) => j !== i))}>
                     <DeleteIcon />
                   </IconButton>
                 </Stack>
-                <TextField size="small" label="질문" value={q.text} onChange={(e) => patch(i, { text: e.target.value })} inputProps={{ maxLength: 300 }} />
+                <TextField size="small" label={tr('질문')} value={q.text} onChange={(e) => patch(i, { text: e.target.value })} inputProps={{ maxLength: 300 }} />
                 {hasOptions(q.type) &&
                   q.options.map((o, k) => (
                     <Stack key={k} direction="row" spacing={1}>
                       <TextField
                         size="small"
                         fullWidth
-                        label={`선택지 ${k + 1}`}
+                        label={tr('선택지 {0}', { 0: k + 1 })}
                         value={o}
                         onChange={(e) => patch(i, { options: q.options.map((x, m) => (m === k ? e.target.value : x)) })}
                         inputProps={{ maxLength: 100 }}
                       />
-                      <IconButton aria-label="선택지 삭제" disabled={q.options.length <= 2} onClick={() => patch(i, { options: q.options.filter((_, m) => m !== k) })}>
+                      <IconButton aria-label={tr('선택지 삭제')} disabled={q.options.length <= 2} onClick={() => patch(i, { options: q.options.filter((_, m) => m !== k) })}>
                         <DeleteIcon fontSize="small" />
                       </IconButton>
                     </Stack>
                   ))}
                 {hasOptions(q.type) && q.options.length < 10 && (
                   <Button size="small" sx={{ alignSelf: 'flex-start' }} onClick={() => patch(i, { options: [...q.options, ''] })}>
-                    선택지 추가
+                    {tr('선택지 추가')}
                   </Button>
                 )}
                 {q.type === 'RATING' && (
                   <Typography variant="caption" color="text.secondary">
-                    학부모는 별 1~5개로 답합니다.
+                    {tr('학부모는 별 1~5개로 답합니다.')}
                   </Typography>
                 )}
               </Stack>
             </Paper>
           ))}
           <Button startIcon={<AddIcon />} disabled={qs.length >= 20} onClick={() => setQs((l) => [...l, blank()])} sx={{ alignSelf: 'flex-start' }}>
-            질문 추가
+            {tr('질문 추가')}
           </Button>
           {create.isError && <Alert severity="error">{errorMessage(create.error)}</Alert>}
           <Stack direction="row" spacing={1} justifyContent="flex-end">
-            <Button onClick={() => router.back()}>취소</Button>
+            <Button onClick={() => router.back()}>{tr('취소')}</Button>
             <Button variant="contained" disabled={!valid || create.isPending} onClick={() => create.mutate()}>
-              설문 보내기
+              {tr('설문 보내기')}
             </Button>
           </Stack>
         </Stack>

@@ -33,6 +33,7 @@ import { useSession } from '@/lib/session';
 import type { Classroom, JoinRequest, JoinRequestStatus } from '@/lib/types';
 import PageHeader from '@/components/PageHeader';
 import InviteParentDialog from '@/components/students/InviteParentDialog';
+import { useT } from '@/lib/i18n';
 
 const TABS: { value: JoinRequestStatus; label: string }[] = [
   { value: 'PENDING', label: '대기' },
@@ -47,6 +48,7 @@ const age = (birth: string) => dayjs().diff(dayjs(birth), 'year');
  * 반을 배정해 승인하면 원생·보호자·반 배정이 한 번에 만들어진다.
  */
 export default function JoinRequestsView() {
+  const tr = useT();
   const qc = useQueryClient();
   const { session } = useSession();
   const instId = session?.institution?.institutionId;
@@ -71,16 +73,16 @@ export default function JoinRequestsView() {
   return (
     <>
       <PageHeader
-        title="가입 승인"
+        title={tr('가입 승인')}
         menuId="STU-004"
-        description="초대 링크로 학부모가 입력한 자녀 정보입니다. 반을 배정해 승인하면 원생으로 등록되고 학부모 앱과 연결됩니다."
+        description={tr('초대 링크로 학부모가 입력한 자녀 정보입니다. 반을 배정해 승인하면 원생으로 등록되고 학부모 앱과 연결됩니다.')}
         actions={
           <>
             <Button startIcon={<ArrowBackIcon />} component={NextLink} href="/students">
-              원생 목록
+              {tr('원생 목록')}
             </Button>
             <Button variant="contained" startIcon={<SendIcon />} onClick={() => setInviteOpen(true)}>
-              학부모 초대
+              {tr('학부모 초대')}
             </Button>
           </>
         }
@@ -88,7 +90,7 @@ export default function JoinRequestsView() {
 
       <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
         {TABS.map((t) => (
-          <Tab key={t.value} value={t.value} label={t.label} />
+          <Tab key={t.value} value={t.value} label={tr(t.label)} />
         ))}
       </Tabs>
 
@@ -100,19 +102,19 @@ export default function JoinRequestsView() {
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>자녀</TableCell>
-                <TableCell>생년월일</TableCell>
-                <TableCell>보호자</TableCell>
-                <TableCell>연락처</TableCell>
-                <TableCell>신청</TableCell>
-                <TableCell align="right">{tab === 'PENDING' ? '처리' : '상태'}</TableCell>
+                <TableCell>{tr('자녀')}</TableCell>
+                <TableCell>{tr('생년월일')}</TableCell>
+                <TableCell>{tr('보호자')}</TableCell>
+                <TableCell>{tr('연락처')}</TableCell>
+                <TableCell>{tr('신청')}</TableCell>
+                <TableCell align="right">{tab === 'PENDING' ? tr('처리') : tr('상태')}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {list.data?.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} align="center" sx={{ py: 4, color: 'text.secondary' }}>
-                    {tab === 'PENDING' ? '대기 중인 가입 신청이 없습니다' : '내역이 없습니다'}
+                    {tab === 'PENDING' ? tr('대기 중인 가입 신청이 없습니다') : tr('내역이 없습니다')}
                   </TableCell>
                 </TableRow>
               )}
@@ -120,7 +122,7 @@ export default function JoinRequestsView() {
                 <TableRow key={r.id} hover>
                   <TableCell sx={{ fontWeight: 600 }}>{r.childName}</TableCell>
                   <TableCell>
-                    {r.birthDate} <Typography component="span" variant="caption" color="text.secondary">(만 {age(r.birthDate)}세)</Typography>
+                    {r.birthDate} <Typography component="span" variant="caption" color="text.secondary">{tr('(만 {0}세)', { 0: age(r.birthDate) })}</Typography>
                   </TableCell>
                   <TableCell>
                     {r.guardianName}
@@ -132,14 +134,14 @@ export default function JoinRequestsView() {
                     {r.status === 'PENDING' ? (
                       <Stack direction="row" spacing={1} justifyContent="flex-end">
                         <Button size="small" color="inherit" onClick={() => setRejecting(r)}>
-                          반려
+                          {tr('반려')}
                         </Button>
                         <Button size="small" variant="contained" onClick={() => setApproving(r)}>
-                          승인
+                          {tr('승인')}
                         </Button>
                       </Stack>
                     ) : (
-                      <Chip size="small" label={r.status === 'APPROVED' ? '승인' : '반려'} color={r.status === 'APPROVED' ? 'success' : 'default'} />
+                      <Chip size="small" label={r.status === 'APPROVED' ? tr('승인') : tr('반려')} color={r.status === 'APPROVED' ? 'success' : 'default'} />
                     )}
                   </TableCell>
                 </TableRow>
@@ -157,6 +159,7 @@ export default function JoinRequestsView() {
 }
 
 function ApproveDialog({ target, classes, onClose, onDone }: { target: JoinRequest | null; classes: Classroom[]; onClose: () => void; onDone: () => void }) {
+  const tr = useT();
   const [classroomId, setClassroomId] = useState('');
   useEffect(() => setClassroomId(''), [target]);
 
@@ -173,21 +176,21 @@ function ApproveDialog({ target, classes, onClose, onDone }: { target: JoinReque
 
   return (
     <Dialog open={!!target} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>가입 승인</DialogTitle>
+      <DialogTitle>{tr('가입 승인')}</DialogTitle>
       <DialogContent>
         {target && (
           <Stack spacing={2} sx={{ mt: 1 }}>
             <Typography variant="body2">
-              <b>{target.childName}</b> ({target.birthDate}) · 보호자 {target.guardianName} {target.guardianPhone}
+              <b>{target.childName}</b>{' '}{tr('({0}) · 보호자 {1} {2}', { 0: target.birthDate, 1: target.guardianName, 2: target.guardianPhone })}
             </Typography>
             <TextField
               select
-              label="배정할 반"
+              label={tr('배정할 반')}
               required
               value={classroomId}
               onChange={(e) => setClassroomId(e.target.value)}
               error={!!full}
-              helperText={full ? '정원이 찬 반입니다' : selected ? `현재 ${selected.headcount ?? '-'} / 정원 ${selected.capacity}명` : ' '}
+              helperText={full ? tr('정원이 찬 반입니다') : selected ? tr('현재 {0} / 정원 {1}명', { 0: selected.headcount ?? '-', 1: selected.capacity }) : ' '}
             >
               {classes.map((c) => (
                 <MenuItem key={c.id} value={c.id}>
@@ -200,9 +203,9 @@ function ApproveDialog({ target, classes, onClose, onDone }: { target: JoinReque
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>취소</Button>
+        <Button onClick={onClose}>{tr('취소')}</Button>
         <Button variant="contained" disabled={!classroomId || !!full || approve.isPending} onClick={() => approve.mutate()}>
-          승인
+          {tr('승인')}
         </Button>
       </DialogActions>
     </Dialog>
@@ -210,6 +213,7 @@ function ApproveDialog({ target, classes, onClose, onDone }: { target: JoinReque
 }
 
 function RejectDialog({ target, onClose, onDone }: { target: JoinRequest | null; onClose: () => void; onDone: () => void }) {
+  const tr = useT();
   const [reason, setReason] = useState('');
   useEffect(() => setReason(''), [target]);
 
@@ -223,22 +227,22 @@ function RejectDialog({ target, onClose, onDone }: { target: JoinRequest | null;
 
   return (
     <Dialog open={!!target} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>가입 반려</DialogTitle>
+      <DialogTitle>{tr('가입 반려')}</DialogTitle>
       <DialogContent>
         {target && (
           <Stack spacing={2} sx={{ mt: 1 }}>
             <Typography variant="body2">
-              <b>{target.childName}</b> · 보호자 {target.guardianName} 의 신청을 반려합니다.
+              <b>{target.childName}</b>{' '}{tr('· 보호자 {0} 의 신청을 반려합니다.', { 0: target.guardianName })}
             </Typography>
-            <TextField label="사유 (선택)" multiline minRows={2} value={reason} onChange={(e) => setReason(e.target.value)} inputProps={{ maxLength: 200 }} />
+            <TextField label={tr('사유 (선택)')} multiline minRows={2} value={reason} onChange={(e) => setReason(e.target.value)} inputProps={{ maxLength: 200 }} />
             {reject.isError && <Alert severity="error">{errorMessage(reject.error)}</Alert>}
           </Stack>
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>취소</Button>
+        <Button onClick={onClose}>{tr('취소')}</Button>
         <Button variant="contained" color="error" disabled={reject.isPending} onClick={() => reject.mutate()}>
-          반려
+          {tr('반려')}
         </Button>
       </DialogActions>
     </Dialog>

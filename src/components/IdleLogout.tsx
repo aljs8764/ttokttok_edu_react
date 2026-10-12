@@ -10,6 +10,7 @@ import Typography from '@mui/material/Typography';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { logout, useSession } from '@/lib/session';
+import { useT } from '@/lib/i18n';
 
 const KEY = 'ttok.lastActivity';
 const WARN_SECONDS = 60;
@@ -29,6 +30,7 @@ function readLast(): number {
  * 같은 브라우저의 다른 탭과 마지막 활동 시각을 localStorage 로 공유한다(한 탭이라도 쓰고 있으면 유지).
  */
 export default function IdleLogout() {
+  const t = useT();
   const { session } = useSession();
   const instId = session?.institution?.institutionId;
   const policy = useQuery({
@@ -76,12 +78,12 @@ export default function IdleLogout() {
   if (remaining == null) return null;
   return (
     <Dialog open maxWidth="xs" fullWidth>
-      <DialogTitle>곧 자동 로그아웃됩니다</DialogTitle>
+      <DialogTitle>{t('곧 자동 로그아웃됩니다')}</DialogTitle>
       <DialogContent>
-        <Typography>{minutes}분 동안 사용하지 않아 {remaining}초 뒤 로그아웃합니다. 계속 쓰시려면 아래 버튼을 누르세요.</Typography>
+        <Typography>{t('{0}분 동안 사용하지 않아 {1}초 뒤 로그아웃합니다. 계속 쓰시려면 아래 버튼을 누르세요.', { 0: minutes, 1: remaining })}</Typography>
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => void logout()}>지금 로그아웃</Button>
+        <Button onClick={() => void logout()}>{t('지금 로그아웃')}</Button>
         <Button
           variant="contained"
           onClick={() => {
@@ -93,7 +95,7 @@ export default function IdleLogout() {
             setRemaining(null);
           }}
         >
-          계속 사용
+          {t('계속 사용')}
         </Button>
       </DialogActions>
     </Dialog>

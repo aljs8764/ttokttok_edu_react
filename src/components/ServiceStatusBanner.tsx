@@ -6,9 +6,11 @@ import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useSession } from '@/lib/session';
+import { useT } from '@/lib/i18n';
 
 /** SAAS-001 승인 대기·정지 기관 안내. 이 상태에서는 업무 화면이 막히고 문의하기만 된다 */
 export default function ServiceStatusBanner() {
+  const t = useT();
   const { session, manager } = useSession();
   const instId = session?.institution?.institutionId;
   const q = useQuery({
@@ -21,17 +23,17 @@ export default function ServiceStatusBanner() {
   });
   const s = q.data;
   if (!s || s.status === 'ACTIVE') return null;
-  const action = manager ? <Button color="inherit" size="small" component={Link} href="/support">문의하기</Button> : undefined;
+  const action = manager ? <Button color="inherit" size="small" component={Link} href="/support">{t('문의하기')}</Button> : undefined;
   if (s.status === 'PENDING') {
     return (
       <Alert severity="warning" sx={{ mb: 2 }} action={action}>
-        가입 승인 대기 중입니다. 운영팀이 확인하면 모든 기능을 쓸 수 있고, 그동안 다른 화면은 열리지 않습니다.
+        {t('가입 승인 대기 중입니다. 운영팀이 확인하면 모든 기능을 쓸 수 있고, 그동안 다른 화면은 열리지 않습니다.')}
       </Alert>
     );
   }
   return (
     <Alert severity="error" sx={{ mb: 2 }} action={action}>
-      서비스 이용이 정지된 기관입니다{s.reason ? ` (${s.reason})` : ''}. 운영팀에 문의해 주세요.
+      {t('서비스 이용이 정지된 기관입니다{0}. 운영팀에 문의해 주세요.', { 0: s.reason ? ` (${s.reason})` : '' })}
     </Alert>
   );
 }

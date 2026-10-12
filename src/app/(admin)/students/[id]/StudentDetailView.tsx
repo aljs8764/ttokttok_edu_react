@@ -39,12 +39,14 @@ import { LINK_STATUS, RELATIONS, STUDENT_STATUS, WITHDRAWAL_REASON, formatPhone,
 import type { Classroom, Guardian, StudentDetail, StudentStatus, WithdrawalReason } from '@/lib/types';
 import PageHeader from '@/components/PageHeader';
 import StudentExtras from '@/components/students/StudentExtras';
+import { useT } from '@/lib/i18n';
 
 /**
  * STU-006 원생 상세 — 기본정보·메모, 반 이력, 상태 이력, 형제.
  * 원장·실장: 정보 수정, 반 이동(STU-008), 휴원·퇴원·복귀(STU-012), 보호자 추가·연결 해제(STU-007).
  */
 export default function StudentDetailView({ id }: { id: string }) {
+  const t = useT();
   const qc = useQueryClient();
   const { session, manager } = useSession();
   const instId = session?.institution?.institutionId;
@@ -70,20 +72,20 @@ export default function StudentDetailView({ id }: { id: string }) {
   return (
     <>
       <PageHeader
-        title={s ? s.name : '원생 상세'}
+        title={s ? s.name : t('원생 상세')}
         menuId="STU-006"
         actions={
           <>
             <Button startIcon={<ArrowBackIcon />} component={NextLink} href="/students">
-              원생 목록
+              {t('원생 목록')}
             </Button>
             {manager && s && (
               <>
                 <Button variant="outlined" startIcon={<SwapIcon />} disabled={withdrawn} onClick={() => setMoveOpen(true)}>
-                  반 이동
+                  {t('반 이동')}
                 </Button>
                 <Button variant="outlined" onClick={() => setStatusOpen(true)}>
-                  {withdrawn ? '복귀 처리' : '휴원·퇴원'}
+                  {withdrawn ? t('복귀 처리') : t('휴원·퇴원')}
                 </Button>
               </>
             )}
@@ -99,22 +101,22 @@ export default function StudentDetailView({ id }: { id: string }) {
           <Grid size={{ xs: 12, md: 6 }}>
             <Paper sx={{ p: 2.5, height: '100%' }}>
               <SectionTitle
-                title="기본 정보"
+                title={t('기본 정보')}
                 action={
                   manager && (
                     <Button size="small" startIcon={<EditIcon />} onClick={() => setEditOpen(true)}>
-                      수정
+                      {t('수정')}
                     </Button>
                   )
                 }
               />
-              <Info label="상태">
-                <Chip size="small" label={STUDENT_STATUS[s.status].label} color={STUDENT_STATUS[s.status].color} />
+              <Info label={t('상태')}>
+                <Chip size="small" label={t(STUDENT_STATUS[s.status].label)} color={STUDENT_STATUS[s.status].color} />
               </Info>
-              <Info label="반">{s.classroomIds.map((c) => classNames.get(c) ?? '-').join(', ') || '배정 없음'}</Info>
-              <Info label="생년월일">{s.birthDate ?? '••••-••-••'}</Info>
-              <Info label="학년">{s.grade ?? '-'}</Info>
-              <Info label="형제·자매">
+              <Info label={t('반')}>{s.classroomIds.map((c) => classNames.get(c) ?? '-').join(', ') || t('배정 없음')}</Info>
+              <Info label={t('생년월일')}>{s.birthDate ?? '••••-••-••'}</Info>
+              <Info label={t('학년')}>{s.grade ?? '-'}</Info>
+              <Info label={t('형제·자매')}>
                 {d.siblings.length === 0
                   ? '-'
                   : d.siblings.map((x, i) => (
@@ -126,7 +128,7 @@ export default function StudentDetailView({ id }: { id: string }) {
                       </span>
                     ))}
               </Info>
-              <Info label="메모">
+              <Info label={t('메모')}>
                 <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
                   {d.memo || '-'}
                 </Typography>
@@ -137,12 +139,12 @@ export default function StudentDetailView({ id }: { id: string }) {
           <Grid size={{ xs: 12, md: 6 }}>
             <Paper sx={{ p: 2.5, height: '100%' }}>
               <SectionTitle
-                title="보호자"
+                title={t('보호자')}
                 action={
                   manager &&
                   !withdrawn && (
                     <Button size="small" startIcon={<AddIcon />} onClick={() => setGuardianOpen(true)}>
-                      보호자 추가
+                      {t('보호자 추가')}
                     </Button>
                   )
                 }
@@ -156,11 +158,11 @@ export default function StudentDetailView({ id }: { id: string }) {
                         {g.relation ? ` · ${g.relation}` : ''}
                       </Typography>
                     </Box>
-                    {g.isPrimary && <Chip size="small" label="대표" color="primary" variant="outlined" />}
-                    <Chip size="small" variant="outlined" color={LINK_STATUS[g.linkStatus]?.color} label={LINK_STATUS[g.linkStatus]?.label ?? g.linkStatus} />
+                    {g.isPrimary && <Chip size="small" label={t('대표')} color="primary" variant="outlined" />}
+                    <Chip size="small" variant="outlined" color={LINK_STATUS[g.linkStatus]?.color} label={t(LINK_STATUS[g.linkStatus]?.label ?? g.linkStatus)} />
                     {manager && g.linkStatus !== 'UNLINKED' && (
-                      <Tooltip title="연결 해제 (STU-007)">
-                        <IconButton size="small" onClick={() => setUnlinking(g)} aria-label="연결 해제">
+                      <Tooltip title={t('연결 해제 (STU-007)')}>
+                        <IconButton size="small" onClick={() => setUnlinking(g)} aria-label={t('연결 해제')}>
                           <LinkOffIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
@@ -169,7 +171,7 @@ export default function StudentDetailView({ id }: { id: string }) {
                 ))}
                 {s.guardians.length === 0 && (
                   <Typography variant="body2" color="text.secondary">
-                    등록된 보호자가 없습니다
+                    {t('등록된 보호자가 없습니다')}
                   </Typography>
                 )}
               </Stack>
@@ -178,11 +180,11 @@ export default function StudentDetailView({ id }: { id: string }) {
 
           <Grid size={{ xs: 12, md: 6 }}>
             <Paper sx={{ p: 2.5 }}>
-              <SectionTitle title="반 이력" />
+              <SectionTitle title={t('반 이력')} />
               <History
                 rows={d.classHistory.map((h) => ({
                   key: h.classroomId + h.fromDate,
-                  when: `${h.fromDate} ~ ${h.toDate ?? '현재'}`,
+                  when: `${h.fromDate} ~ ${h.toDate ?? t('현재')}`,
                   what: h.classroomName,
                   current: !h.toDate,
                 }))}
@@ -192,12 +194,12 @@ export default function StudentDetailView({ id }: { id: string }) {
 
           <Grid size={{ xs: 12, md: 6 }}>
             <Paper sx={{ p: 2.5 }}>
-              <SectionTitle title="재원 상태 이력" />
+              <SectionTitle title={t('재원 상태 이력')} />
               <History
                 rows={d.statusHistory.map((h, i) => ({
                   key: String(i),
                   when: h.effectiveDate,
-                  what: `${h.from ? STUDENT_STATUS[h.from].label : '등록'} → ${STUDENT_STATUS[h.to].label}${h.reason ? ` (${WITHDRAWAL_REASON[h.reason]})` : ''}`,
+                  what: `${h.from ? t(STUDENT_STATUS[h.from].label) : t('등록')} → ${t(STUDENT_STATUS[h.to].label)}${h.reason ? ` (${t(WITHDRAWAL_REASON[h.reason])})` : ''}`,
                   note: h.note,
                 }))}
               />
@@ -246,10 +248,11 @@ function Info({ label, children }: { label: string; children: ReactNode }) {
 }
 
 function History({ rows }: { rows: { key: string; when: string; what: string; current?: boolean; note?: string | null }[] }) {
+  const t = useT();
   if (rows.length === 0)
     return (
       <Typography variant="body2" color="text.secondary">
-        이력이 없습니다
+        {t('이력이 없습니다')}
       </Typography>
     );
   return (
@@ -291,6 +294,7 @@ function useAction<T>(fn: (v: T) => Promise<unknown>, { onClose, onDone }: Pick<
 
 /** STU-006 기본정보·메모 수정 (빈 값은 "변경 없음"으로 처리됨) */
 function EditDialog({ open, detail, onClose, onDone }: DialogProps & { detail: StudentDetail }) {
+  const t = useT();
   const s = detail.student;
   const [name, setName] = useState('');
   const [birthDate, setBirthDate] = useState<Dayjs | null>(null);
@@ -318,22 +322,22 @@ function EditDialog({ open, detail, onClose, onDone }: DialogProps & { detail: S
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>기본 정보 수정</DialogTitle>
+      <DialogTitle>{t('기본 정보 수정')}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-            <TextField label="이름" required fullWidth value={name} onChange={(e) => setName(e.target.value)} inputProps={{ maxLength: 50 }} />
-            <DatePicker label="생년월일" value={birthDate} onChange={setBirthDate} disableFuture format="YYYY-MM-DD" slotProps={{ textField: { fullWidth: true } }} />
+            <TextField label={t('이름')} required fullWidth value={name} onChange={(e) => setName(e.target.value)} inputProps={{ maxLength: 50 }} />
+            <DatePicker label={t('생년월일')} value={birthDate} onChange={setBirthDate} disableFuture format="YYYY-MM-DD" slotProps={{ textField: { fullWidth: true } }} />
           </Stack>
-          <TextField label="학년" value={grade} onChange={(e) => setGrade(e.target.value)} inputProps={{ maxLength: 20 }} />
-          <TextField label="메모 (교직원만 보임)" multiline minRows={3} value={memo} onChange={(e) => setMemo(e.target.value)} inputProps={{ maxLength: 2000 }} />
+          <TextField label={t('학년')} value={grade} onChange={(e) => setGrade(e.target.value)} inputProps={{ maxLength: 20 }} />
+          <TextField label={t('메모 (교직원만 보임)')} multiline minRows={3} value={memo} onChange={(e) => setMemo(e.target.value)} inputProps={{ maxLength: 2000 }} />
           {save.isError && <Alert severity="error">{errorMessage(save.error)}</Alert>}
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>취소</Button>
+        <Button onClick={onClose}>{t('취소')}</Button>
         <Button variant="contained" disabled={!name.trim() || save.isPending} onClick={() => save.mutate(undefined)}>
-          저장
+          {t('저장')}
         </Button>
       </DialogActions>
     </Dialog>
@@ -342,6 +346,7 @@ function EditDialog({ open, detail, onClose, onDone }: DialogProps & { detail: S
 
 /** STU-008 반 이동. 이전 반 소속은 적용일 전날로 마감되고 이력에 남는다. */
 function MoveClassDialog({ open, studentId, current, classes, onClose, onDone }: DialogProps & { studentId: string; current: string[]; classes: Classroom[] }) {
+  const t = useT();
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [date, setDate] = useState<Dayjs | null>(dayjs());
@@ -365,11 +370,11 @@ function MoveClassDialog({ open, studentId, current, classes, onClose, onDone }:
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>반 이동 · STU-008</DialogTitle>
+      <DialogTitle>{t('반 이동 · STU-008')}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
           {current.length > 0 && (
-            <TextField select label="현재 반" value={from} onChange={(e) => setFrom(e.target.value)} required={needFrom} disabled={!needFrom}>
+            <TextField select label={t('현재 반')} value={from} onChange={(e) => setFrom(e.target.value)} required={needFrom} disabled={!needFrom}>
               {current.map((c) => (
                 <MenuItem key={c} value={c}>
                   {classes.find((x) => x.id === c)?.name ?? c}
@@ -379,12 +384,12 @@ function MoveClassDialog({ open, studentId, current, classes, onClose, onDone }:
           )}
           <TextField
             select
-            label="이동할 반"
+            label={t('이동할 반')}
             required
             value={to}
             onChange={(e) => setTo(e.target.value)}
             error={!!full}
-            helperText={full ? '정원이 찬 반입니다' : selected ? `현재 ${selected.headcount ?? '-'} / 정원 ${selected.capacity}명` : ' '}
+            helperText={full ? t('정원이 찬 반입니다') : selected ? t('현재 {0} / 정원 {1}명', { 0: selected.headcount ?? '-', 1: selected.capacity }) : ' '}
           >
             {targets.map((c) => (
               <MenuItem key={c.id} value={c.id}>
@@ -392,14 +397,14 @@ function MoveClassDialog({ open, studentId, current, classes, onClose, onDone }:
               </MenuItem>
             ))}
           </TextField>
-          <DatePicker label="적용일" value={date} onChange={setDate} format="YYYY-MM-DD" />
+          <DatePicker label={t('적용일')} value={date} onChange={setDate} format="YYYY-MM-DD" />
           {move.isError && <Alert severity="error">{errorMessage(move.error)}</Alert>}
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>취소</Button>
+        <Button onClick={onClose}>{t('취소')}</Button>
         <Button variant="contained" disabled={!to || !!full || (needFrom && !from) || !date?.isValid() || move.isPending} onClick={() => move.mutate(undefined)}>
-          이동
+          {t('이동')}
         </Button>
       </DialogActions>
     </Dialog>
@@ -408,6 +413,7 @@ function MoveClassDialog({ open, studentId, current, classes, onClose, onDone }:
 
 /** STU-012 휴원·퇴원·복귀. 퇴원은 사유 필수(퇴원 사유 통계). */
 function StatusDialog({ open, studentId, current, onClose, onDone }: DialogProps & { studentId: string; current: StudentStatus }) {
+  const t = useT();
   const options = (Object.keys(STUDENT_STATUS) as StudentStatus[]).filter((x) => x !== current);
   const [to, setTo] = useState<StudentStatus>(options[0]);
   const [reason, setReason] = useState<WithdrawalReason | ''>('');
@@ -433,15 +439,15 @@ function StatusDialog({ open, studentId, current, onClose, onDone }: DialogProps
     { onClose, onDone },
   );
 
-  const label = (x: StudentStatus) => (x === 'ACTIVE' ? (current === 'WITHDRAWN' ? '복귀(재등록)' : '재원 복귀') : STUDENT_STATUS[x].label);
+  const label = (x: StudentStatus) => (x === 'ACTIVE' ? (current === 'WITHDRAWN' ? t('복귀(재등록)') : t('재원 복귀')) : t(STUDENT_STATUS[x].label));
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>재원 상태 변경 · STU-012</DialogTitle>
+      <DialogTitle>{t('재원 상태 변경 · STU-012')}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
           <Typography variant="body2" color="text.secondary">
-            현재 상태: {STUDENT_STATUS[current].label}
+            {t('현재 상태: {0}', { 0: t(STUDENT_STATUS[current].label) })}
           </Typography>
           <ToggleButtonGroup exclusive fullWidth size="small" value={to} onChange={(_, v) => v && setTo(v)}>
             {options.map((x) => (
@@ -451,29 +457,29 @@ function StatusDialog({ open, studentId, current, onClose, onDone }: DialogProps
             ))}
           </ToggleButtonGroup>
           {to === 'WITHDRAWN' && (
-            <TextField select label="퇴원 사유" required value={reason} onChange={(e) => setReason(e.target.value as WithdrawalReason)}>
+            <TextField select label={t('퇴원 사유')} required value={reason} onChange={(e) => setReason(e.target.value as WithdrawalReason)}>
               {(Object.keys(WITHDRAWAL_REASON) as WithdrawalReason[]).map((r) => (
                 <MenuItem key={r} value={r}>
-                  {WITHDRAWAL_REASON[r]}
+                  {t(WITHDRAWAL_REASON[r])}
                 </MenuItem>
               ))}
             </TextField>
           )}
-          <DatePicker label="적용일" value={date} onChange={setDate} format="YYYY-MM-DD" />
-          <TextField label="메모" multiline minRows={2} value={note} onChange={(e) => setNote(e.target.value)} inputProps={{ maxLength: 500 }} />
-          {to === 'WITHDRAWN' && <Alert severity="warning">퇴원하면 반 소속이 끝나고 출결 대상에서 빠집니다.</Alert>}
+          <DatePicker label={t('적용일')} value={date} onChange={setDate} format="YYYY-MM-DD" />
+          <TextField label={t('메모')} multiline minRows={2} value={note} onChange={(e) => setNote(e.target.value)} inputProps={{ maxLength: 500 }} />
+          {to === 'WITHDRAWN' && <Alert severity="warning">{t('퇴원하면 반 소속이 끝나고 출결 대상에서 빠집니다.')}</Alert>}
           {change.isError && <Alert severity="error">{errorMessage(change.error)}</Alert>}
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>취소</Button>
+        <Button onClick={onClose}>{t('취소')}</Button>
         <Button
           variant="contained"
           color={to === 'WITHDRAWN' ? 'error' : 'primary'}
           disabled={(to === 'WITHDRAWN' && !reason) || !date?.isValid() || change.isPending}
           onClick={() => change.mutate(undefined)}
         >
-          변경
+          {t('변경')}
         </Button>
       </DialogActions>
     </Dialog>
@@ -481,6 +487,7 @@ function StatusDialog({ open, studentId, current, onClose, onDone }: DialogProps
 }
 
 function AddGuardianDialog({ open, studentId, onClose, onDone }: DialogProps & { studentId: string }) {
+  const t = useT();
   const [phone, setPhone] = useState('');
   const [relation, setRelation] = useState('아버지');
   const [primary, setPrimary] = useState(false);
@@ -489,7 +496,7 @@ function AddGuardianDialog({ open, studentId, onClose, onDone }: DialogProps & {
   useEffect(() => {
     if (!open) return;
     setPhone('');
-    setRelation('아버지');
+    setRelation(t('아버지'));
     setPrimary(false);
     setSendGuide(true);
   }, [open]);
@@ -498,35 +505,35 @@ function AddGuardianDialog({ open, studentId, onClose, onDone }: DialogProps & {
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>보호자 추가</DialogTitle>
+      <DialogTitle>{t('보호자 추가')}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
           <TextField
-            label="휴대폰 번호"
+            label={t('휴대폰 번호')}
             required
             autoFocus
             value={phone}
             onChange={(e) => setPhone(formatPhone(e.target.value))}
             error={!!phone && !isMobile(phone)}
-            helperText={phone && !isMobile(phone) ? '휴대폰 번호 형식이 아닙니다' : ' '}
+            helperText={phone && !isMobile(phone) ? t('휴대폰 번호 형식이 아닙니다') : ' '}
             inputProps={{ inputMode: 'numeric' }}
           />
-          <TextField select label="관계" value={relation} onChange={(e) => setRelation(e.target.value)}>
+          <TextField select label={t('관계')} value={relation} onChange={(e) => setRelation(e.target.value)}>
             {RELATIONS.map((r) => (
               <MenuItem key={r} value={r}>
-                {r}
+                {t(r)}
               </MenuItem>
             ))}
           </TextField>
-          <FormControlLabel control={<Checkbox checked={primary} onChange={(e) => setPrimary(e.target.checked)} />} label="대표 보호자로 지정" />
-          <FormControlLabel control={<Checkbox checked={sendGuide} onChange={(e) => setSendGuide(e.target.checked)} />} label="앱 설치 안내 알림톡 보내기" />
+          <FormControlLabel control={<Checkbox checked={primary} onChange={(e) => setPrimary(e.target.checked)} />} label={t('대표 보호자로 지정')} />
+          <FormControlLabel control={<Checkbox checked={sendGuide} onChange={(e) => setSendGuide(e.target.checked)} />} label={t('앱 설치 안내 알림톡 보내기')} />
           {add.isError && <Alert severity="error">{errorMessage(add.error)}</Alert>}
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>취소</Button>
+        <Button onClick={onClose}>{t('취소')}</Button>
         <Button variant="contained" disabled={!isMobile(phone) || add.isPending} onClick={() => add.mutate(undefined)}>
-          추가
+          {t('추가')}
         </Button>
       </DialogActions>
     </Dialog>
@@ -535,25 +542,26 @@ function AddGuardianDialog({ open, studentId, onClose, onDone }: DialogProps & {
 
 /** STU-007 학부모 계정 연결 해제 — 해당 보호자는 더 이상 알림·출결 푸시를 받지 않는다 */
 function UnlinkDialog({ target, studentId, onClose, onDone }: { target: Guardian | null; studentId: string; onClose: () => void; onDone: () => void }) {
+  const t = useT();
   const unlink = useAction(() => api.delete(`students/${studentId}/guardians/${target!.id}`), { onClose, onDone });
   useEffect(() => unlink.reset(), [target]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Dialog open={!!target} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>보호자 연결 해제 · STU-007</DialogTitle>
+      <DialogTitle>{t('보호자 연결 해제 · STU-007')}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
           <Typography variant="body2">
             {target?.phone}
-            {target?.relation ? ` (${target.relation})` : ''} 보호자의 앱 연결을 해제합니다. 이후 이 원생의 출결 알림·알림장을 받지 못합니다.
+            {t('{0} 보호자의 앱 연결을 해제합니다. 이후 이 원생의 출결 알림·알림장을 받지 못합니다.', { 0: target?.relation ? ` (${target.relation})` : '' })}
           </Typography>
           {unlink.isError && <Alert severity="error">{errorMessage(unlink.error)}</Alert>}
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>취소</Button>
+        <Button onClick={onClose}>{t('취소')}</Button>
         <Button variant="contained" color="error" disabled={unlink.isPending} onClick={() => unlink.mutate(undefined)}>
-          연결 해제
+          {t('연결 해제')}
         </Button>
       </DialogActions>
     </Dialog>

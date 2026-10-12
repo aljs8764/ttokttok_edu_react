@@ -15,9 +15,11 @@ import { QUESTION_TYPE, type SurveyResults } from '@/lib/comm';
 import { dateTime } from '@/lib/format';
 import { useSession } from '@/lib/session';
 import PageHeader from '@/components/PageHeader';
+import { useT } from '@/lib/i18n';
 
 /** NTC-010 설문 결과 — 문항별 집계, 응답자·미응답자, 미응답 재푸시(30분 쿨타임), 마감 */
 export default function SurveyResultView({ id }: { id: string }) {
+  const tr = useT();
   const qc = useQueryClient();
   const { session } = useSession();
   const instId = session?.institution?.institutionId;
@@ -28,31 +30,31 @@ export default function SurveyResultView({ id }: { id: string }) {
   const close = useMutation({ mutationFn: () => api.post(`surveys/${id}/close`), onSuccess: refresh });
   const remind = useMutation({
     mutationFn: () => api.post<{ pushRecipients: number }>(`surveys/${id}/remind`),
-    onSuccess: (r) => setMsg(`미응답 보호자 ${r.pushRecipients}명에게 알림을 보냈습니다`),
+    onSuccess: (r) => setMsg(tr('미응답 보호자 {0}명에게 알림을 보냈습니다', { 0: r.pushRecipients })),
   });
 
   const s = res.data?.survey;
   return (
     <>
       <PageHeader
-        title={s?.title ?? '설문 결과'}
+        title={s?.title ?? tr('설문 결과')}
         menuId="NTC-010"
-        description={s ? `${s.author.name} · ${dateTime(s.createdAt)}${s.closesAt ? ` · 마감 ${dateTime(s.closesAt)}` : ''}` : undefined}
+        description={s ? `${s.author.name} · ${dateTime(s.createdAt)}${s.closesAt ? tr(' · 마감 {0}', { 0: dateTime(s.closesAt) }) : ''}` : undefined}
         actions={
           s?.status === 'OPEN' && (
             <>
               <Button variant="outlined" disabled={remind.isPending} onClick={() => (setMsg(''), remind.mutate())}>
-                미응답자에게 다시 알림
+                {tr('미응답자에게 다시 알림')}
               </Button>
               <Button
                 variant="outlined"
                 color="warning"
                 disabled={close.isPending}
                 onClick={() => {
-                  if (window.confirm('설문을 마감할까요? 마감 후에는 응답을 받을 수 없습니다.')) close.mutate();
+                  if (window.confirm(tr('설문을 마감할까요? 마감 후에는 응답을 받을 수 없습니다.'))) close.mutate();
                 }}
               >
-                마감
+                {tr('마감')}
               </Button>
             </>
           )
@@ -66,9 +68,9 @@ export default function SurveyResultView({ id }: { id: string }) {
         <Stack spacing={2} sx={{ maxWidth: 900 }}>
           <Paper sx={{ p: 2.5 }}>
             <Stack direction="row" spacing={1} alignItems="center">
-              <Chip size="small" label={s.status === 'OPEN' ? '진행 중' : '마감'} color={s.status === 'OPEN' ? 'primary' : 'default'} />
+              <Chip size="small" label={s.status === 'OPEN' ? tr('진행 중') : tr('마감')} color={s.status === 'OPEN' ? 'primary' : 'default'} />
               <Typography variant="body2">
-                응답 {s.responses}/{s.recipients}명 ({s.recipients ? Math.round((s.responses / s.recipients) * 100) : 0}%)
+                {tr('응답 {0}/{1}명 ({2}%)', { 0: s.responses, 1: s.recipients, 2: s.recipients ? Math.round((s.responses / s.recipients) * 100) : 0 })}
               </Typography>
             </Stack>
             {s.description && (
@@ -88,12 +90,12 @@ export default function SurveyResultView({ id }: { id: string }) {
                   {r.question.required && <Typography component="span" color="error"> *</Typography>}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  {QUESTION_TYPE[r.question.type]}
-                  {r.average !== null && ` · 평균 ${r.average.toFixed(2)}점`}
+                  {tr(QUESTION_TYPE[r.question.type])}
+                  {r.average !== null && tr(' · 평균 {0}점', { 0: r.average.toFixed(2) })}
                 </Typography>
                 {r.question.type === 'TEXT' ? (
                   <Stack spacing={0.5} sx={{ mt: 1 }}>
-                    {r.texts.length === 0 && <Typography variant="body2" color="text.secondary">답변이 없습니다</Typography>}
+                    {r.texts.length === 0 && <Typography variant="body2" color="text.secondary">{tr('답변이 없습니다')}</Typography>}
                     {r.texts.map((t, k) => (
                       <Typography key={k} variant="body2">
                         <b>{t.studentName}</b> — {t.text}
@@ -107,7 +109,7 @@ export default function SurveyResultView({ id }: { id: string }) {
                       return (
                         <Box key={k}>
                           <Typography variant="body2">
-                            {r.question.type === 'RATING' ? `${k}점` : k} · {n}명{total ? ` (${Math.round((n / total) * 100)}%)` : ''}
+                            {r.question.type === 'RATING' ? tr('{0}점', { 0: k }) : k}{' '}{tr('· {0}명{1}', { 0: n, 1: total ? ` (${Math.round((n / total) * 100)}%)` : '' })}
                           </Typography>
                           <LinearProgress variant="determinate" value={total ? (n / total) * 100 : 0} sx={{ height: 8, borderRadius: 4 }} />
                         </Box>
@@ -121,13 +123,13 @@ export default function SurveyResultView({ id }: { id: string }) {
 
           <Paper sx={{ p: 2.5 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-              미응답 {res.data?.nonRespondents.length ?? 0}명
+              {tr('미응답 {0}명', { 0: res.data?.nonRespondents.length ?? 0 })}
             </Typography>
             <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 0.5, mt: 1 }}>
               {res.data?.nonRespondents.map((n, k) => <Chip key={k} size="small" label={n} variant="outlined" />)}
             </Stack>
             <Typography variant="subtitle1" sx={{ fontWeight: 700, mt: 2 }}>
-              응답자 {res.data?.respondents.length ?? 0}명
+              {tr('응답자 {0}명', { 0: res.data?.respondents.length ?? 0 })}
             </Typography>
             <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 0.5, mt: 1 }}>
               {res.data?.respondents.map((r) => <Chip key={r.studentId} size="small" label={`${r.studentName} (${r.guardianName})`} title={dateTime(r.submittedAt)} />)}

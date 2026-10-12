@@ -5,6 +5,7 @@ import Box from '@mui/material/Box';
 import type * as Leaflet from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { DEFAULT_CENTER, type LatLng } from '@/lib/shuttle';
+import { useT } from '@/lib/i18n';
 
 export interface MapStop extends LatLng { name: string; seq: number; passed?: boolean; etaMinutes?: number | null }
 export interface MapVehicle extends LatLng { id: string; label: string; stale?: boolean }
@@ -29,6 +30,7 @@ export default function ShuttleMap({
   fitKey?: string;
   height?: number;
 }) {
+  const t = useT();
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<Leaflet.Map | null>(null);
   const layer = useRef<Leaflet.LayerGroup | null>(null);
@@ -81,7 +83,7 @@ export default function ShuttleMap({
       L.polyline(path.map((p) => [p.lat, p.lng] as [number, number]), { color: '#2563eb', weight: 4 }).addTo(g);
     }
     sorted.forEach((s) => {
-      const eta = s.passed ? '지남' : s.etaMinutes != null ? `${s.etaMinutes}분` : '';
+      const eta = s.passed ? t('지남') : s.etaMinutes != null ? t('{0}분', { 0: s.etaMinutes }) : '';
       L.circleMarker([s.lat, s.lng], {
         radius: 8, weight: 2, color: s.passed ? '#94a3b8' : '#0f766e', fillColor: '#fff', fillOpacity: 1,
       })

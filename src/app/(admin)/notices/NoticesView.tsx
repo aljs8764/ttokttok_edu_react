@@ -31,9 +31,11 @@ import { useSession } from '@/lib/session';
 import type { Notice, NoticeKind, NoticeStatus, Page } from '@/lib/types';
 import PageHeader from '@/components/PageHeader';
 import { targetSummary } from '@/components/TargetPicker';
+import { useT } from '@/lib/i18n';
 
 /** NTC-004 발송 이력 — 교사는 본인 작성분만. 열람률은 원생 기준 */
 export default function NoticesView() {
+  const t = useT();
   const qc = useQueryClient();
   const router = useRouter();
   const { session, manager } = useSession();
@@ -58,27 +60,27 @@ export default function NoticesView() {
   return (
     <>
       <PageHeader
-        title="알림장"
+        title={t('알림장')}
         menuId="NTC-004"
-        description={manager ? '보낸 알림장과 공지, 예약 건을 봅니다. 열람률은 원생 기준입니다.' : '내가 쓴 알림장만 보입니다.'}
+        description={manager ? t('보낸 알림장과 공지, 예약 건을 봅니다. 열람률은 원생 기준입니다.') : t('내가 쓴 알림장만 보입니다.')}
         actions={
           <Button variant="contained" startIcon={<EditIcon />} component={NextLink} href="/notices/new">
-            알림장 쓰기
+            {t('알림장 쓰기')}
           </Button>
         }
       />
 
       <Stack direction="row" spacing={1.5} sx={{ mb: 2 }}>
-        <TextField select size="small" label="종류" value={kind} onChange={(e) => (setKind(e.target.value as NoticeKind | ''), setPage(0))} sx={{ minWidth: 130 }}>
-          <MenuItem value="">전체</MenuItem>
-          <MenuItem value="NOTE">알림장</MenuItem>
-          <MenuItem value="ANNOUNCEMENT">공지</MenuItem>
+        <TextField select size="small" label={t('종류')} value={kind} onChange={(e) => (setKind(e.target.value as NoticeKind | ''), setPage(0))} sx={{ minWidth: 130 }}>
+          <MenuItem value="">{t('전체')}</MenuItem>
+          <MenuItem value="NOTE">{t('알림장')}</MenuItem>
+          <MenuItem value="ANNOUNCEMENT">{t('공지')}</MenuItem>
         </TextField>
-        <TextField select size="small" label="상태" value={status} onChange={(e) => (setStatus(e.target.value as NoticeStatus | ''), setPage(0))} sx={{ minWidth: 130 }}>
-          <MenuItem value="">전체</MenuItem>
+        <TextField select size="small" label={t('상태')} value={status} onChange={(e) => (setStatus(e.target.value as NoticeStatus | ''), setPage(0))} sx={{ minWidth: 130 }}>
+          <MenuItem value="">{t('전체')}</MenuItem>
           {(Object.keys(NOTICE_STATUS) as NoticeStatus[]).map((s) => (
             <MenuItem key={s} value={s}>
-              {NOTICE_STATUS[s].label}
+              {t(NOTICE_STATUS[s].label)}
             </MenuItem>
           ))}
         </TextField>
@@ -92,19 +94,19 @@ export default function NoticesView() {
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>제목</TableCell>
-                <TableCell>대상</TableCell>
-                <TableCell>상태</TableCell>
-                <TableCell>발송(예정)</TableCell>
-                <TableCell sx={{ width: 180 }}>열람률</TableCell>
-                {manager && <TableCell>작성</TableCell>}
+                <TableCell>{t('제목')}</TableCell>
+                <TableCell>{t('대상')}</TableCell>
+                <TableCell>{t('상태')}</TableCell>
+                <TableCell>{t('발송(예정)')}</TableCell>
+                <TableCell sx={{ width: 180 }}>{t('열람률')}</TableCell>
+                {manager && <TableCell>{t('작성')}</TableCell>}
               </TableRow>
             </TableHead>
             <TableBody>
               {list.data?.items.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} align="center" sx={{ py: 4, color: 'text.secondary' }}>
-                    알림장이 없습니다
+                    {t('알림장이 없습니다')}
                   </TableCell>
                 </TableRow>
               )}
@@ -113,7 +115,7 @@ export default function NoticesView() {
                   <TableCell>
                     <Stack direction="row" spacing={1} alignItems="center">
                       {n.pinned && <PushPinIcon fontSize="small" color="secondary" />}
-                      <Chip size="small" label={NOTICE_KIND[n.kind]} variant="outlined" color={n.kind === 'ANNOUNCEMENT' ? 'primary' : 'default'} />
+                      <Chip size="small" label={t(NOTICE_KIND[n.kind])} variant="outlined" color={n.kind === 'ANNOUNCEMENT' ? 'primary' : 'default'} />
                       <Typography variant="body2" sx={{ fontWeight: 600 }} noWrap>
                         {n.title}
                       </Typography>
@@ -126,7 +128,7 @@ export default function NoticesView() {
                   </TableCell>
                   <TableCell>{targetSummary(n.targets)}</TableCell>
                   <TableCell>
-                    <Chip size="small" label={NOTICE_STATUS[n.status].label} color={NOTICE_STATUS[n.status].color} />
+                    <Chip size="small" label={t(NOTICE_STATUS[n.status].label)} color={NOTICE_STATUS[n.status].color} />
                   </TableCell>
                   <TableCell>{dateTime(n.sentAt ?? n.scheduledAt)}</TableCell>
                   <TableCell>
@@ -145,7 +147,7 @@ export default function NoticesView() {
           onPageChange={(_, p) => setPage(p)}
           rowsPerPage={20}
           rowsPerPageOptions={[20]}
-          labelDisplayedRows={({ from, to, count }) => `${from}–${to} / 총 ${count}건`}
+          labelDisplayedRows={({ from, to, count }) => t('{0}–{1} / 총 {2}건', { 0: from, 1: to, 2: count })}
         />
       </Paper>
     </>
@@ -153,6 +155,7 @@ export default function NoticesView() {
 }
 
 export function ReadRate({ stats }: { stats: Notice['readStats'] }) {
+  const t = useT();
   if (!stats || stats.targetStudents === 0)
     return (
       <Typography variant="body2" color="text.secondary">
@@ -164,7 +167,7 @@ export function ReadRate({ stats }: { stats: Notice['readStats'] }) {
   return (
     <Box>
       <Typography variant="caption">
-        {stats.readStudents}/{stats.targetStudents}명 · {rate.toFixed(0)}%
+        {t('{0}/{1}명 · {2}%', { 0: stats.readStudents, 1: stats.targetStudents, 2: rate.toFixed(0) })}
       </Typography>
       <LinearProgress variant="determinate" value={Math.min(100, rate)} color={rate >= 80 ? 'success' : rate >= 50 ? 'primary' : 'warning'} sx={{ height: 5, borderRadius: 3 }} />
     </Box>

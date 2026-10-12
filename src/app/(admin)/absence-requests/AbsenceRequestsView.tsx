@@ -24,9 +24,11 @@ import { dateTime, hm } from '@/lib/format';
 import { ownerEventDestinations, useRealtime } from '@/lib/realtime';
 import { useSession } from '@/lib/session';
 import PageHeader from '@/components/PageHeader';
+import { useT } from '@/lib/i18n';
 
 /** ATT-007 학부모가 앱에서 미리 낸 결석·지각·조퇴 신청. 확인하면 학부모에게 푸시가 간다 (출결 기록 자체는 바꾸지 않음) */
 export default function AbsenceRequestsView() {
+  const t = useT();
   const qc = useQueryClient();
   const { session, manager } = useSession();
   const instId = session?.institution?.institutionId;
@@ -50,15 +52,15 @@ export default function AbsenceRequestsView() {
 
   return (
     <>
-      <PageHeader title="결석·지각 신청" menuId="ATT-007" description="학부모가 미리 알려 온 결석·지각·조퇴입니다. 교사는 담당 반 원생 건만 보입니다." />
+      <PageHeader title={t('결석·지각 신청')} menuId="ATT-007" description={t('학부모가 미리 알려 온 결석·지각·조퇴입니다. 교사는 담당 반 원생 건만 보입니다.')} />
       <Stack direction="row" spacing={1.5} sx={{ mb: 2, flexWrap: 'wrap', gap: 1.5 }}>
-        <TextField size="small" type="date" label="시작일" value={from} onChange={(e) => setFrom(e.target.value)} InputLabelProps={{ shrink: true }} />
-        <TextField size="small" type="date" label="종료일" value={to} onChange={(e) => setTo(e.target.value)} InputLabelProps={{ shrink: true }} />
-        <TextField select size="small" label="상태" value={status} onChange={(e) => setStatus(e.target.value as AbsenceStatus | '')} sx={{ minWidth: 130 }}>
-          <MenuItem value="">전체</MenuItem>
+        <TextField size="small" type="date" label={t('시작일')} value={from} onChange={(e) => setFrom(e.target.value)} InputLabelProps={{ shrink: true }} />
+        <TextField size="small" type="date" label={t('종료일')} value={to} onChange={(e) => setTo(e.target.value)} InputLabelProps={{ shrink: true }} />
+        <TextField select size="small" label={t('상태')} value={status} onChange={(e) => setStatus(e.target.value as AbsenceStatus | '')} sx={{ minWidth: 130 }}>
+          <MenuItem value="">{t('전체')}</MenuItem>
           {(Object.keys(ABSENCE_STATUS) as AbsenceStatus[]).map((s) => (
             <MenuItem key={s} value={s}>
-              {ABSENCE_STATUS[s].label}
+              {t(ABSENCE_STATUS[s].label)}
             </MenuItem>
           ))}
         </TextField>
@@ -71,12 +73,12 @@ export default function AbsenceRequestsView() {
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>날짜</TableCell>
-                <TableCell>원생</TableCell>
-                <TableCell>구분</TableCell>
-                <TableCell>사유</TableCell>
-                <TableCell>보호자</TableCell>
-                <TableCell>상태</TableCell>
+                <TableCell>{t('날짜')}</TableCell>
+                <TableCell>{t('원생')}</TableCell>
+                <TableCell>{t('구분')}</TableCell>
+                <TableCell>{t('사유')}</TableCell>
+                <TableCell>{t('보호자')}</TableCell>
+                <TableCell>{t('상태')}</TableCell>
                 <TableCell align="right" />
               </TableRow>
             </TableHead>
@@ -84,7 +86,7 @@ export default function AbsenceRequestsView() {
               {list.data?.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={7} align="center" sx={{ py: 4, color: 'text.secondary' }}>
-                    신청이 없습니다
+                    {t('신청이 없습니다')}
                   </TableCell>
                 </TableRow>
               )}
@@ -93,7 +95,7 @@ export default function AbsenceRequestsView() {
                   <TableCell>{dayjs(r.date).format('M/D (dd)')}</TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>{r.studentName}</TableCell>
                   <TableCell>
-                    <Chip size="small" label={`${ABSENCE_KIND[r.kind]}${r.expectedTime ? ` ${hm(r.expectedTime)}` : ''}`} variant="outlined" />
+                    <Chip size="small" label={`${t(ABSENCE_KIND[r.kind])}${r.expectedTime ? ` ${hm(r.expectedTime)}` : ''}`} variant="outlined" />
                   </TableCell>
                   <TableCell sx={{ maxWidth: 320 }}>
                     <Typography variant="body2" noWrap title={r.reason}>
@@ -102,7 +104,7 @@ export default function AbsenceRequestsView() {
                   </TableCell>
                   <TableCell>{r.guardianName}</TableCell>
                   <TableCell>
-                    <Chip size="small" label={ABSENCE_STATUS[r.status].label} color={ABSENCE_STATUS[r.status].color} />
+                    <Chip size="small" label={t(ABSENCE_STATUS[r.status].label)} color={ABSENCE_STATUS[r.status].color} />
                     {r.acknowledgedAt && (
                       <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
                         {dateTime(r.acknowledgedAt)}
@@ -112,7 +114,7 @@ export default function AbsenceRequestsView() {
                   <TableCell align="right">
                     {r.status === 'SUBMITTED' && (
                       <Button size="small" variant="outlined" disabled={ack.isPending} onClick={() => ack.mutate(r.id)}>
-                        확인
+                        {t('확인')}
                       </Button>
                     )}
                   </TableCell>

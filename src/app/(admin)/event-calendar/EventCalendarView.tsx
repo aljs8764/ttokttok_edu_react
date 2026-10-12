@@ -19,9 +19,11 @@ import { time } from '@/lib/format';
 import { WEEKDAY, type CalendarEvent } from '@/lib/ops';
 import { useSession } from '@/lib/session';
 import PageHeader from '@/components/PageHeader';
+import { useT } from '@/lib/i18n';
 
 /** EVT-006 행사 달력 — 월간 보기. 행사를 누르면 상세(RSVP 현황)로 이동 */
 export default function EventCalendarView() {
+  const t = useT();
   const { session } = useSession();
   const instId = session?.institution?.institutionId;
   const [cursor, setCursor] = useState(dayjs().startOf('month'));
@@ -39,23 +41,23 @@ export default function EventCalendarView() {
   return (
     <>
       <PageHeader
-        title="행사 달력"
+        title={t('행사 달력')}
         menuId="EVT-006"
-        description="이번 달 행사를 달력으로 봅니다."
-        actions={<Button component={Link} href="/event-templates" variant="outlined">반복 행사 템플릿</Button>}
+        description={t('이번 달 행사를 달력으로 봅니다.')}
+        actions={<Button component={Link} href="/event-templates" variant="outlined">{t('반복 행사 템플릿')}</Button>}
       />
       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
-        <IconButton aria-label="이전 달" onClick={() => setCursor(cursor.subtract(1, 'month'))}><ChevronLeft /></IconButton>
-        <Typography variant="h6" sx={{ minWidth: 120, textAlign: 'center' }}>{cursor.format('YYYY년 M월')}</Typography>
-        <IconButton aria-label="다음 달" onClick={() => setCursor(cursor.add(1, 'month'))}><ChevronRight /></IconButton>
-        <Button size="small" onClick={() => setCursor(dayjs().startOf('month'))}>오늘</Button>
+        <IconButton aria-label={t('이전 달')} onClick={() => setCursor(cursor.subtract(1, 'month'))}><ChevronLeft /></IconButton>
+        <Typography variant="h6" sx={{ minWidth: 120, textAlign: 'center' }}>{cursor.format(t('YYYY년 M월'))}</Typography>
+        <IconButton aria-label={t('다음 달')} onClick={() => setCursor(cursor.add(1, 'month'))}><ChevronRight /></IconButton>
+        <Button size="small" onClick={() => setCursor(dayjs().startOf('month'))}>{t('오늘')}</Button>
       </Stack>
       {q.isError && <Alert severity="error" sx={{ mb: 2 }}>{errorMessage(q.error)}</Alert>}
       {q.isFetching && <LinearProgress />}
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', gap: '1px', bgcolor: 'divider', border: 1, borderColor: 'divider' }}>
         {[1, 2, 3, 4, 5, 6, 7].map((d) => (
           <Box key={d} sx={{ bgcolor: 'background.default', py: 0.5, textAlign: 'center' }}>
-            <Typography variant="caption" sx={{ fontWeight: 700 }}>{WEEKDAY[d]}</Typography>
+            <Typography variant="caption" sx={{ fontWeight: 700 }}>{t(WEEKDAY[d])}</Typography>
           </Box>
         ))}
         {cells.map((d, i) => (

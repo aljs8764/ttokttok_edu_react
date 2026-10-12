@@ -25,6 +25,7 @@ import type { FileRef, Target } from '@/lib/types';
 import AttachmentField from '@/components/AttachmentField';
 import PageHeader from '@/components/PageHeader';
 import TargetPicker, { toTargetRequest } from '@/components/TargetPicker';
+import { useT } from '@/lib/i18n';
 
 const isVideo = (f: FileRef) => f.mime.startsWith('video/');
 
@@ -36,6 +37,7 @@ function Thumb({ f, size = 96 }: { f: FileRef; size?: number }) {
 
 /** NTC-011 앨범 — 사진·영상을 대상 학부모에게만 공개 */
 export default function AlbumsView() {
+  const t = useT();
   const qc = useQueryClient();
   const { session } = useSession();
   const instId = session?.institution?.institutionId;
@@ -47,12 +49,12 @@ export default function AlbumsView() {
   return (
     <>
       <PageHeader
-        title="앨범"
+        title={t('앨범')}
         menuId="NTC-011"
-        description="활동 사진·영상을 반 또는 원생 단위로 공유합니다. 학부모 앱에서는 대상 자녀의 앨범만 보입니다."
+        description={t('활동 사진·영상을 반 또는 원생 단위로 공유합니다. 학부모 앱에서는 대상 자녀의 앨범만 보입니다.')}
         actions={
           <Button variant="contained" startIcon={<AddPhotoIcon />} onClick={() => setCreateOpen(true)}>
-            앨범 올리기
+            {t('앨범 올리기')}
           </Button>
         }
       />
@@ -60,7 +62,7 @@ export default function AlbumsView() {
       {list.isFetching && <LinearProgress />}
       {list.data?.length === 0 && (
         <Typography color="text.secondary" align="center" sx={{ py: 6 }}>
-          올린 앨범이 없습니다
+          {t('올린 앨범이 없습니다')}
         </Typography>
       )}
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
@@ -75,8 +77,8 @@ export default function AlbumsView() {
                   {a.title}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  {a.itemCount}개 · {a.author.name} · {dateTime(a.createdAt)}
-                  {a.recipients !== null && ` · 받는 학부모 ${a.recipients}명`}
+                  {t('{0}개 · {1} · {2}', { 0: a.itemCount, 1: a.author.name, 2: dateTime(a.createdAt) })}
+                  {a.recipients !== null && t(' · 받는 학부모 {0}명', { 0: a.recipients })}
                 </Typography>
               </CardContent>
             </CardActionArea>
@@ -95,6 +97,7 @@ export default function AlbumsView() {
 }
 
 function CreateDialog({ open, onClose, onCreated }: { open: boolean; onClose: () => void; onCreated: () => void }) {
+  const t = useT();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [files, setFiles] = useState<FileRef[]>([]);
@@ -113,15 +116,15 @@ function CreateDialog({ open, onClose, onCreated }: { open: boolean; onClose: ()
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
-      <DialogTitle>앨범 올리기</DialogTitle>
+      <DialogTitle>{t('앨범 올리기')}</DialogTitle>
       <DialogContent>
         <Stack spacing={2.5} sx={{ mt: 1 }}>
           <TargetPicker value={targets} onChange={setTargets} />
-          <TextField label="제목" required value={title} onChange={(e) => setTitle(e.target.value)} inputProps={{ maxLength: 100 }} />
-          <TextField label="설명 (선택)" multiline minRows={2} value={description} onChange={(e) => setDescription(e.target.value)} inputProps={{ maxLength: 1000 }} />
+          <TextField label={t('제목')} required value={title} onChange={(e) => setTitle(e.target.value)} inputProps={{ maxLength: 100 }} />
+          <TextField label={t('설명 (선택)')} multiline minRows={2} value={description} onChange={(e) => setDescription(e.target.value)} inputProps={{ maxLength: 1000 }} />
           <Box>
             <Typography variant="caption" color="text.secondary">
-              사진(jpg·png·heic) 또는 영상(mp4·mov, 100MB 이하) — 최대 30개
+              {t('사진(jpg·png·heic) 또는 영상(mp4·mov, 100MB 이하) — 최대 30개')}
             </Typography>
             <AttachmentField purpose="ALBUM_MEDIA" value={files} onChange={setFiles} max={30} />
           </Box>
@@ -129,9 +132,9 @@ function CreateDialog({ open, onClose, onCreated }: { open: boolean; onClose: ()
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>취소</Button>
+        <Button onClick={onClose}>{t('취소')}</Button>
         <Button variant="contained" disabled={!title.trim() || files.length === 0 || targets.length === 0 || create.isPending} onClick={() => create.mutate()}>
-          올리고 알림 보내기
+          {t('올리고 알림 보내기')}
         </Button>
       </DialogActions>
     </Dialog>
@@ -139,6 +142,7 @@ function CreateDialog({ open, onClose, onCreated }: { open: boolean; onClose: ()
 }
 
 function DetailDialog({ id, onClose, onDeleted }: { id: string | null; onClose: () => void; onDeleted: () => void }) {
+  const t = useT();
   const { session } = useSession();
   const instId = session?.institution?.institutionId;
   const detail = useQuery({ queryKey: ['albums', instId, 'detail', id], queryFn: () => api.get<Album>(`albums/${id}`), enabled: !!instId && !!id });
@@ -147,14 +151,14 @@ function DetailDialog({ id, onClose, onDeleted }: { id: string | null; onClose: 
 
   return (
     <Dialog open={!!id} onClose={onClose} fullWidth maxWidth="md">
-      <DialogTitle>{a?.title ?? '앨범'}</DialogTitle>
+      <DialogTitle>{a?.title ?? t('앨범')}</DialogTitle>
       <DialogContent>
         {detail.isFetching && <LinearProgress />}
         {detail.isError && <Alert severity="error">{errorMessage(detail.error)}</Alert>}
         {a && (
           <Stack spacing={1.5}>
             <Typography variant="caption" color="text.secondary">
-              {a.author.name} · {dateTime(a.createdAt)} · {a.itemCount}개{a.recipients !== null && ` · 받는 학부모 ${a.recipients}명`}
+              {t('{0} · {1} · {2}개', { 0: a.author.name, 1: dateTime(a.createdAt), 2: a.itemCount })}{a.recipients !== null && t(' · 받는 학부모 {0}명', { 0: a.recipients })}
             </Typography>
             {a.description && <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{a.description}</Typography>}
             <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 1 }}>
@@ -179,12 +183,12 @@ function DetailDialog({ id, onClose, onDeleted }: { id: string | null; onClose: 
           color="error"
           disabled={!a || remove.isPending}
           onClick={() => {
-            if (window.confirm('앨범을 삭제할까요? 학부모 앱에서도 사라집니다.')) remove.mutate();
+            if (window.confirm(t('앨범을 삭제할까요? 학부모 앱에서도 사라집니다.'))) remove.mutate();
           }}
         >
-          삭제
+          {t('삭제')}
         </Button>
-        <Button onClick={onClose}>닫기</Button>
+        <Button onClick={onClose}>{t('닫기')}</Button>
       </DialogActions>
     </Dialog>
   );

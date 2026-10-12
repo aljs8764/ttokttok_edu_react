@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { useTheme } from '@mui/material/styles';
+import { useT } from '@/lib/i18n';
 
 /** 외부 차트 라이브러리 없이 쓰는 가벼운 SVG 차트 모음 (통계 화면·대시보드 위젯 공용) */
 
@@ -150,6 +151,7 @@ export function BarChart({ labels, series, height = H }: { labels: string[]; ser
 
 /** 도넛 — 재원 상태 비율, 학년 분포 */
 export function Donut({ slices, size = 160 }: { slices: { label: string; value: number; color: string }[]; size?: number }) {
+  const tr = useT();
   const total = slices.reduce((a, s) => a + s.value, 0);
   const r = 56;
   const c = 2 * Math.PI * r;
@@ -162,8 +164,8 @@ export function Donut({ slices, size = 160 }: { slices: { label: string; value: 
           slices.map((s) => {
             const len = (s.value / total) * c;
             const el = (
-              <circle key={s.label} cx="80" cy="80" r={r} fill="none" stroke={s.color} strokeWidth="22" strokeDasharray={`${len} ${c - len}`} strokeDashoffset={-offset} transform="rotate(-90 80 80)">
-                <title>{`${s.label} ${s.value}명`}</title>
+              <circle key={tr(s.label)} cx="80" cy="80" r={r} fill="none" stroke={s.color} strokeWidth="22" strokeDasharray={`${len} ${c - len}`} strokeDashoffset={-offset} transform="rotate(-90 80 80)">
+                <title>{tr('{0} {1}명', { 0: s.label, 1: s.value })}</title>
               </circle>
             );
             offset += len;
@@ -175,10 +177,10 @@ export function Donut({ slices, size = 160 }: { slices: { label: string; value: 
       </svg>
       <Box>
         {slices.map((s) => (
-          <Box key={s.label} sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.25 }}>
+          <Box key={tr(s.label)} sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.25 }}>
             <Box sx={{ width: 10, height: 10, borderRadius: '2px', bgcolor: s.color }} />
             <Typography variant="body2">
-              {s.label} {s.value}명{total > 0 ? ` (${Math.round((s.value / total) * 100)}%)` : ''}
+              {tr('{0} {1}명{2}', { 0: s.label, 1: s.value, 2: total > 0 ? ` (${Math.round((s.value / total) * 100)}%)` : '' })}
             </Typography>
           </Box>
         ))}
@@ -189,6 +191,7 @@ export function Donut({ slices, size = 160 }: { slices: { label: string; value: 
 
 /** 요일×시간 히트맵. value(weekday, hour) → 0 이상 숫자 */
 export function Heatmap({ weekdays, hours, value, color = '27,37,89' }: { weekdays: string[]; hours: number[]; value: (weekday: number, hour: number) => number; color?: string }) {
+  const tr = useT();
   let max = 0;
   weekdays.forEach((_, wi) => hours.forEach((h) => (max = Math.max(max, value(wi + 1, h)))));
   return (
@@ -211,7 +214,7 @@ export function Heatmap({ weekdays, hours, value, color = '27,37,89' }: { weekda
               return (
                 <Box
                   key={h}
-                  title={`${w} ${h}시 ${v}`}
+                  title={tr('{0} {1}시 {2}', { 0: w, 1: h, 2: v })}
                   sx={{ height: 28, borderRadius: '3px', bgcolor: a === 0 ? 'action.hover' : `rgba(${color},${0.12 + a * 0.88})`, color: a > 0.55 ? '#fff' : 'text.secondary', fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
                   {v > 0 ? Math.round(v * 10) / 10 : ''}

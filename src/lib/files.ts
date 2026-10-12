@@ -1,5 +1,6 @@
 import { api } from './api';
 import type { FileRef } from './types';
+import { translate } from '@/lib/i18n';
 
 export type FilePurpose = 'LOGO' | 'SEAL' | 'ABSENCE_EVIDENCE' | 'NOTICE_ATTACHMENT' | 'ALBUM_MEDIA';
 
@@ -26,9 +27,9 @@ function mimeOf(file: File) {
 
 /** 업로드 전 검사. 문제가 없으면 null */
 export function checkFile(purpose: FilePurpose, file: File): string | null {
-  if (!ALLOWED[purpose].includes(mimeOf(file))) return purpose === 'ALBUM_MEDIA' ? 'jpg·png·heic 사진과 mp4·mov 영상만 올릴 수 있습니다' : 'jpg·png·heic·pdf 파일만 올릴 수 있습니다';
+  if (!ALLOWED[purpose].includes(mimeOf(file))) return purpose === 'ALBUM_MEDIA' ? translate('jpg·png·heic 사진과 mp4·mov 영상만 올릴 수 있습니다') : translate('jpg·png·heic·pdf 파일만 올릴 수 있습니다');
   const max = MAX_BY_PURPOSE[purpose] ?? MAX_FILE_BYTES;
-  if (file.size > max) return `${Math.round(max / 1024 / 1024)}MB 이하 파일만 올릴 수 있습니다`;
+  if (file.size > max) return translate('{0}MB 이하 파일만 올릴 수 있습니다', { 0: Math.round(max / 1024 / 1024) });
   return null;
 }
 
@@ -45,7 +46,7 @@ export async function uploadFile(purpose: FilePurpose, file: File): Promise<File
     size: file.size,
   });
   const put = await fetch(upload.url, { method: upload.method || 'PUT', headers: upload.headers, body: file });
-  if (!put.ok) throw new Error(`파일 업로드에 실패했습니다 (${put.status})`);
+  if (!put.ok) throw new Error(translate('파일 업로드에 실패했습니다 ({0})', { 0: put.status }));
   return api.post<FileRef>(`files/${fileId}/complete`);
 }
 

@@ -14,6 +14,7 @@ import { api, errorMessage } from '@/lib/api';
 import type { NoticeTemplate } from '@/lib/comm';
 import { useSession } from '@/lib/session';
 import type { NoticeKind } from '@/lib/types';
+import { useT } from '@/lib/i18n';
 
 /** NTC-003 작성 화면에서 템플릿 불러오기 / 지금 내용을 템플릿으로 저장 */
 export default function TemplatePicker({
@@ -29,6 +30,7 @@ export default function TemplatePicker({
   onPick: (t: { title: string; body: string }) => void;
   disabled?: boolean;
 }) {
+  const tr = useT();
   const qc = useQueryClient();
   const { session } = useSession();
   const instId = session?.institution?.institutionId;
@@ -40,7 +42,7 @@ export default function TemplatePicker({
   const save = useMutation({
     mutationFn: (name: string) => api.post('notice-templates', { kind, name, title: title.trim(), body: body.trim() }),
     onSuccess: () => {
-      setSaved('템플릿으로 저장했습니다');
+      setSaved(tr('템플릿으로 저장했습니다'));
       void qc.invalidateQueries({ queryKey: ['notice-templates'] });
     },
   });
@@ -49,7 +51,7 @@ export default function TemplatePicker({
     <Stack spacing={1}>
       <Stack direction="row" spacing={1}>
         <Button size="small" variant="outlined" startIcon={<ArticleIcon />} disabled={disabled} onClick={(e) => setAnchor(e.currentTarget)}>
-          템플릿 불러오기
+          {tr('템플릿 불러오기')}
         </Button>
         <Button
           size="small"
@@ -57,20 +59,20 @@ export default function TemplatePicker({
           startIcon={<BookmarkAddIcon />}
           disabled={disabled || !title.trim() || !body.trim() || save.isPending}
           onClick={() => {
-            const name = window.prompt('템플릿 이름', title.trim().slice(0, 50));
+            const name = window.prompt(tr('템플릿 이름'), title.trim().slice(0, 50));
             if (name?.trim()) {
               setSaved('');
               save.mutate(name.trim());
             }
           }}
         >
-          현재 내용을 템플릿으로 저장
+          {tr('현재 내용을 템플릿으로 저장')}
         </Button>
       </Stack>
       <Menu anchorEl={anchor} open={!!anchor} onClose={() => setAnchor(null)}>
         {list.data?.length === 0 && (
           <MenuItem disabled>
-            <Typography variant="body2">저장된 템플릿이 없습니다</Typography>
+            <Typography variant="body2">{tr('저장된 템플릿이 없습니다')}</Typography>
           </MenuItem>
         )}
         {list.data?.map((t) => (

@@ -17,9 +17,11 @@ import { api, errorMessage } from '@/lib/api';
 import { useSession } from '@/lib/session';
 import type { LatLng, TripHistory, TripLive } from '@/lib/shuttle';
 import ShuttleMap from '@/components/ShuttleMap';
+import { useT } from '@/lib/i18n';
 
 /** 날짜별 운행 기록과 이동 경로 (좌표는 30일 보관) */
 export default function HistoryTab() {
+  const tr = useT();
   const { session } = useSession();
   const instId = session?.institution?.institutionId;
   const [date, setDate] = useState(dayjs().format('YYYY-MM-DD'));
@@ -29,11 +31,11 @@ export default function HistoryTab() {
   const path = useQuery({ queryKey: ['shuttle', 'path', sel], queryFn: () => api.get<LatLng[]>(`shuttle/trips/${sel}/path`), enabled: !!sel });
   return (
     <Stack spacing={2}>
-      <TextField size="small" type="date" label="날짜" value={date} onChange={(e) => e.target.value && setDate(e.target.value)} slotProps={{ inputLabel: { shrink: true } }} sx={{ width: 180 }} />
+      <TextField size="small" type="date" label={tr('날짜')} value={date} onChange={(e) => e.target.value && setDate(e.target.value)} slotProps={{ inputLabel: { shrink: true } }} sx={{ width: 180 }} />
       {list.isError && <Alert severity="error">{errorMessage(list.error)}</Alert>}
       <Paper variant="outlined" sx={{ overflowX: 'auto' }}>
         <Table size="small">
-          <TableHead><TableRow><TableCell>노선</TableCell><TableCell>기사</TableCell><TableCell>출발</TableCell><TableCell>종료</TableCell><TableCell align="right">좌표 수</TableCell><TableCell>상태</TableCell></TableRow></TableHead>
+          <TableHead><TableRow><TableCell>{tr('노선')}</TableCell><TableCell>{tr('기사')}</TableCell><TableCell>{tr('출발')}</TableCell><TableCell>{tr('종료')}</TableCell><TableCell align="right">{tr('좌표 수')}</TableCell><TableCell>{tr('상태')}</TableCell></TableRow></TableHead>
           <TableBody>
             {list.data?.map((t) => (
               <TableRow key={t.id} hover selected={t.id === sel} sx={{ cursor: 'pointer' }} onClick={() => setSel(t.id)}>
@@ -42,10 +44,10 @@ export default function HistoryTab() {
                 <TableCell>{dayjs(t.startedAt).format('HH:mm')}</TableCell>
                 <TableCell>{t.endedAt ? dayjs(t.endedAt).format('HH:mm') : '-'}</TableCell>
                 <TableCell align="right">{t.pointCount}</TableCell>
-                <TableCell>{t.status === 'RUNNING' ? <Chip size="small" color="success" label="운행 중" /> : <Chip size="small" label="종료" />}</TableCell>
+                <TableCell>{t.status === 'RUNNING' ? <Chip size="small" color="success" label={tr('운행 중')} /> : <Chip size="small" label={tr('종료')} />}</TableCell>
               </TableRow>
             ))}
-            {list.data?.length === 0 && <TableRow><TableCell colSpan={6} align="center">이 날짜의 운행이 없습니다</TableCell></TableRow>}
+            {list.data?.length === 0 && <TableRow><TableCell colSpan={6} align="center">{tr('이 날짜의 운행이 없습니다')}</TableCell></TableRow>}
           </TableBody>
         </Table>
       </Paper>

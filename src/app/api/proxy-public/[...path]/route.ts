@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { BACKEND_URL } from '@/lib/server/session';
+import { BACKEND_URL, languageOf } from '@/lib/server/session';
 
 /**
  * 로그인 없이 부르는 공개 API 만 통과 (임시 비밀번호·교직원 초대 수락 등).
@@ -17,7 +17,7 @@ async function handle(req: NextRequest, ctx: { params: Promise<{ path: string[] 
   if (!ALLOWED.some((a) => a.method === req.method && a.pattern.test(joined))) {
     return NextResponse.json({ code: 'NOT_FOUND', message: '없는 경로입니다' }, { status: 404 });
   }
-  const headers = new Headers({ 'Content-Type': req.headers.get('content-type') ?? 'application/json' });
+  const headers = new Headers({ 'Content-Type': req.headers.get('content-type') ?? 'application/json', 'Accept-Language': languageOf(req) });
   const fwd = req.headers.get('x-forwarded-for');
   if (fwd) headers.set('X-Forwarded-For', fwd);
   const res = await fetch(`${BACKEND_URL}/api/v1/${path.map(encodeURIComponent).join('/')}${req.nextUrl.search}`, {

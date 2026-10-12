@@ -26,6 +26,7 @@ import AttachmentField from '@/components/AttachmentField';
 import PageHeader from '@/components/PageHeader';
 import TargetPicker, { toTargetRequest } from '@/components/TargetPicker';
 import TemplatePicker from '@/components/TemplatePicker';
+import { useT } from '@/lib/i18n';
 
 const MAX_TITLE = 100;
 const MAX_BODY = 5000;
@@ -35,6 +36,7 @@ const MAX_BODY = 5000;
  * 공지(ANNOUNCEMENT)와 전체 대상은 원장·실장만. 예약은 30일 이내.
  */
 export default function NoticeForm({ id }: { id?: string }) {
+  const tr = useT();
   const qc = useQueryClient();
   const router = useRouter();
   const { session, manager } = useSession();
@@ -86,29 +88,29 @@ export default function NoticeForm({ id }: { id?: string }) {
 
   const editingLocked = !!existing.data && existing.data.status !== 'SCHEDULED';
   const now = dayjs();
-  const scheduleError = scheduled && (!sendAt?.isValid() ? '예약 시각을 고르세요' : !sendAt.isAfter(now) ? '현재 이후로 고르세요' : sendAt.isAfter(now.add(30, 'day')) ? '30일 이내로만 예약할 수 있습니다' : '');
+  const scheduleError = scheduled && (!sendAt?.isValid() ? tr('예약 시각을 고르세요') : !sendAt.isAfter(now) ? tr('현재 이후로 고르세요') : sendAt.isAfter(now.add(30, 'day')) ? tr('30일 이내로만 예약할 수 있습니다') : '');
   const valid = title.trim() && body.trim() && targets.length > 0 && !scheduleError && !editingLocked;
 
   return (
     <>
       <PageHeader
-        title={id ? '예약 알림장 수정' : '알림장 쓰기'}
+        title={id ? tr('예약 알림장 수정') : tr('알림장 쓰기')}
         menuId="NTC-001"
         actions={
           <Button startIcon={<ArrowBackIcon />} component={NextLink} href={id ? `/notices/${id}` : '/notices'}>
-            {id ? '상세로' : '목록'}
+            {id ? tr('상세로') : tr('목록')}
           </Button>
         }
       />
       {existing.isFetching && <LinearProgress />}
-      {editingLocked && <Alert severity="info" sx={{ mb: 2 }}>이미 발송되었거나 취소된 알림장은 수정할 수 없습니다.</Alert>}
+      {editingLocked && <Alert severity="info" sx={{ mb: 2 }}>{tr('이미 발송되었거나 취소된 알림장은 수정할 수 없습니다.')}</Alert>}
 
       <Paper sx={{ p: 3, maxWidth: 820 }}>
         <Stack spacing={2.5}>
           {manager && (
             <ToggleButtonGroup exclusive size="small" value={kind} onChange={(_, v) => v && setKind(v)}>
-              <ToggleButton value="NOTE">알림장</ToggleButton>
-              <ToggleButton value="ANNOUNCEMENT">공지</ToggleButton>
+              <ToggleButton value="NOTE">{tr('알림장')}</ToggleButton>
+              <ToggleButton value="ANNOUNCEMENT">{tr('공지')}</ToggleButton>
             </ToggleButtonGroup>
           )}
 
@@ -124,7 +126,7 @@ export default function NoticeForm({ id }: { id?: string }) {
           )}
 
           <TextField
-            label="제목"
+            label={tr('제목')}
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -132,7 +134,7 @@ export default function NoticeForm({ id }: { id?: string }) {
             helperText={`${title.length}/${MAX_TITLE}`}
           />
           <TextField
-            label="내용"
+            label={tr('내용')}
             required
             multiline
             minRows={8}
@@ -143,18 +145,18 @@ export default function NoticeForm({ id }: { id?: string }) {
           />
           <AttachmentField purpose="NOTICE_ATTACHMENT" value={attachments} onChange={setAttachments} disabled={editingLocked} />
           {kind === 'ANNOUNCEMENT' && (
-            <FormControlLabel control={<Checkbox checked={pinned} onChange={(e) => setPinned(e.target.checked)} />} label="학부모 앱 상단에 고정" />
+            <FormControlLabel control={<Checkbox checked={pinned} onChange={(e) => setPinned(e.target.checked)} />} label={tr('학부모 앱 상단에 고정')} />
           )}
 
           <Divider />
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ sm: 'center' }}>
             <ToggleButtonGroup exclusive size="small" value={scheduled ? 'later' : 'now'} onChange={(_, v) => v && setScheduled(v === 'later')} disabled={!!id}>
-              <ToggleButton value="now">바로 보내기</ToggleButton>
-              <ToggleButton value="later">예약 발송</ToggleButton>
+              <ToggleButton value="now">{tr('바로 보내기')}</ToggleButton>
+              <ToggleButton value="later">{tr('예약 발송')}</ToggleButton>
             </ToggleButtonGroup>
             {scheduled && (
               <DateTimePicker
-                label="보낼 시각"
+                label={tr('보낼 시각')}
                 value={sendAt}
                 onChange={setSendAt}
                 disablePast
@@ -166,16 +168,16 @@ export default function NoticeForm({ id }: { id?: string }) {
             )}
           </Stack>
           <Typography variant="caption" color="text.secondary">
-            학부모 앱으로 푸시가 갑니다. 열람 여부는 상세 화면의 수신 확인에서 볼 수 있고, 미열람자에게만 다시 보낼 수 있습니다.
+            {tr('학부모 앱으로 푸시가 갑니다. 열람 여부는 상세 화면의 수신 확인에서 볼 수 있고, 미열람자에게만 다시 보낼 수 있습니다.')}
           </Typography>
 
           {save.isError && <Alert severity="error">{errorMessage(save.error)}</Alert>}
           <Stack direction="row" justifyContent="flex-end" spacing={1}>
             <Button component={NextLink} href={id ? `/notices/${id}` : '/notices'}>
-              취소
+              {tr('취소')}
             </Button>
             <Button variant="contained" disabled={!valid || save.isPending} onClick={() => save.mutate()}>
-              {id ? '저장' : scheduled ? '예약하기' : '보내기'}
+              {id ? tr('저장') : scheduled ? tr('예약하기') : tr('보내기')}
             </Button>
           </Stack>
         </Stack>
@@ -186,6 +188,7 @@ export default function NoticeForm({ id }: { id?: string }) {
 
 /** CLS-005 반별 최근 진도·숙제를 본문에 붙인다. 대상에서 반을 골라야 쓸 수 있다 */
 function ProgressQuoteButton({ classIds, onQuote }: { classIds: string[]; onQuote: (text: string) => void }) {
+  const tr = useT();
   const [message, setMessage] = useState('');
   const quote = useMutation({
     mutationFn: () => api.post<{ text: string }>('curriculum/quote', { classroomIds: classIds }),
@@ -194,7 +197,7 @@ function ProgressQuoteButton({ classIds, onQuote }: { classIds: string[]; onQuot
         onQuote(r.text);
         setMessage('');
       } else {
-        setMessage('고른 반에 기록된 진도가 없습니다. 반 관리 > 교재·진도에서 먼저 기록하세요.');
+        setMessage(tr('고른 반에 기록된 진도가 없습니다. 반 관리 > 교재·진도에서 먼저 기록하세요.'));
       }
     },
     onError: (e) => setMessage(errorMessage(e)),
@@ -202,10 +205,10 @@ function ProgressQuoteButton({ classIds, onQuote }: { classIds: string[]; onQuot
   return (
     <Stack direction="row" spacing={1} alignItems="center">
       <Button size="small" variant="outlined" disabled={classIds.length === 0 || quote.isPending} onClick={() => quote.mutate()}>
-        진도 불러오기
+        {tr('진도 불러오기')}
       </Button>
       <Typography variant="caption" color={message ? 'warning.main' : 'text.secondary'}>
-        {message || (classIds.length === 0 ? '대상에서 반을 고르면 그 반의 최근 진도·숙제를 본문에 붙일 수 있습니다.' : '반별 가장 최근 진도·숙제를 본문 끝에 붙입니다.')}
+        {message || (classIds.length === 0 ? tr('대상에서 반을 고르면 그 반의 최근 진도·숙제를 본문에 붙일 수 있습니다.') : tr('반별 가장 최근 진도·숙제를 본문 끝에 붙입니다.'))}
       </Typography>
     </Stack>
   );

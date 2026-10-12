@@ -21,12 +21,14 @@ import dayjs from 'dayjs';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, errorMessage } from '@/lib/api';
 import type { PlatformNotice } from '@/lib/platform';
+import { useT } from '@/lib/i18n';
 
 const EMPTY = { kind: 'NOTICE', title: '', body: '', startsAt: '', endsAt: '' };
 const iso = (v: string) => (v ? dayjs(v).toISOString() : null);
 
 /** SAAS-005 공지·점검 안내 (기관 화면 상단 배너로 노출) */
 export default function NoticesTab() {
+  const t = useT();
   const qc = useQueryClient();
   const [form, setForm] = useState<typeof EMPTY | null>(null);
   const q = useQuery({ queryKey: ['platform', 'notices'], queryFn: () => api.get<PlatformNotice[]>('platform/notices') });
@@ -40,50 +42,50 @@ export default function NoticesTab() {
   return (
     <>
       <Stack direction="row" sx={{ mb: 2 }}>
-        <Button variant="contained" sx={{ ml: 'auto' }} onClick={() => setForm(EMPTY)}>공지·점검 등록</Button>
+        <Button variant="contained" sx={{ ml: 'auto' }} onClick={() => setForm(EMPTY)}>{t('공지·점검 등록')}</Button>
       </Stack>
       {(q.isError || cancel.isError) && <Alert severity="error" sx={{ mb: 2 }}>{errorMessage(q.error ?? cancel.error)}</Alert>}
       <Paper variant="outlined" sx={{ overflowX: 'auto' }}>
         <Table size="small">
-          <TableHead><TableRow><TableCell>구분</TableCell><TableCell>제목</TableCell><TableCell>노출 기간</TableCell><TableCell>상태</TableCell><TableCell align="right">처리</TableCell></TableRow></TableHead>
+          <TableHead><TableRow><TableCell>{t('구분')}</TableCell><TableCell>{t('제목')}</TableCell><TableCell>{t('노출 기간')}</TableCell><TableCell>{t('상태')}</TableCell><TableCell align="right">{t('처리')}</TableCell></TableRow></TableHead>
           <TableBody>
             {q.data?.map((n) => {
               const live = !n.cancelled && dayjs(n.startsAt).isBefore(now) && (!n.endsAt || dayjs(n.endsAt).isAfter(now));
               return (
                 <TableRow key={n.id}>
-                  <TableCell>{n.kind === 'MAINTENANCE' ? '점검' : '공지'}</TableCell>
+                  <TableCell>{n.kind === 'MAINTENANCE' ? t('점검') : t('공지')}</TableCell>
                   <TableCell>{n.title}</TableCell>
                   <TableCell>{dayjs(n.startsAt).format('M/D HH:mm')} ~ {n.endsAt ? dayjs(n.endsAt).format('M/D HH:mm') : ''}</TableCell>
-                  <TableCell>{n.cancelled ? <Chip size="small" label="취소" /> : live ? <Chip size="small" color="success" label="노출 중" /> : <Chip size="small" variant="outlined" label="예정/종료" />}</TableCell>
-                  <TableCell align="right">{!n.cancelled && <Button size="small" color="error" onClick={() => cancel.mutate(n.id)}>취소</Button>}</TableCell>
+                  <TableCell>{n.cancelled ? <Chip size="small" label={t('취소')} /> : live ? <Chip size="small" color="success" label={t('노출 중')} /> : <Chip size="small" variant="outlined" label={t('예정/종료')} />}</TableCell>
+                  <TableCell align="right">{!n.cancelled && <Button size="small" color="error" onClick={() => cancel.mutate(n.id)}>{t('취소')}</Button>}</TableCell>
                 </TableRow>
               );
             })}
-            {q.data?.length === 0 && <TableRow><TableCell colSpan={5} align="center">등록된 공지가 없습니다</TableCell></TableRow>}
+            {q.data?.length === 0 && <TableRow><TableCell colSpan={5} align="center">{t('등록된 공지가 없습니다')}</TableCell></TableRow>}
           </TableBody>
         </Table>
       </Paper>
       <Dialog open={!!form} onClose={() => setForm(null)} fullWidth maxWidth="sm">
-        <DialogTitle>공지·점검 등록</DialogTitle>
+        <DialogTitle>{t('공지·점검 등록')}</DialogTitle>
         <DialogContent>
           {form && (
             <Stack spacing={2} sx={{ pt: 1 }}>
               {create.isError && <Alert severity="error">{errorMessage(create.error)}</Alert>}
-              <TextField select size="small" label="구분" value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value })}>
-                <MenuItem value="NOTICE">공지</MenuItem><MenuItem value="MAINTENANCE">점검</MenuItem>
+              <TextField select size="small" label={t('구분')} value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value })}>
+                <MenuItem value="NOTICE">{t('공지')}</MenuItem><MenuItem value="MAINTENANCE">{t('점검')}</MenuItem>
               </TextField>
-              <TextField size="small" label="제목" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-              <TextField multiline minRows={3} size="small" label="내용" value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} />
+              <TextField size="small" label={t('제목')} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+              <TextField multiline minRows={3} size="small" label={t('내용')} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} />
               <Stack direction="row" spacing={1}>
-                <TextField size="small" type="datetime-local" label="노출 시작 (비우면 즉시)" value={form.startsAt} onChange={(e) => setForm({ ...form, startsAt: e.target.value })} slotProps={{ inputLabel: { shrink: true } }} />
-                <TextField size="small" type="datetime-local" label="노출 종료" value={form.endsAt} onChange={(e) => setForm({ ...form, endsAt: e.target.value })} slotProps={{ inputLabel: { shrink: true } }} />
+                <TextField size="small" type="datetime-local" label={t('노출 시작 (비우면 즉시)')} value={form.startsAt} onChange={(e) => setForm({ ...form, startsAt: e.target.value })} slotProps={{ inputLabel: { shrink: true } }} />
+                <TextField size="small" type="datetime-local" label={t('노출 종료')} value={form.endsAt} onChange={(e) => setForm({ ...form, endsAt: e.target.value })} slotProps={{ inputLabel: { shrink: true } }} />
               </Stack>
             </Stack>
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setForm(null)}>취소</Button>
-          <Button variant="contained" disabled={!form?.title.trim() || !form.body.trim() || create.isPending} onClick={() => form && create.mutate(form)}>등록</Button>
+          <Button onClick={() => setForm(null)}>{t('취소')}</Button>
+          <Button variant="contained" disabled={!form?.title.trim() || !form.body.trim() || create.isPending} onClick={() => form && create.mutate(form)}>{t('등록')}</Button>
         </DialogActions>
       </Dialog>
     </>

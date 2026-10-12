@@ -33,9 +33,11 @@ import { ownerEventDestinations, useRealtime } from '@/lib/realtime';
 import { useSession } from '@/lib/session';
 import type { Page, Student } from '@/lib/types';
 import PageHeader from '@/components/PageHeader';
+import { useT } from '@/lib/i18n';
 
 /** NTC-007 알림장 회신 · NTC-008 학부모 1:1 채팅 — 교직원 메시지함. 교사는 담당 반 원생 대화만 보인다. */
 export default function MessagesView() {
+  const tr = useT();
   const qc = useQueryClient();
   const params = useSearchParams();
   const { session, manager } = useSession();
@@ -64,12 +66,12 @@ export default function MessagesView() {
   return (
     <>
       <PageHeader
-        title="메시지함"
+        title={tr('메시지함')}
         menuId="NTC-008"
-        description={noticeId ? '선택한 알림장에 달린 학부모 회신입니다.' : '학부모와의 1:1 대화와 알림장 회신입니다.'}
+        description={noticeId ? tr('선택한 알림장에 달린 학부모 회신입니다.') : tr('학부모와의 1:1 대화와 알림장 회신입니다.')}
         actions={
           <Button variant="contained" startIcon={<AddCommentIcon />} onClick={() => setNewOpen(true)}>
-            새 대화
+            {tr('새 대화')}
           </Button>
         }
       />
@@ -77,15 +79,15 @@ export default function MessagesView() {
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '340px 1fr' }, gap: 2, alignItems: 'start' }}>
         <Paper sx={{ overflow: 'hidden' }}>
           <Box sx={{ px: 2, py: 1, borderBottom: 1, borderColor: 'divider' }}>
-            <FormControlLabel control={<Switch size="small" checked={unreadOnly} onChange={(e) => setUnreadOnly(e.target.checked)} />} label="안 읽은 것만" />
+            <FormControlLabel control={<Switch size="small" checked={unreadOnly} onChange={(e) => setUnreadOnly(e.target.checked)} />} label={tr('안 읽은 것만')} />
             {noticeId && (
-              <Chip size="small" label="알림장 회신만" component={NextLink} href="/messages" clickable onDelete={() => undefined} sx={{ ml: 1 }} />
+              <Chip size="small" label={tr('알림장 회신만')} component={NextLink} href="/messages" clickable onDelete={() => undefined} sx={{ ml: 1 }} />
             )}
           </Box>
           <List disablePadding sx={{ maxHeight: 620, overflowY: 'auto' }}>
             {list.data?.length === 0 && (
               <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 4 }}>
-                대화가 없습니다
+                {tr('대화가 없습니다')}
               </Typography>
             )}
             {list.data?.map((c) => (
@@ -101,9 +103,9 @@ export default function MessagesView() {
                   }
                   secondary={
                     <>
-                      {c.notice && <Chip size="small" variant="outlined" label={`회신: ${c.notice.title}`} sx={{ mr: 0.5, maxWidth: 220 }} />}
+                      {c.notice && <Chip size="small" variant="outlined" label={tr('회신: {0}', { 0: c.notice.title })} sx={{ mr: 0.5, maxWidth: 220 }} />}
                       <Typography component="span" variant="caption" color="text.secondary">
-                        {c.lastMessagePreview ?? '대화를 시작해 보세요'} · {dateTime(c.lastMessageAt)}
+                        {c.lastMessagePreview ?? tr('대화를 시작해 보세요')} · {dateTime(c.lastMessageAt)}
                       </Typography>
                     </>
                   }
@@ -119,7 +121,7 @@ export default function MessagesView() {
             <Thread conversation={current} />
           ) : (
             <Typography color="text.secondary" align="center" sx={{ m: 'auto' }}>
-              왼쪽에서 대화를 고르세요
+              {tr('왼쪽에서 대화를 고르세요')}
             </Typography>
           )}
         </Paper>
@@ -138,6 +140,7 @@ export default function MessagesView() {
 }
 
 function Thread({ conversation }: { conversation: Conversation }) {
+  const tr = useT();
   const qc = useQueryClient();
   const { session } = useSession();
   const instId = session?.institution?.institutionId;
@@ -174,11 +177,11 @@ function Thread({ conversation }: { conversation: Conversation }) {
     <>
       <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
         <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-          {conversation.studentName} 학부모 · {conversation.guardian.name}
+          {tr('{0} 학부모 · {1}', { 0: conversation.studentName, 1: conversation.guardian.name })}
         </Typography>
         {conversation.notice && (
           <Typography variant="caption" color="text.secondary" component={NextLink} href={`/notices/${conversation.notice.id}`}>
-            알림장 「{conversation.notice.title}」에 대한 회신
+            {tr('알림장 「{0}」에 대한 회신', { 0: conversation.notice.title })}
           </Typography>
         )}
       </Box>
@@ -202,7 +205,7 @@ function Thread({ conversation }: { conversation: Conversation }) {
           size="small"
           multiline
           maxRows={4}
-          placeholder="메시지를 입력하세요 (Ctrl+Enter 전송)"
+          placeholder={tr('메시지를 입력하세요 (Ctrl+Enter 전송)')}
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => {
@@ -210,7 +213,7 @@ function Thread({ conversation }: { conversation: Conversation }) {
           }}
           inputProps={{ maxLength: 2000 }}
         />
-        <IconButton color="primary" disabled={!text.trim() || send.isPending} onClick={() => send.mutate()} aria-label="보내기">
+        <IconButton color="primary" disabled={!text.trim() || send.isPending} onClick={() => send.mutate()} aria-label={tr('보내기')}>
           <SendIcon />
         </IconButton>
       </Stack>
@@ -220,6 +223,7 @@ function Thread({ conversation }: { conversation: Conversation }) {
 
 /** 교직원이 먼저 말 걸기 — 원생을 고르면 앱 연결된 보호자마다 대화가 하나씩 열린다 */
 function NewChatDialog({ open, onClose, onOpened }: { open: boolean; onClose: () => void; onOpened: (c: Conversation[]) => void }) {
+  const tr = useT();
   const { session } = useSession();
   const instId = session?.institution?.institutionId;
   const [input, setInput] = useState('');
@@ -241,7 +245,7 @@ function NewChatDialog({ open, onClose, onOpened }: { open: boolean; onClose: ()
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-      <DialogTitle>새 대화</DialogTitle>
+      <DialogTitle>{tr('새 대화')}</DialogTitle>
       <DialogContent>
         <Autocomplete
           sx={{ mt: 1 }}
@@ -252,15 +256,15 @@ function NewChatDialog({ open, onClose, onOpened }: { open: boolean; onClose: ()
           inputValue={input}
           onInputChange={(_, v) => setInput(v)}
           filterOptions={(o) => o}
-          noOptionsText={keyword ? '검색 결과가 없습니다' : '원생 이름을 입력하세요'}
-          renderInput={(p) => <TextField {...p} label="원생 검색" />}
+          noOptionsText={keyword ? tr('검색 결과가 없습니다') : tr('원생 이름을 입력하세요')}
+          renderInput={(p) => <TextField {...p} label={tr('원생 검색')} />}
         />
         {openChat.isError && <Alert severity="error" sx={{ mt: 2 }}>{errorMessage(openChat.error)}</Alert>}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>닫기</Button>
+        <Button onClick={onClose}>{tr('닫기')}</Button>
         <Button variant="contained" disabled={!student || openChat.isPending} onClick={() => openChat.mutate()}>
-          대화 열기
+          {tr('대화 열기')}
         </Button>
       </DialogActions>
     </Dialog>

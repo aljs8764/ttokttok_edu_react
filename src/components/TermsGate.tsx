@@ -16,6 +16,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, errorMessage } from '@/lib/api';
 import { logout, useSession } from '@/lib/session';
 import type { Terms } from '@/lib/types';
+import { useT } from '@/lib/i18n';
 
 /** 아직 동의하지 않은 기관용 약관 (개정 시 재동의) */
 export function usePendingTerms() {
@@ -33,6 +34,7 @@ export function usePendingTerms() {
  * 선택 약관만 남았으면 한 번 보여 주고 닫을 수 있다.
  */
 export default function TermsGate() {
+  const tr = useT();
   const qc = useQueryClient();
   const pending = usePendingTerms();
   const items = pending.data ?? [];
@@ -54,10 +56,10 @@ export default function TermsGate() {
 
   return (
     <Dialog open={open} maxWidth="sm" fullWidth onClose={blocking ? undefined : () => setDismissed(true)}>
-      <DialogTitle>약관이 개정되었습니다</DialogTitle>
+      <DialogTitle>{tr('약관이 개정되었습니다')}</DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          {blocking ? '계속 이용하려면 필수 약관에 동의해 주세요.' : '선택 약관에 동의하지 않아도 이용할 수 있습니다.'}
+          {blocking ? tr('계속 이용하려면 필수 약관에 동의해 주세요.') : tr('선택 약관에 동의하지 않아도 이용할 수 있습니다.')}
         </Typography>
         <Stack spacing={2}>
           {items.map((t) => (
@@ -66,7 +68,7 @@ export default function TermsGate() {
                 control={<Checkbox checked={checked.has(t.id)} onChange={() => toggle(t.id)} />}
                 label={
                   <Typography variant="subtitle2">
-                    [{t.required ? '필수' : '선택'}] {t.title} (v{t.version})
+                    [{t.required ? tr('필수') : tr('선택')}] {t.title} (v{t.version})
                   </Typography>
                 }
               />
@@ -83,13 +85,13 @@ export default function TermsGate() {
       <DialogActions>
         {blocking ? (
           <Button color="inherit" onClick={() => void logout()}>
-            로그아웃
+            {tr('로그아웃')}
           </Button>
         ) : (
-          <Button onClick={() => setDismissed(true)}>나중에</Button>
+          <Button onClick={() => setDismissed(true)}>{tr('나중에')}</Button>
         )}
         <Button variant="contained" disabled={!allRequired || checked.size === 0 || agree.isPending} onClick={() => agree.mutate()}>
-          동의하고 계속
+          {tr('동의하고 계속')}
         </Button>
       </DialogActions>
     </Dialog>

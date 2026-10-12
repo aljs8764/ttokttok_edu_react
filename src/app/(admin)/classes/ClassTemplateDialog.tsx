@@ -24,6 +24,7 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
 import { api, errorMessage } from '@/lib/api';
 import { DAYS, DAY_LABEL } from '@/lib/format';
+import { useT } from '@/lib/i18n';
 
 type Row = { use: boolean; name: string; days: string[]; startTime: string; endTime: string; capacity: string; error?: string; done?: boolean };
 
@@ -61,6 +62,7 @@ const TEMPLATES: { key: string; title: string; desc: string; rows: Row[] }[] = [
 ];
 
 export default function ClassTemplateDialog({ open, onClose, onCreated }: { open: boolean; onClose: () => void; onCreated: () => void }) {
+  const tr = useT();
   const [rows, setRows] = useState<Row[] | null>(null);
   const [running, setRunning] = useState(false);
   const [doneCount, setDoneCount] = useState(0);
@@ -99,7 +101,7 @@ export default function ClassTemplateDialog({ open, onClose, onCreated }: { open
 
   return (
     <Dialog open={open} onClose={close} fullWidth maxWidth="md">
-      <DialogTitle>템플릿으로 반 만들기</DialogTitle>
+      <DialogTitle>{tr('템플릿으로 반 만들기')}</DialogTitle>
       <DialogContent>
         {!rows ? (
           <Grid container spacing={1.5} sx={{ pt: 1 }}>
@@ -108,8 +110,8 @@ export default function ClassTemplateDialog({ open, onClose, onCreated }: { open
                 <Card variant="outlined">
                   <CardActionArea onClick={() => setRows(t.rows.map((x) => ({ ...x })))}>
                     <CardContent>
-                      <Typography variant="subtitle1" fontWeight={700}>{t.title}</Typography>
-                      <Typography variant="body2" color="text.secondary">{t.desc}</Typography>
+                      <Typography variant="subtitle1" fontWeight={700}>{tr(t.title)}</Typography>
+                      <Typography variant="body2" color="text.secondary">{tr(t.desc)}</Typography>
                       <Typography variant="caption" color="text.secondary">{t.rows.map((x) => x.name).join(' · ')}</Typography>
                     </CardContent>
                   </CardActionArea>
@@ -120,24 +122,24 @@ export default function ClassTemplateDialog({ open, onClose, onCreated }: { open
         ) : (
           <>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-              이름·요일·시간·정원을 우리 기관에 맞게 고친 뒤 만드세요. 담당 교사는 만든 뒤 반 카드에서 배정합니다.
+              {tr('이름·요일·시간·정원을 우리 기관에 맞게 고친 뒤 만드세요. 담당 교사는 만든 뒤 반 카드에서 배정합니다.')}
             </Typography>
             {running && <LinearProgress sx={{ mb: 1 }} />}
-            {doneCount > 0 && <Alert severity="success" sx={{ mb: 1 }}>{doneCount}개 반을 만들었습니다.</Alert>}
+            {doneCount > 0 && <Alert severity="success" sx={{ mb: 1 }}>{tr('{0}개 반을 만들었습니다.', { 0: doneCount })}</Alert>}
             <Table size="small">
               <TableHead>
-                <TableRow><TableCell padding="checkbox" /><TableCell>반 이름</TableCell><TableCell>요일</TableCell><TableCell>시작</TableCell><TableCell>끝</TableCell><TableCell>정원</TableCell></TableRow>
+                <TableRow><TableCell padding="checkbox" /><TableCell>{tr('반 이름')}</TableCell><TableCell>{tr('요일')}</TableCell><TableCell>{tr('시작')}</TableCell><TableCell>{tr('끝')}</TableCell><TableCell>{tr('정원')}</TableCell></TableRow>
               </TableHead>
               <TableBody>
                 {rows.map((x, i) => (
                   <TableRow key={i} sx={{ opacity: x.use ? 1 : 0.5 }}>
                     <TableCell padding="checkbox"><Checkbox checked={x.use} disabled={x.done} onChange={(e) => upd(i, { use: e.target.checked })} /></TableCell>
                     <TableCell>
-                      <TextField size="small" variant="standard" value={x.name} disabled={x.done} onChange={(e) => upd(i, { name: e.target.value })} error={!!x.error} helperText={x.done ? '만들었음' : x.error} />
+                      <TextField size="small" variant="standard" value={x.name} disabled={x.done} onChange={(e) => upd(i, { name: e.target.value })} error={!!x.error} helperText={x.done ? tr('만들었음') : x.error} />
                     </TableCell>
                     <TableCell>
                       <ToggleButtonGroup size="small" value={x.days} disabled={x.done} onChange={(_, v: string[]) => upd(i, { days: v })}>
-                        {DAYS.map((d) => <ToggleButton key={d} value={d} sx={{ px: 0.75, py: 0.25 }}>{DAY_LABEL[d]}</ToggleButton>)}
+                        {DAYS.map((d) => <ToggleButton key={d} value={d} sx={{ px: 0.75, py: 0.25 }}>{tr(DAY_LABEL[d])}</ToggleButton>)}
                       </ToggleButtonGroup>
                     </TableCell>
                     <TableCell><TextField size="small" variant="standard" type="time" value={x.startTime} disabled={x.done} onChange={(e) => upd(i, { startTime: e.target.value })} /></TableCell>
@@ -151,11 +153,11 @@ export default function ClassTemplateDialog({ open, onClose, onCreated }: { open
         )}
       </DialogContent>
       <DialogActions>
-        {rows && !running && <Button onClick={() => { setRows(null); setDoneCount(0); }}>다른 템플릿</Button>}
-        <Button onClick={close} disabled={running}>닫기</Button>
+        {rows && !running && <Button onClick={() => { setRows(null); setDoneCount(0); }}>{tr('다른 템플릿')}</Button>}
+        <Button onClick={close} disabled={running}>{tr('닫기')}</Button>
         {rows && (
           <Button variant="contained" disabled={running || targets.length === 0 || !targets.every(valid)} onClick={() => void create()}>
-            {targets.length}개 반 만들기
+            {tr('{0}개 반 만들기', { 0: targets.length })}
           </Button>
         )}
       </DialogActions>

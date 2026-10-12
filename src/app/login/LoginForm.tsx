@@ -75,7 +75,7 @@ export default function LoginForm() {
       });
       const body = await res.json();
       if (!res.ok) {
-        setError(res.status === 429 ? '시도가 너무 많습니다. 1분 뒤 다시 시도하세요' : body.message ?? '로그인에 실패했습니다');
+        setError(res.status === 429 ? t('시도가 너무 많습니다. 1분 뒤 다시 시도하세요') : body.message ?? t('로그인에 실패했습니다'));
         return;
       }
       if (body.otpRequired) {
@@ -85,7 +85,7 @@ export default function LoginForm() {
       }
       afterLogin(body);
     } catch {
-      setError('서버에 연결할 수 없습니다');
+      setError(t('서버에 연결할 수 없습니다'));
     } finally {
       setPending(false);
     }
@@ -105,12 +105,12 @@ export default function LoginForm() {
       if (!res.ok) {
         // 시간 초과·5회 실패면 처음으로
         if (/처음부터/.test(body.message ?? '')) setChallengeId(null);
-        setError(res.status === 429 ? '시도가 너무 많습니다. 1분 뒤 다시 시도하세요' : body.message ?? '인증에 실패했습니다');
+        setError(res.status === 429 ? t('시도가 너무 많습니다. 1분 뒤 다시 시도하세요') : body.message ?? t('인증에 실패했습니다'));
         return;
       }
       afterLogin(body);
     } catch {
-      setError('서버에 연결할 수 없습니다');
+      setError(t('서버에 연결할 수 없습니다'));
     } finally {
       setPending(false);
     }
@@ -134,14 +134,14 @@ export default function LoginForm() {
       body: JSON.stringify({ institutionId }),
     });
     if (res.ok) router.replace(next);
-    else setError('기관을 선택할 수 없습니다');
+    else setError(t('기관을 선택할 수 없습니다'));
   }
 
   return (
     <Box sx={{ minHeight: '100vh', display: 'grid', placeItems: 'center', p: 2, bgcolor: 'background.default' }}>
       <Paper sx={{ width: '100%', maxWidth: 400, p: { xs: 3, sm: 4 } }}>
         <Typography variant="h1" sx={{ letterSpacing: -0.5 }}>
-          똑똑<Box component="span" sx={{ color: 'secondary.main' }}>.</Box>
+          {t('똑똑')}<Box component="span" sx={{ color: 'secondary.main' }}>.</Box>
         </Typography>
         <Stack direction="row" alignItems="center" sx={{ mb: 3 }}>
           <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
@@ -230,7 +230,7 @@ function TempPasswordDialog({ open, onClose }: { open: boolean; onClose: () => v
       body: JSON.stringify({ email: email.trim() }),
     });
     if (res.ok) setSent(true);
-    else setError(res.status === 429 ? '시도가 너무 많습니다. 잠시 후 다시 시도하세요' : '요청에 실패했습니다');
+    else setError(res.status === 429 ? t('시도가 너무 많습니다. 잠시 후 다시 시도하세요') : t('요청에 실패했습니다'));
   }
 
   return (

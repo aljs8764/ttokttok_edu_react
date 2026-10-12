@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
-import { BACKEND_URL } from '@/lib/server/session';
+import { BACKEND_URL, languageOf } from '@/lib/server/session';
 import { finishLogin } from '@/lib/server/finishLogin';
 
 /** AUTH-001 관리자 로그인 → httpOnly 쿠키. 2단계 인증(AUTH-007)을 켠 계정은 { otpRequired, challengeId } 만 돌려준다 */
 export async function POST(req: Request) {
   const { loginId, password, rememberMe } = (await req.json()) as { loginId: string; password: string; rememberMe?: boolean };
 
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const headers: Record<string, string> = { 'Content-Type': 'application/json', 'Accept-Language': languageOf(req) };
   // 백엔드 로그인 Rate limit 이 사용자 IP 기준으로 동작하도록 전달
   const forwarded = req.headers.get('x-forwarded-for');
   if (forwarded) headers['X-Forwarded-For'] = forwarded;

@@ -1,3 +1,4 @@
+import { translate } from '@/lib/i18n';
 // Phase 2 ④ 결제·구독 응답 타입 (PAY-001~003, SET-003, DASH-007)
 
 export type InvoiceStatus = 'UNPAID' | 'PAID' | 'CANCELED';
@@ -95,4 +96,4 @@ export interface BillingWidgetData {
   invoices: InvoiceSummary;
 }
 
-export const won = (n: number | null | undefined) => (n === null || n === undefined ? '-' : `${n.toLocaleString('ko-KR')}원`);
+export const won = (n: number | null | undefined) => (n === null || n === undefined ? '-' : translate('{0}원', { 0: n.toLocaleString('ko-KR') }));

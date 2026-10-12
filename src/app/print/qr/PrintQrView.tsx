@@ -7,12 +7,14 @@ import { api, errorMessage } from '@/lib/api';
 import { useSession } from '@/lib/session';
 import type { CheckinQr } from '@/lib/types';
 import QrImage from '@/components/QrImage';
+import { useT } from '@/lib/i18n';
 
 /**
  * QR-001 인쇄용 화면 — A4 한 장에 QR 하나 (기관명·붙일 곳·사용 안내).
  * 관리자 레이아웃 밖이라 사이드바 없이 인쇄되고, 그려지면 인쇄 창을 자동으로 연다.
  */
 export default function PrintQrView() {
+  const tr = useT();
   const params = useSearchParams();
   const ids = useMemo(() => (params.get('ids') ?? '').split(',').filter(Boolean), [params]);
   const { session } = useSession();
@@ -28,8 +30,8 @@ export default function PrintQrView() {
   }, [qrs.isSuccess, list.length]);
 
   if (qrs.isError) return <p style={{ padding: 24 }}>{errorMessage(qrs.error)}</p>;
-  if (!qrs.isSuccess) return <p style={{ padding: 24 }}>불러오는 중…</p>;
-  if (list.length === 0) return <p style={{ padding: 24 }}>인쇄할 QR 이 없습니다.</p>;
+  if (!qrs.isSuccess) return <p style={{ padding: 24 }}>{tr('불러오는 중…')}</p>;
+  if (list.length === 0) return <p style={{ padding: 24 }}>{tr('인쇄할 QR 이 없습니다.')}</p>;
 
   return (
     <>
@@ -52,21 +54,21 @@ export default function PrintQrView() {
       {list.map((q) => (
         <section key={q.id} className="sheet">
           <div className="brand">
-            똑똑<span>.</span> 출석
+            {tr('똑똑')}<span>.</span>{' '}{tr('출석')}
           </div>
           <div className="inst">{session?.institution?.institutionName}</div>
           <div className="place">{q.name}</div>
           <div className="qr">
             <QrImage value={q.content} size={420} />
           </div>
-          <div className="title">학생앱으로 찍어 주세요</div>
+          <div className="title">{tr('학생앱으로 찍어 주세요')}</div>
           <div className="steps">
-            똑똑 학생앱 → <b>QR 출석</b> → 이 QR 을 비추면
+            {tr('똑똑 학생앱 →')}{' '}<b>{tr('QR 출석')}</b>{' '}{tr('→ 이 QR 을 비추면')}
             <br />
-            도착·출발이 부모님께 바로 알림으로 갑니다
+            {tr('도착·출발이 부모님께 바로 알림으로 갑니다')}
           </div>
           <div className="foot">
-            휴대폰 기본 카메라로는 출석되지 않습니다 · QR 을 촬영해 공유하면 출석이 막힐 수 있습니다
+            {tr('휴대폰 기본 카메라로는 출석되지 않습니다 · QR 을 촬영해 공유하면 출석이 막힐 수 있습니다')}
           </div>
         </section>
       ))}

@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import type { AttendanceStatus, Role } from './types';
+import { translate } from '@/lib/i18n';
 
 export const ROLE_LABEL: Record<Role, string> = { OWNER: '원장', ADMIN: '실장', TEACHER: '교사', PARENT: '학부모' };
 
@@ -11,14 +12,14 @@ type ChipColor = 'default' | 'success' | 'error' | 'warning' | 'info' | 'primary
 export function attendanceLabel(status: AttendanceStatus, isLate = false, isEarlyLeave = false): { label: string; color: ChipColor } {
   switch (status) {
     case 'SCHEDULED':
-      return { label: '등원 예정', color: 'default' };
+      return { label: translate('등원 예정'), color: 'default' };
     case 'ABSENT':
-      return { label: '결석', color: 'error' };
+      return { label: translate('결석'), color: 'error' };
     case 'IN':
-      return isLate ? { label: '등원(지각)', color: 'warning' } : { label: '등원', color: 'success' };
+      return isLate ? { label: translate('등원(지각)'), color: 'warning' } : { label: translate('등원'), color: 'success' };
     case 'OUT':
-      if (isEarlyLeave) return { label: isLate ? '하원(지각·조퇴)' : '하원(조퇴)', color: 'warning' };
-      return isLate ? { label: '하원(지각)', color: 'warning' } : { label: '하원', color: 'info' };
+      if (isEarlyLeave) return { label: isLate ? translate('하원(지각·조퇴)') : translate('하원(조퇴)'), color: 'warning' };
+      return isLate ? { label: translate('하원(지각)'), color: 'warning' } : { label: translate('하원'), color: 'info' };
   }
 }
 
@@ -38,7 +39,7 @@ export const DAY_LABEL: Record<string, string> = { MONDAY: '월', TUESDAY: '화'
 /** ["MONDAY","WEDNESDAY"] → "월·수" (요일 순서대로) */
 export const dayList = (days: string[]) =>
   DAYS.filter((d) => days.includes(d))
-    .map((d) => DAY_LABEL[d])
+    .map((d) => translate(DAY_LABEL[d]))
     .join('·');
 
 /** 백엔드 LocalTime("14:00" 또는 "14:00:00") → "14:00" */

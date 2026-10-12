@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { BACKEND_URL, staffMemberships, writeInstitution, writeTokens, type Tokens } from '@/lib/server/session';
+import { BACKEND_URL, languageOf, staffMemberships, writeInstitution, writeTokens, type Tokens } from '@/lib/server/session';
 
 /**
  * STF-002 교직원 초대 수락 (공개). 백엔드가 바로 로그인 토큰을 주므로 로그인과 똑같이 httpOnly 쿠키로 심는다.
@@ -11,7 +11,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ token: string 
 
   const res = await fetch(`${BACKEND_URL}/api/v1/staff-invitations/${encodeURIComponent(token)}/accept`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'Accept-Language': languageOf(req) },
     body: JSON.stringify({ password }),
     cache: 'no-store',
   }).catch(() => null);

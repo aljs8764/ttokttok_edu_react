@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { BACKEND_URL, clearSession, readSession, refreshTokens, writeTokens, type Tokens } from '@/lib/server/session';
+import { BACKEND_URL, clearSession, languageOf, readSession, refreshTokens, writeTokens, type Tokens } from '@/lib/server/session';
 
 /**
  * 백엔드 프록시: /api/proxy/<path> → BACKEND_URL/api/v1/<path>
@@ -25,6 +25,7 @@ async function handle(req: NextRequest, ctx: { params: Promise<{ path: string[] 
       if (v) headers.set(h, v);
     });
     headers.set('Authorization', `Bearer ${access}`);
+    headers.set('Accept-Language', languageOf(req));
     if (s.institutionId) headers.set('X-Institution-Id', s.institutionId);
     const fwd = req.headers.get('x-forwarded-for');
     if (fwd) headers.set('X-Forwarded-For', fwd);

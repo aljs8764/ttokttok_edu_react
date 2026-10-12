@@ -29,6 +29,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import dayjs, { type Dayjs } from 'dayjs';
 import { api, errorMessage } from '@/lib/api';
 import type { Classroom } from '@/lib/types';
+import { useT } from '@/lib/i18n';
 
 export interface Textbook { id: string; classroomId: string; name: string; publisher: string | null; memo: string | null; archived: boolean }
 export interface Progress {
@@ -41,6 +42,7 @@ const emptyProgress = (): ProgressForm => ({ date: dayjs(), textbookId: '', cont
 
 /** CLS-005 반별 교재·진도 관리 (교사는 담당 반) */
 export default function CurriculumDialog({ classroom, onClose }: { classroom: Classroom | null; onClose: () => void }) {
+  const tr = useT();
   const qc = useQueryClient();
   const cid = classroom?.id;
   const [tab, setTab] = useState<'progress' | 'textbooks'>('progress');
@@ -85,12 +87,12 @@ export default function CurriculumDialog({ classroom, onClose }: { classroom: Cl
   return (
     <Dialog open={!!classroom} onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle>
-        {classroom?.name} 교재·진도 <Chip size="small" variant="outlined" label="CLS-005" sx={{ ml: 1 }} />
+        {tr('{0} 교재·진도', { 0: classroom?.name })}{' '}<Chip size="small" variant="outlined" label="CLS-005" sx={{ ml: 1 }} />
       </DialogTitle>
       <DialogContent>
         <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
-          <Tab value="progress" label="진도·숙제" />
-          <Tab value="textbooks" label="교재" />
+          <Tab value="progress" label={tr('진도·숙제')} />
+          <Tab value="textbooks" label={tr('교재')} />
         </Tabs>
         {err && <Alert severity="error" sx={{ mb: 2 }}>{errorMessage(err)}</Alert>}
 
@@ -98,23 +100,23 @@ export default function CurriculumDialog({ classroom, onClose }: { classroom: Cl
           <>
             <Stack spacing={1.5} sx={{ mb: 2 }}>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-                <DatePicker label="날짜" value={pf.date} onChange={(v) => v && setPf({ ...pf, date: v })} format="YYYY.MM.DD" slotProps={{ textField: { size: 'small', sx: { width: 170 } } }} />
-                <TextField select size="small" label="교재" value={pf.textbookId} onChange={(e) => setPf({ ...pf, textbookId: e.target.value })} sx={{ minWidth: 200 }}>
-                  <MenuItem value="">(선택 안 함)</MenuItem>
+                <DatePicker label={tr('날짜')} value={pf.date} onChange={(v) => v && setPf({ ...pf, date: v })} format="YYYY.MM.DD" slotProps={{ textField: { size: 'small', sx: { width: 170 } } }} />
+                <TextField select size="small" label={tr('교재')} value={pf.textbookId} onChange={(e) => setPf({ ...pf, textbookId: e.target.value })} sx={{ minWidth: 200 }}>
+                  <MenuItem value="">{tr('(선택 안 함)')}</MenuItem>
                   {activeBooks.map((t) => <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>)}
                 </TextField>
               </Stack>
-              <TextField size="small" label="진도" placeholder="예: 3단원 분수의 덧셈 p.42~47" value={pf.content} onChange={(e) => setPf({ ...pf, content: e.target.value })} inputProps={{ maxLength: 500 }} />
-              <TextField size="small" label="숙제 (선택)" value={pf.homework} onChange={(e) => setPf({ ...pf, homework: e.target.value })} inputProps={{ maxLength: 500 }} multiline minRows={1} />
+              <TextField size="small" label={tr('진도')} placeholder={tr('예: 3단원 분수의 덧셈 p.42~47')} value={pf.content} onChange={(e) => setPf({ ...pf, content: e.target.value })} inputProps={{ maxLength: 500 }} />
+              <TextField size="small" label={tr('숙제 (선택)')} value={pf.homework} onChange={(e) => setPf({ ...pf, homework: e.target.value })} inputProps={{ maxLength: 500 }} multiline minRows={1} />
               <Stack direction="row" spacing={1} justifyContent="flex-end">
-                {pf.id && <Button onClick={() => setPf(emptyProgress())}>새로 쓰기</Button>}
+                {pf.id && <Button onClick={() => setPf(emptyProgress())}>{tr('새로 쓰기')}</Button>}
                 <Button variant="contained" disabled={!pf.content.trim() || saveProgress.isPending} onClick={() => saveProgress.mutate()}>
-                  {pf.id ? '수정' : '기록'}
+                  {pf.id ? tr('수정') : tr('기록')}
                 </Button>
               </Stack>
             </Stack>
             <Divider />
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>최근 90일 · 알림장 작성 화면의 &lsquo;진도 불러오기&rsquo;로 인용할 수 있습니다.</Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>{tr('최근 90일 · 알림장 작성 화면의 &lsquo;진도 불러오기&rsquo;로 인용할 수 있습니다.')}</Typography>
             <List dense>
               {(progress.data ?? []).map((p) => (
                 <ListItem
@@ -129,11 +131,11 @@ export default function CurriculumDialog({ classroom, onClose }: { classroom: Cl
                 >
                   <ListItemText
                     primary={`${dayjs(p.date).format('M/D (dd)')} ${p.content}${p.textbookName ? ` · ${p.textbookName}` : ''}`}
-                    secondary={`${p.homework ? `숙제: ${p.homework} · ` : ''}${p.authorName}`}
+                    secondary={`${p.homework ? tr('숙제: {0} · ', { 0: p.homework }) : ''}${p.authorName}`}
                   />
                 </ListItem>
               ))}
-              {progress.data?.length === 0 && <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>기록된 진도가 없습니다.</Typography>}
+              {progress.data?.length === 0 && <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>{tr('기록된 진도가 없습니다.')}</Typography>}
             </List>
           </>
         )}
@@ -141,15 +143,15 @@ export default function CurriculumDialog({ classroom, onClose }: { classroom: Cl
         {tab === 'textbooks' && (
           <>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mb: 2 }} alignItems={{ sm: 'center' }}>
-              <TextField size="small" label="교재 이름" value={tb.name} onChange={(e) => setTb({ ...tb, name: e.target.value })} inputProps={{ maxLength: 100 }} sx={{ flex: 2 }} />
-              <TextField size="small" label="출판사" value={tb.publisher} onChange={(e) => setTb({ ...tb, publisher: e.target.value })} inputProps={{ maxLength: 50 }} sx={{ flex: 1 }} />
-              <TextField size="small" label="메모" value={tb.memo} onChange={(e) => setTb({ ...tb, memo: e.target.value })} inputProps={{ maxLength: 300 }} sx={{ flex: 2 }} />
-              {tb.id && <FormControlLabel control={<Switch checked={tb.archived} onChange={(e) => setTb({ ...tb, archived: e.target.checked })} />} label="보관" />}
+              <TextField size="small" label={tr('교재 이름')} value={tb.name} onChange={(e) => setTb({ ...tb, name: e.target.value })} inputProps={{ maxLength: 100 }} sx={{ flex: 2 }} />
+              <TextField size="small" label={tr('출판사')} value={tb.publisher} onChange={(e) => setTb({ ...tb, publisher: e.target.value })} inputProps={{ maxLength: 50 }} sx={{ flex: 1 }} />
+              <TextField size="small" label={tr('메모')} value={tb.memo} onChange={(e) => setTb({ ...tb, memo: e.target.value })} inputProps={{ maxLength: 300 }} sx={{ flex: 2 }} />
+              {tb.id && <FormControlLabel control={<Switch checked={tb.archived} onChange={(e) => setTb({ ...tb, archived: e.target.checked })} />} label={tr('보관')} />}
               <Button variant="contained" disabled={!tb.name.trim() || saveTextbook.isPending} onClick={() => saveTextbook.mutate()}>
-                {tb.id ? '수정' : '추가'}
+                {tb.id ? tr('수정') : tr('추가')}
               </Button>
             </Stack>
-            <FormControlLabel control={<Switch size="small" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />} label="보관한 교재도 보기" />
+            <FormControlLabel control={<Switch size="small" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />} label={tr('보관한 교재도 보기')} />
             <List dense>
               {(textbooks.data ?? []).map((t) => (
                 <ListItem
@@ -158,18 +160,18 @@ export default function CurriculumDialog({ classroom, onClose }: { classroom: Cl
                   secondaryAction={<IconButton size="small" onClick={() => setTb({ id: t.id, name: t.name, publisher: t.publisher ?? '', memo: t.memo ?? '', archived: t.archived })}><EditIcon fontSize="small" /></IconButton>}
                 >
                   <ListItemText
-                    primary={<Box component="span">{t.name}{t.archived && <Chip size="small" label="보관" sx={{ ml: 1 }} />}</Box>}
+                    primary={<Box component="span">{t.name}{t.archived && <Chip size="small" label={tr('보관')} sx={{ ml: 1 }} />}</Box>}
                     secondary={[t.publisher, t.memo].filter(Boolean).join(' · ') || undefined}
                   />
                 </ListItem>
               ))}
-              {textbooks.data?.length === 0 && <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>등록된 교재가 없습니다.</Typography>}
+              {textbooks.data?.length === 0 && <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>{tr('등록된 교재가 없습니다.')}</Typography>}
             </List>
           </>
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>닫기</Button>
+        <Button onClick={onClose}>{tr('닫기')}</Button>
       </DialogActions>
     </Dialog>
   );

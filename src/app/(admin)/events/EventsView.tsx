@@ -30,9 +30,11 @@ import { useSession } from '@/lib/session';
 import type { Page, SchoolEvent, Tally } from '@/lib/types';
 import PageHeader from '@/components/PageHeader';
 import { targetSummary } from '@/components/TargetPicker';
+import { useT } from '@/lib/i18n';
 
 /** EVT-001 행사 목록 — 다가오는 행사(기본) / 지난 행사. 교사는 본인이 만든 행사만 */
 export default function EventsView() {
+  const t = useT();
   const qc = useQueryClient();
   const router = useRouter();
   const { session, manager } = useSession();
@@ -54,19 +56,19 @@ export default function EventsView() {
   return (
     <>
       <PageHeader
-        title="행사(RSVP)"
+        title={t('행사(RSVP)')}
         menuId="EVT-001"
-        description="참석 여부는 학부모 앱에서 받고, 마감 전 미응답자에게 자동 독촉이 갑니다."
+        description={t('참석 여부는 학부모 앱에서 받고, 마감 전 미응답자에게 자동 독촉이 갑니다.')}
         actions={
           <Button variant="contained" startIcon={<AddIcon />} component={NextLink} href="/events/new">
-            행사 만들기
+            {t('행사 만들기')}
           </Button>
         }
       />
 
       <ToggleButtonGroup exclusive size="small" value={upcoming ? 'up' : 'past'} onChange={(_, v) => v && (setUpcoming(v === 'up'), setPage(0))} sx={{ mb: 2 }}>
-        <ToggleButton value="up">다가오는 행사</ToggleButton>
-        <ToggleButton value="past">전체(지난 행사 포함)</ToggleButton>
+        <ToggleButton value="up">{t('다가오는 행사')}</ToggleButton>
+        <ToggleButton value="past">{t('전체(지난 행사 포함)')}</ToggleButton>
       </ToggleButtonGroup>
 
       {list.isError && <Alert severity="error" sx={{ mb: 2 }}>{errorMessage(list.error)}</Alert>}
@@ -77,18 +79,18 @@ export default function EventsView() {
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>행사</TableCell>
-                <TableCell>일시</TableCell>
-                <TableCell>대상</TableCell>
-                <TableCell>응답 마감</TableCell>
-                <TableCell sx={{ width: 220 }}>응답 현황</TableCell>
+                <TableCell>{t('행사')}</TableCell>
+                <TableCell>{t('일시')}</TableCell>
+                <TableCell>{t('대상')}</TableCell>
+                <TableCell>{t('응답 마감')}</TableCell>
+                <TableCell sx={{ width: 220 }}>{t('응답 현황')}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {list.data?.items.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={5} align="center" sx={{ py: 4, color: 'text.secondary' }}>
-                    {upcoming ? '다가오는 행사가 없습니다' : '행사가 없습니다'}
+                    {upcoming ? t('다가오는 행사가 없습니다') : t('행사가 없습니다')}
                   </TableCell>
                 </TableRow>
               )}
@@ -101,7 +103,7 @@ export default function EventsView() {
                         <Typography variant="body2" sx={{ fontWeight: 600 }}>
                           {e.title}
                         </Typography>
-                        {e.status === 'CANCELED' && <Chip size="small" label="취소" />}
+                        {e.status === 'CANCELED' && <Chip size="small" label={t('취소')} />}
                       </Stack>
                       {e.location && (
                         <Typography variant="caption" color="text.secondary">
@@ -115,10 +117,10 @@ export default function EventsView() {
                       {e.rsvpEnabled ? (
                         <Stack direction="row" spacing={1} alignItems="center">
                           <span>{dateTime(e.rsvpDeadline)}</span>
-                          {closed && <Chip size="small" label="마감" variant="outlined" />}
+                          {closed && <Chip size="small" label={t('마감')} variant="outlined" />}
                         </Stack>
                       ) : (
-                        '안 받음'
+                        t('안 받음')
                       )}
                     </TableCell>
                     <TableCell>{e.rsvpEnabled && e.tally ? <TallyBar tally={e.tally} /> : '-'}</TableCell>
@@ -135,7 +137,7 @@ export default function EventsView() {
           onPageChange={(_, p) => setPage(p)}
           rowsPerPage={20}
           rowsPerPageOptions={[20]}
-          labelDisplayedRows={({ from, to, count }) => `${from}–${to} / 총 ${count}건`}
+          labelDisplayedRows={({ from, to, count }) => t('{0}–{1} / 총 {2}건', { 0: from, 1: to, 2: count })}
         />
       </Paper>
     </>
@@ -144,12 +146,13 @@ export default function EventsView() {
 
 /** 참석(초록)·불참(빨강)·미응답(회색) 비율 막대 */
 export function TallyBar({ tally, large }: { tally: Tally; large?: boolean }) {
+  const t = useT();
   const total = Math.max(1, tally.targets);
   const seg = (n: number, color: string) => <Box sx={{ width: `${(n / total) * 100}%`, bgcolor: color }} />;
   return (
     <Box>
       <Typography variant={large ? 'body2' : 'caption'}>
-        참석 {tally.attend} · 불참 {tally.absent} · 미응답 {tally.pending} / {tally.targets}명
+        {t('참석 {0} · 불참 {1} · 미응답 {2} / {3}명', { 0: tally.attend, 1: tally.absent, 2: tally.pending, 3: tally.targets })}
       </Typography>
       <Box sx={{ display: 'flex', height: large ? 10 : 6, borderRadius: 3, overflow: 'hidden', bgcolor: 'grey.200', mt: 0.5 }}>
         {seg(tally.attend, 'success.main')}

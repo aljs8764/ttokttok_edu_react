@@ -8,6 +8,18 @@ import type { Membership, SessionUser } from '@/lib/types';
  * 브라우저 JS 는 토큰을 볼 수 없고, 모든 API 호출은 /api/proxy 를 거쳐 Next 서버가 Authorization 을 붙인다.
  */
 
+/**
+ * SET-007 화면 언어 쿠키 (브라우저 LocaleProvider 가 심음, httpOnly 아님). 로그아웃해도 지우지 않는다.
+ * BFF 가 백엔드로 Accept-Language 를 붙여 서버 오류 문장을 같은 언어로 받는다.
+ */
+export const LOCALE_COOKIE = 'ttok_locale';
+
+export function languageOf(req: Request): 'ko' | 'en' {
+  const cookie = req.headers.get('cookie') ?? '';
+  const m = cookie.match(/(?:^|;\s*)ttok_locale=(ko|en)(?:;|$)/);
+  return m?.[1] === 'en' ? 'en' : 'ko';
+}
+
 export const BACKEND_URL = (process.env.BACKEND_URL ?? 'http://localhost:8080').replace(/\/$/, '');
 
 const SECURE = process.env.COOKIE_SECURE === 'true';

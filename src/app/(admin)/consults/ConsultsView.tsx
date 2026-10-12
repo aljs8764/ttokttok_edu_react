@@ -29,6 +29,7 @@ import { api, errorMessage } from '@/lib/api';
 import { useSession } from '@/lib/session';
 import type { StaffMember } from '@/lib/types';
 import PageHeader from '@/components/PageHeader';
+import { useT } from '@/lib/i18n';
 
 type ConsultStatus = 'OPEN' | 'BOOKED' | 'CANCELED' | 'DONE';
 interface ConsultSlot {
@@ -55,6 +56,7 @@ const STATUS: Record<ConsultStatus, { label: string; color: 'default' | 'success
 };
 
 function OpenDialog({ onClose, onDone }: { onClose: () => void; onDone: () => void }) {
+  const tr = useT();
   const { session, manager } = useSession();
   const instId = session?.institution?.institutionId;
   const staff = useQuery({ queryKey: ['staff', instId], queryFn: () => api.get<StaffMember[]>('staff'), enabled: !!instId && manager });
@@ -78,37 +80,37 @@ function OpenDialog({ onClose, onDone }: { onClose: () => void; onDone: () => vo
   }, [f]);
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>상담 시간 열기</DialogTitle>
+      <DialogTitle>{tr('상담 시간 열기')}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ pt: 1 }}>
           {save.isError && <Alert severity="error">{errorMessage(save.error)}</Alert>}
           {manager && (
-            <TextField select size="small" label="상담 선생님" value={f.teacherId} onChange={(e) => setF({ ...f, teacherId: e.target.value })}>
-              <MenuItem value="">나</MenuItem>
+            <TextField select size="small" label={tr('상담 선생님')} value={f.teacherId} onChange={(e) => setF({ ...f, teacherId: e.target.value })}>
+              <MenuItem value="">{tr('나')}</MenuItem>
               {staff.data?.map((s) => <MenuItem key={s.userId} value={s.userId}>{s.name}</MenuItem>)}
             </TextField>
           )}
           <Stack direction="row" spacing={1}>
-            <TextField size="small" type="date" label="날짜" value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} slotProps={{ inputLabel: { shrink: true } }} />
-            <TextField size="small" type="time" label="첫 시작" value={f.startTime} onChange={(e) => setF({ ...f, startTime: e.target.value })} slotProps={{ inputLabel: { shrink: true } }} />
+            <TextField size="small" type="date" label={tr('날짜')} value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} slotProps={{ inputLabel: { shrink: true } }} />
+            <TextField size="small" type="time" label={tr('첫 시작')} value={f.startTime} onChange={(e) => setF({ ...f, startTime: e.target.value })} slotProps={{ inputLabel: { shrink: true } }} />
           </Stack>
           <Stack direction="row" spacing={1}>
-            <TextField size="small" type="number" label="1회 상담(분)" value={f.minutes} onChange={(e) => setF({ ...f, minutes: e.target.value })} />
-            <TextField size="small" type="number" label="몇 번" value={f.count} onChange={(e) => setF({ ...f, count: e.target.value })} />
-            <TextField size="small" type="number" label="사이 쉬는 시간(분)" value={f.breakMinutes} onChange={(e) => setF({ ...f, breakMinutes: e.target.value })} />
+            <TextField size="small" type="number" label={tr('1회 상담(분)')} value={f.minutes} onChange={(e) => setF({ ...f, minutes: e.target.value })} />
+            <TextField size="small" type="number" label={tr('몇 번')} value={f.count} onChange={(e) => setF({ ...f, count: e.target.value })} />
+            <TextField size="small" type="number" label={tr('사이 쉬는 시간(분)')} value={f.breakMinutes} onChange={(e) => setF({ ...f, breakMinutes: e.target.value })} />
           </Stack>
           <Stack direction="row" spacing={1}>
-            <TextField select size="small" label="방식" value={f.mode} onChange={(e) => setF({ ...f, mode: e.target.value })} sx={{ minWidth: 120 }}>
-              <MenuItem value="IN_PERSON">대면</MenuItem><MenuItem value="PHONE">전화</MenuItem><MenuItem value="VIDEO">화상</MenuItem>
+            <TextField select size="small" label={tr('방식')} value={f.mode} onChange={(e) => setF({ ...f, mode: e.target.value })} sx={{ minWidth: 120 }}>
+              <MenuItem value="IN_PERSON">{tr('대면')}</MenuItem><MenuItem value="PHONE">{tr('전화')}</MenuItem><MenuItem value="VIDEO">{tr('화상')}</MenuItem>
             </TextField>
-            <TextField size="small" fullWidth label="장소·안내 (선택)" value={f.location} onChange={(e) => setF({ ...f, location: e.target.value })} />
+            <TextField size="small" fullWidth label={tr('장소·안내 (선택)')} value={f.location} onChange={(e) => setF({ ...f, location: e.target.value })} />
           </Stack>
-          <Typography variant="body2" color="text.secondary">만들어질 시간: {preview.join(', ') || '-'}</Typography>
+          <Typography variant="body2" color="text.secondary">{tr('만들어질 시간: {0}', { 0: preview.join(', ') || '-' })}</Typography>
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>취소</Button>
-        <Button variant="contained" disabled={save.isPending || preview.length === 0} onClick={() => save.mutate()}>열기</Button>
+        <Button onClick={onClose}>{tr('취소')}</Button>
+        <Button variant="contained" disabled={save.isPending || preview.length === 0} onClick={() => save.mutate()}>{tr('열기')}</Button>
       </DialogActions>
     </Dialog>
   );
@@ -116,6 +118,7 @@ function OpenDialog({ onClose, onDone }: { onClose: () => void; onDone: () => vo
 
 /** NTC-008 후반 상담 예약 — 상담 가능한 시간을 열면 학부모가 앱에서 고른다 */
 export default function ConsultsView() {
+  const tr = useT();
   const qc = useQueryClient();
   const { session, manager } = useSession();
   const instId = session?.institution?.institutionId;
@@ -146,29 +149,29 @@ export default function ConsultsView() {
   return (
     <>
       <PageHeader
-        title="상담 예약"
+        title={tr('상담 예약')}
         menuId="NTC-008"
-        description={`상담 가능한 시간을 열어 두면 학부모가 앱에서 예약합니다. 예약·취소는 알림으로 알려 드립니다.${manager ? '' : ' 내 상담만 보입니다.'}`}
-        actions={<Button variant="contained" onClick={() => setOpenDialog(true)}>상담 시간 열기</Button>}
+        description={tr('상담 가능한 시간을 열어 두면 학부모가 앱에서 예약합니다. 예약·취소는 알림으로 알려 드립니다.') + (manager ? '' : tr(' 내 상담만 보입니다.'))}
+        actions={<Button variant="contained" onClick={() => setOpenDialog(true)}>{tr('상담 시간 열기')}</Button>}
       />
       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
         <IconButton onClick={() => setFrom(from.subtract(14, 'day'))}><ChevronLeftIcon /></IconButton>
-        <Typography variant="subtitle1">{from.format('M월 D일')} ~ {to.format('M월 D일')}</Typography>
+        <Typography variant="subtitle1">{from.format(tr('M월 D일'))} ~ {to.format(tr('M월 D일'))}</Typography>
         <IconButton onClick={() => setFrom(from.add(14, 'day'))}><ChevronRightIcon /></IconButton>
-        <Button size="small" onClick={() => setFrom(dayjs().startOf('day'))}>오늘</Button>
+        <Button size="small" onClick={() => setFrom(dayjs().startOf('day'))}>{tr('오늘')}</Button>
         <Box sx={{ flex: 1 }} />
-        <Typography variant="body2" color="text.secondary">예약 {booked}건</Typography>
+        <Typography variant="body2" color="text.secondary">{tr('예약 {0}건', { 0: booked })}</Typography>
       </Stack>
       {(q.isError || act.isError) && <Alert severity="error" sx={{ mb: 2 }}>{errorMessage(q.error ?? act.error)}</Alert>}
       {q.isFetching && <LinearProgress />}
-      {q.data?.length === 0 && <Alert severity="info">이 기간에 열린 상담 시간이 없습니다.</Alert>}
+      {q.data?.length === 0 && <Alert severity="info">{tr('이 기간에 열린 상담 시간이 없습니다.')}</Alert>}
       <Stack spacing={2}>
         {byDay.map(([day, list]) => (
           <Paper key={day} variant="outlined" sx={{ overflowX: 'auto' }}>
-            <Typography variant="subtitle2" sx={{ px: 2, pt: 1.5 }}>{dayjs(day).format('M월 D일 (dd)')}</Typography>
+            <Typography variant="subtitle2" sx={{ px: 2, pt: 1.5 }}>{dayjs(day).format(tr('M월 D일 (dd)'))}</Typography>
             <Table size="small">
               <TableHead>
-                <TableRow><TableCell>시간</TableCell><TableCell>선생님</TableCell><TableCell>방식</TableCell><TableCell>상태</TableCell><TableCell>예약</TableCell><TableCell align="right">처리</TableCell></TableRow>
+                <TableRow><TableCell>{tr('시간')}</TableCell><TableCell>{tr('선생님')}</TableCell><TableCell>{tr('방식')}</TableCell><TableCell>{tr('상태')}</TableCell><TableCell>{tr('예약')}</TableCell><TableCell align="right">{tr('처리')}</TableCell></TableRow>
               </TableHead>
               <TableBody>
                 {list.map((s) => (
@@ -177,7 +180,7 @@ export default function ConsultsView() {
                     <TableCell>{s.teacher.name}</TableCell>
                     <TableCell>{s.modeLabel}{s.location && <Typography variant="caption" color="text.secondary" display="block">{s.location}</Typography>}</TableCell>
                     <TableCell>
-                      <Chip size="small" color={STATUS[s.status].color} label={STATUS[s.status].label} />
+                      <Chip size="small" color={STATUS[s.status].color} label={tr(STATUS[s.status].label)} />
                       {s.cancelReason && <Typography variant="caption" color="text.secondary" display="block">{s.cancelReason}</Typography>}
                     </TableCell>
                     <TableCell>
@@ -189,15 +192,15 @@ export default function ConsultsView() {
                       ) : '-'}
                     </TableCell>
                     <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
-                      {s.status === 'BOOKED' && <Button size="small" onClick={() => act.mutate({ id: s.id, op: 'done' })}>완료</Button>}
+                      {s.status === 'BOOKED' && <Button size="small" onClick={() => act.mutate({ id: s.id, op: 'done' })}>{tr('완료')}</Button>}
                       {(s.status === 'OPEN' || s.status === 'BOOKED') && (
                         <Button size="small" color="error" onClick={() => {
-                          const reason = s.status === 'BOOKED' ? window.prompt('취소 사유 (학부모에게 알림으로 갑니다)') : '';
+                          const reason = s.status === 'BOOKED' ? window.prompt(tr('취소 사유 (학부모에게 알림으로 갑니다)')) : '';
                           if (reason === null) return;
                           act.mutate({ id: s.id, op: 'cancel', reason: reason || undefined });
-                        }}>취소</Button>
+                        }}>{tr('취소')}</Button>
                       )}
-                      {(s.status === 'OPEN' || s.status === 'CANCELED') && !s.bookedBy && <Button size="small" onClick={() => act.mutate({ id: s.id, op: 'delete' })}>지우기</Button>}
+                      {(s.status === 'OPEN' || s.status === 'CANCELED') && !s.bookedBy && <Button size="small" onClick={() => act.mutate({ id: s.id, op: 'delete' })}>{tr('지우기')}</Button>}
                     </TableCell>
                   </TableRow>
                 ))}

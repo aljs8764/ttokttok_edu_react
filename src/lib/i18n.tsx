@@ -4,10 +4,12 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import dayjs from 'dayjs';
 import 'dayjs/locale/en';
 import 'dayjs/locale/ko';
+import { EN_SCREENS } from './i18n-en';
 
 /**
  * SET-007 다국어 UI (한국어·영어). 한국어 문구 자체를 키로 쓰고, 영어 사전에 있는 문구만 바꾼다.
- * → 아직 옮기지 않은 화면은 한국어 그대로 보이고, 화면을 옮길 때마다 EN 사전에 문구만 더하면 된다.
+ * → 화면 문구는 i18n-en.ts, 메뉴·로그인 등 기본 문구는 아래 EN. 사전에 없는 문구는 한국어 그대로 보인다.
+ * 값이 끼는 문구는 t('{0}명', { 0: n }) 처럼 자리표시를 쓴다.
  * 선택한 언어는 브라우저(localStorage)와 계정(/me/locale)에 함께 저장한다.
  */
 export type Locale = 'ko' | 'en';
@@ -43,11 +45,12 @@ const EN: Record<string, string> = {
   원장: 'Owner', 실장: 'Manager', 교사: 'Teacher', 학부모: 'Parent',
   // 언어 설정
   '화면 언어': 'Display language',
-  '메뉴·로그인·설정 등 주요 화면부터 영어를 지원합니다. 아직 옮기지 않은 화면과 서버 안내 문구는 한국어로 보입니다.':
-    'English is available for menus, sign-in and settings first. Screens not yet translated and server messages stay in Korean.',
+  '관리자 웹 화면과 서버 안내 문구를 영어로 볼 수 있습니다. 원생 이름·알림장 본문처럼 직접 입력한 내용은 번역하지 않습니다.':
+    'The admin web screens and server messages are available in English. Content you enter yourself, such as student names and notice text, is not translated.',
 };
 
-const DICT: Record<Locale, Record<string, string>> = { ko: {}, en: EN };
+// 화면 문구 사전(i18n-en.ts) 위에 메뉴·로그인 등 기본 사전을 얹는다
+const DICT: Record<Locale, Record<string, string>> = { ko: {}, en: { ...EN_SCREENS, ...EN } };
 const STORAGE_KEY = 'ttok.locale';
 
 function readStored(): Locale | null {
@@ -65,20 +68,47 @@ function writeStored(l: Locale) {
   } catch {
     /* 저장 못 해도 이번 화면에는 적용된다 */
   }
+  writeCookie(l);
 }
 
-interface Ctx { locale: Locale; setLocale: (l: Locale, sync?: boolean) => void; t: (ko: string) => string }
-const LocaleContext = createContext<Ctx>({ locale: 'ko', setLocale: () => {}, t: (s) => s });
+/** BFF 가 백엔드에 Accept-Language 로 넘길 언어 (lib/server/session.ts languageOf) */
+function writeCookie(l: Locale) {
+  try {
+    document.cookie = `ttok_locale=${l}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
+  } catch {
+    /* 쿠키를 못 쓰면 서버 오류 문장만 한국어로 온다 */
+  }
+}
+
+/** 문구 안의 {0}·{1}… 자리에 값을 넣는다 (사전에 없으면 한국어 원문에 넣는다) */
+type Vars = Record<string | number, unknown>;
+export type TFunc = (ko: string | null | undefined, vars?: Vars) => string;
+
+function fill(s: string, vars?: Vars) {
+  if (!vars) return s;
+  return s.replace(/\{(\w+)\}/g, (m, k: string) => (k in vars ? String(vars[k] ?? '') : m));
+}
+
+/** 컴포넌트 밖(모듈 상수·유틸)에서 쓰는 번역. 현재 언어는 LocaleProvider 가 맞춰 둔다 */
+let currentLocale: Locale = 'ko';
+export const translate: TFunc = (ko, vars) => (ko == null ? '' : fill(DICT[currentLocale][ko] ?? ko, vars));
+
+interface Ctx { locale: Locale; setLocale: (l: Locale, sync?: boolean) => void; t: TFunc }
+const LocaleContext = createContext<Ctx>({ locale: 'ko', setLocale: () => {}, t: (s, v) => (s == null ? '' : fill(s, v)) });
 
 export function LocaleProvider({ children }: { children: ReactNode }) {
   const [locale, setState] = useState<Locale>('ko');
 
   useEffect(() => {
     const stored = readStored();
-    if (stored) setState(stored);
+    if (stored) {
+      setState(stored);
+      writeCookie(stored);
+    }
   }, []);
 
   useEffect(() => {
+    currentLocale = locale;
     document.documentElement.lang = locale;
     dayjs.locale(locale);
   }, [locale]);
@@ -92,7 +122,8 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const t = useCallback((ko: string) => DICT[locale][ko] ?? ko, [locale]);
+  currentLocale = locale; // 렌더 중 translate() 호출도 같은 언어로
+  const t = useCallback<TFunc>((ko, vars) => (ko == null ? '' : fill(DICT[locale][ko] ?? ko, vars)), [locale]);
   const value = useMemo(() => ({ locale, setLocale, t }), [locale, setLocale, t]);
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
 }

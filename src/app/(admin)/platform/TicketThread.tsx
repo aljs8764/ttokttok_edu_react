@@ -9,9 +9,11 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import dayjs from 'dayjs';
 import type { Ticket } from '@/lib/platform';
+import { useT } from '@/lib/i18n';
 
 /** 티켓 대화 목록 + 답글 입력 (운영사·기관 공용) */
 export default function TicketThread({ ticket, pending, onReply }: { ticket: Ticket; pending: boolean; onReply: (body: string) => void }) {
+  const t = useT();
   const [body, setBody] = useState('');
   return (
     <Stack spacing={1.5}>
@@ -19,14 +21,14 @@ export default function TicketThread({ ticket, pending, onReply }: { ticket: Tic
         <Box key={m.id} sx={{ display: 'flex', justifyContent: m.fromOperator ? 'flex-end' : 'flex-start' }}>
           <Paper variant="outlined" sx={{ p: 1.5, maxWidth: '85%', bgcolor: m.fromOperator ? 'action.hover' : 'background.paper' }}>
             <Typography variant="caption" color="text.secondary">
-              {m.fromOperator ? '운영팀' : m.authorName} · {dayjs(m.createdAt).format('M/D HH:mm')}
+              {m.fromOperator ? t('운영팀') : m.authorName} · {dayjs(m.createdAt).format('M/D HH:mm')}
             </Typography>
             <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{m.body}</Typography>
           </Paper>
         </Box>
       ))}
-      <TextField multiline minRows={2} size="small" label="답글" value={body} onChange={(e) => setBody(e.target.value)} />
-      <Button variant="contained" sx={{ alignSelf: 'flex-end' }} disabled={!body.trim() || pending} onClick={() => { onReply(body.trim()); setBody(''); }}>보내기</Button>
+      <TextField multiline minRows={2} size="small" label={t('답글')} value={body} onChange={(e) => setBody(e.target.value)} />
+      <Button variant="contained" sx={{ alignSelf: 'flex-end' }} disabled={!body.trim() || pending} onClick={() => { onReply(body.trim()); setBody(''); }}>{t('보내기')}</Button>
     </Stack>
   );
 }

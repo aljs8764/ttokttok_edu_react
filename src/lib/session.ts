@@ -4,11 +4,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ApiError } from './api';
 import type { Session } from './types';
 import { isManager } from './format';
+import { translate } from '@/lib/i18n';
 
 async function fetchSession(): Promise<Session> {
   const res = await fetch('/api/auth/session', { cache: 'no-store' });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ code: 'UNAUTHENTICATED', message: '로그인이 필요합니다' }));
+    const err = await res.json().catch(() => ({ code: 'UNAUTHENTICATED', message: translate('로그인이 필요합니다') }));
     throw new ApiError(res.status, err.code, err.message);
   }
   return res.json();
@@ -29,7 +30,7 @@ export function useSwitchInstitution() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ institutionId }),
       });
-      if (!res.ok) throw new ApiError(res.status, 'FORBIDDEN', '기관을 바꿀 수 없습니다');
+      if (!res.ok) throw new ApiError(res.status, 'FORBIDDEN', translate('기관을 바꿀 수 없습니다'));
       return (await res.json()) as Session;
     },
     // 기관이 바뀌면 모든 데이터가 달라지므로 캐시 전체 초기화

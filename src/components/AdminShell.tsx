@@ -148,7 +148,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
     <Box sx={{ py: 1 }}>
       <Toolbar sx={{ px: 2.5 }}>
         <Typography variant="h3" sx={{ color: 'primary.main', letterSpacing: -0.5 }}>
-          똑똑<Box component="span" sx={{ color: 'secondary.main' }}>.</Box>
+          {t('똑똑')}<Box component="span" sx={{ color: 'secondary.main' }}>.</Box>
         </Typography>
       </Toolbar>
       {[...NAV, ...(platformAdmin ? [PLATFORM_GROUP] : [])].map((g) => {
@@ -186,7 +186,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
       >
         <Toolbar sx={{ gap: 1.5 }}>
           {!desktop && (
-            <IconButton edge="start" onClick={() => setMobileOpen(true)} aria-label="메뉴">
+            <IconButton edge="start" onClick={() => setMobileOpen(true)} aria-label={t('메뉴')}>
               <MenuIcon />
             </IconButton>
           )}
@@ -199,7 +199,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
             >
               {memberships.map((m) => (
                 <MenuItem key={m.institutionId} value={m.institutionId}>
-                  {m.institutionName} · {ROLE_LABEL[m.role]}
+                  {m.institutionName} · {t(ROLE_LABEL[m.role])}
                 </MenuItem>
               ))}
             </Select>
@@ -241,7 +241,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
                 setLocale(locale === 'ko' ? 'en' : 'ko');
               }}
             >
-              {t('언어')}: {locale === 'ko' ? 'English로 바꾸기' : '한국어로 바꾸기'}
+              {t('언어')}: {locale === 'ko' ? t('English로 바꾸기') : t('한국어로 바꾸기')}
             </MenuItem>
             <Divider />
             <MenuItem onClick={() => void logout()}>{t('로그아웃')}</MenuItem>
