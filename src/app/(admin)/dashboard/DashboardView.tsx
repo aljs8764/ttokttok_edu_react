@@ -1,6 +1,10 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import MenuItem from '@mui/material/MenuItem';
+import TextField from '@mui/material/TextField';
+import TuneIcon from '@mui/icons-material/Tune';
 import Link from 'next/link';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
@@ -20,19 +24,105 @@ import Typography from '@mui/material/Typography';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { api, errorMessage } from '@/lib/api';
-import { dateTime, percent, time } from '@/lib/format';
+import { dateTime, percent, ROLE_LABEL, time } from '@/lib/format';
+import { useDashboardLayout, type DashboardKind, type DashboardWidget } from '@/lib/dashboard';
 import { useRealtime } from '@/lib/realtime';
 import { useSession } from '@/lib/session';
-import type { Classroom, DashboardStudentItem, DashboardToday, ScheduleItem, TimelineEntry } from '@/lib/types';
+import type { Classroom, DashboardStudentItem, DashboardToday, ScheduleItem, StaffMember, TimelineEntry } from '@/lib/types';
 import { CongestionMiniWidget, LowReadNoticesWidget, MissingAlertWidget } from '@/components/InsightWidgets';
 import BillingWidget from '@/components/BillingWidget';
+import { BusinessKpiRow, ChurnRiskWidget, ClassBoardWidget, InboxWidget, InstitutionsWidget, OwnerBillingWidget, StaffMemoWidget, StaffTodayWidget } from '@/components/dashboard/OwnerWidgets';
+import TeacherDashboardView, { TEACHER_WIDGET_LABEL, TEACHER_WIDGETS } from '@/components/dashboard/TeacherDashboardView';
+import LayoutDialog from '@/components/dashboard/LayoutDialog';
 import PageHeader from '@/components/PageHeader';
 import SampleModeBanner from '@/components/SampleModeBanner';
 import StatusChip from '@/components/StatusChip';
 import { useT } from '@/lib/i18n';
 
-/** DASH-001 투데이 KPI · DASH-002 실시간 타임라인 · DASH-003 주요 일정 · DASH-004 미열람 알림장 · DASH-005 결석/지각 위젯 · DASH-006 혼잡도 */
+export const OWNER_WIDGETS = [
+  'business-kpi', 'today-kpi', 'inbox', 'classes', 'missing', 'students', 'churn', 'billing', 'staff', 'memos',
+  'schedule', 'timeline', 'low-read', 'congestion', 'subscription', 'institutions',
+];
+export const OWNER_WIDGET_LABEL: Record<string, string> = {
+  'business-kpi': '경영 KPI', 'today-kpi': '오늘 출결 KPI', inbox: '처리 대기함', classes: '반별 운영 현황', missing: '미등원 초과 경고',
+  students: '확인이 필요한 원생', churn: '이탈 위험 원생', billing: '수납 · 미납', staff: '교직원 현황', memos: '교직원 공지 · 업무 지시',
+  schedule: '오늘·내일 일정', timeline: '실시간 타임라인', 'low-read': '열람률 낮은 알림장', congestion: '오늘 혼잡도',
+  subscription: '구독 · 수납 현황', institutions: '운영 기관 한눈에 보기',
+};
+/** 두 칸을 다 쓰는 위젯 */
+const WIDE = new Set(['classes', 'institutions']);
+
+/**
+ * DASH-008 역할별 대시보드 분리: 원장·실장 → 원장 대시보드, 교사 → 교사 대시보드.
+ * 원장·실장은 '교사 화면 보기'로 교직원 한 명의 교사 대시보드를 읽기 전용으로 본다 (?view=teacher&teacherId=).
+ */
 export default function DashboardView() {
+  const t = useT();
+  const { session, manager } = useSession();
+  const instId = session?.institution?.institutionId;
+  const params = useSearchParams();
+  const router = useRouter();
+  const teacherId = manager ? params.get('teacherId') ?? undefined : undefined;
+  const kind: DashboardKind = manager && !teacherId ? 'OWNER' : 'TEACHER';
+  const layout = useDashboardLayout(kind, kind === 'OWNER' ? OWNER_WIDGETS : TEACHER_WIDGETS);
+  const [layoutOpen, setLayoutOpen] = useState(false);
+  const staff = useQuery({ queryKey: ['staff', instId], queryFn: () => api.get<StaffMember[]>('staff'), enabled: !!instId && manager });
+
+  if (!session) return null;
+  const settings = (
+    <Button size="small" variant="outlined" startIcon={<TuneIcon />} onClick={() => setLayoutOpen(true)}>
+      {t('위젯 설정')}
+    </Button>
+  );
+  const teacherPicker = manager && (
+    <TextField
+      select
+      size="small"
+      label={t('교사 화면 보기')}
+      value={teacherId ?? ''}
+      onChange={(e) => router.push(e.target.value ? `/dashboard?teacherId=${e.target.value}` : '/dashboard')}
+      sx={{ minWidth: 180 }}
+    >
+      <MenuItem value="">{t('원장 대시보드')}</MenuItem>
+      {(staff.data ?? []).map((s) => (
+        <MenuItem key={s.userId} value={s.userId}>
+          {s.name} ({t(ROLE_LABEL[s.role])})
+        </MenuItem>
+      ))}
+    </TextField>
+  );
+  return (
+    <>
+      {kind === 'OWNER' ? (
+        <OwnerDashboard widgets={layout.widgets} actions={<>{teacherPicker}{settings}</>} />
+      ) : (
+        <>
+          <PageHeader
+            title={t('교사 대시보드')}
+            menuId="DASH-018"
+            description={dayjs().format(t('M월 D일 (dd)'))}
+            actions={<>{teacherPicker}{settings}</>}
+          />
+          <TeacherDashboardView instId={instId} teacherId={teacherId} widgets={layout.widgets} />
+        </>
+      )}
+      {layoutOpen && (
+        <LayoutDialog
+          widgets={layout.widgets}
+          labels={kind === 'OWNER' ? OWNER_WIDGET_LABEL : TEACHER_WIDGET_LABEL}
+          busy={layout.save.isPending || layout.reset.isPending}
+          error={layout.save.error ?? layout.reset.error}
+          onSave={(w, done) => layout.save.mutate(w, { onSuccess: done })}
+          onReset={(done) => layout.reset.mutate(undefined, { onSuccess: done })}
+          onClose={() => setLayoutOpen(false)}
+        />
+      )}
+    </>
+  );
+}
+
+/** DASH-001~007 기존 위젯 + DASH-009~016 원장 전용 위젯 */
+function OwnerDashboard({ widgets, actions }: { widgets: DashboardWidget[]; actions: ReactNode }) {
   const t = useT();
   const qc = useQueryClient();
   const { session, manager, role } = useSession();
@@ -65,12 +155,29 @@ export default function DashboardView() {
   });
 
   const k = today.data?.kpi;
+  const blocks: Record<string, ReactNode> = {
+    inbox: <InboxWidget instId={instId} />,
+    classes: <ClassBoardWidget instId={instId} />,
+    missing: <MissingAlertWidget instId={instId} />,
+    students: <StudentWidgets data={today.data} loading={today.isLoading} />,
+    churn: <ChurnRiskWidget instId={instId} />,
+    billing: <OwnerBillingWidget instId={instId} />,
+    staff: <StaffTodayWidget instId={instId} />,
+    memos: <StaffMemoWidget instId={instId} />,
+    schedule: <SchedulePanel items={schedule.data} loading={schedule.isLoading} />,
+    timeline: <TimelinePanel entries={timeline.data} loading={timeline.isLoading} />,
+    'low-read': <LowReadNoticesWidget instId={instId} />,
+    congestion: <CongestionMiniWidget instId={instId} />,
+    subscription: manager ? <BillingWidget instId={instId} /> : null,
+    institutions: <InstitutionsWidget instId={instId} />,
+  };
 
   return (
     <>
       <PageHeader
-        title={t('대시보드')}
-        menuId="DASH-001"
+        title={t('원장 대시보드')}
+        menuId="DASH-009"
+        actions={actions}
         description={today.data ? t('{0} · {1} 기준{2}', { 0: dayjs(today.data.date).format(t('M월 D일 (dd)')), 1: time(today.data.asOf), 2: manager ? '' : t(' · 담당 반') }) : undefined}
       />
       <SampleModeBanner empty={owner && setupClasses.data?.length === 0} />
@@ -89,23 +196,27 @@ export default function DashboardView() {
       )}
       {today.isError && <Alert severity="error" sx={{ mb: 2 }}>{errorMessage(today.error)}</Alert>}
 
-      <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(4, 1fr)' }, mb: 2 }}>
+      {widgets.filter((w) => w.visible && (w.key === 'business-kpi' || w.key === 'today-kpi')).map((w) =>
+        w.key === 'business-kpi' ? (
+          <BusinessKpiRow key={w.key} instId={instId} />
+        ) : (
+          <Box key={w.key} sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(4, 1fr)' }, mb: 2 }}>
         <Kpi label={t('실시간 등원율')} value={k ? percent(k.attendanceRate) : null} sub={k ? t('{0} / {1}명', { 0: k.present, 1: k.total - k.excusedAbsent }) : ''} progress={k?.attendanceRate ?? undefined} />
         <Kpi label={t('미등원')} value={k ? t('{0}명', { 0: k.notArrived }) : null} sub={t('지각 기준 시각 경과')} tone={k && k.notArrived > 0 ? 'error' : undefined} />
         <Kpi label={t('결석 · 지각')} value={k ? t('{0} · {1}명', { 0: k.absent, 1: k.late }) : null} sub={k ? t('사유 등록 결석 {0}명', { 0: k.excusedAbsent }) : ''} />
         <Kpi label={t('공지 열람률')} value={k ? percent(k.noticeReadRate) : null} sub={t('최근 24시간 발송분')} />
       </Box>
+        ),
+      )}
 
-      <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', lg: '1.2fr 1fr' } }}>
-        <Stack spacing={2}>
-          <MissingAlertWidget instId={instId} />
-          <StudentWidgets data={today.data} loading={today.isLoading} />
-          <SchedulePanel items={schedule.data} loading={schedule.isLoading} />
-          <LowReadNoticesWidget instId={instId} />
-          <CongestionMiniWidget instId={instId} />
-          {manager && <BillingWidget instId={instId} />}
-        </Stack>
-        <TimelinePanel entries={timeline.data} loading={timeline.isLoading} />
+      <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' }, alignItems: 'start' }}>
+        {widgets
+          .filter((w) => w.visible && blocks[w.key])
+          .map((w) => (
+            <Box key={w.key} sx={{ gridColumn: WIDE.has(w.key) ? '1 / -1' : undefined }}>
+              {blocks[w.key]}
+            </Box>
+          ))}
       </Box>
     </>
   );
