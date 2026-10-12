@@ -31,6 +31,7 @@ import EventIcon from '@mui/icons-material/EventAvailableOutlined';
 import SettingsIcon from '@mui/icons-material/SettingsOutlined';
 import QrCodeIcon from '@mui/icons-material/QrCode2';
 import ChatIcon from '@mui/icons-material/ChatBubbleOutline';
+import ForumIcon from '@mui/icons-material/ForumOutlined';
 import PollIcon from '@mui/icons-material/PollOutlined';
 import PhotoIcon from '@mui/icons-material/PhotoLibraryOutlined';
 import EventBusyIcon from '@mui/icons-material/EventBusyOutlined';
@@ -99,6 +100,7 @@ const NAV: { group: string; items: NavItem[] }[] = [
       { href: '/event-calendar', label: '행사 달력', icon: <EventNoteIcon /> },
       { href: '/event-templates', label: '행사 템플릿', icon: <RepeatIcon /> },
       { href: '/messages', label: '메시지함', icon: <ChatIcon /> },
+      { href: '/community', label: '커뮤니티', icon: <ForumIcon /> },
       { href: '/consults', label: '상담 예약', icon: <ConsultIcon /> },
       { href: '/surveys', label: '설문', icon: <PollIcon /> },
       { href: '/albums', label: '앨범', icon: <PhotoIcon /> },
