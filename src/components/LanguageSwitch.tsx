@@ -24,7 +24,7 @@ export function LanguageCard() {
   return (
     <Paper sx={{ p: 3, maxWidth: 640, mt: 2 }}>
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ sm: 'center' }}>
-        <Typography variant="h3" sx={{ flex: 1 }}>{t('화면 언어')}</Typography>
+        <Typography variant="h4" component="h3" sx={{ flex: 1 }}>{t('화면 언어')}</Typography>
         <LanguageSwitch />
       </Stack>
       <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>

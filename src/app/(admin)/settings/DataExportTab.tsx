@@ -38,8 +38,8 @@ export default function DataExportTab() {
   };
 
   return (
-    <Paper variant="outlined" sx={{ p: 2.5, maxWidth: 720 }}>
-      <Typography variant="h3" gutterBottom>{t('데이터 내보내기')}</Typography>
+    <Paper variant="outlined" sx={{ px: 3, py: 2.5, maxWidth: 720 }}>
+      <Typography variant="h4" component="h3" gutterBottom>{t('데이터 내보내기')}</Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
         {t('기관의 데이터를 엑셀 파일 묶음(ZIP)으로 내려받습니다: {0}. 출결과 알림장은 아래 기간(최대 1년)만 담고, 나머지는 전체를 담습니다.', { 0: SHEETS.map((x) => t(x)).join(' · ') })}
       </Typography>

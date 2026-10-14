@@ -7,9 +7,6 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import LinearProgress from '@mui/material/LinearProgress';
-import Paper from '@mui/material/Paper';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
 import ChevronLeft from '@mui/icons-material/ChevronLeft';
 import ChevronRight from '@mui/icons-material/ChevronRight';
 import dayjs from 'dayjs';
@@ -20,6 +17,8 @@ import { WEEKDAY, type CalendarEvent } from '@/lib/ops';
 import { useSession } from '@/lib/session';
 import PageHeader from '@/components/PageHeader';
 import { useT } from '@/lib/i18n';
+import SectionCard from '@/components/ui/SectionCard';
+import { color, tone as TONES } from '@/theme/tokens';
 
 /** EVT-006 행사 달력 — 월간 보기. 행사를 누르면 상세(RSVP 현황)로 이동 */
 export default function EventCalendarView() {
@@ -46,42 +45,55 @@ export default function EventCalendarView() {
         description={t('이번 달 행사를 달력으로 봅니다.')}
         actions={<Button component={Link} href="/event-templates" variant="outlined">{t('반복 행사 템플릿')}</Button>}
       />
-      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
-        <IconButton aria-label={t('이전 달')} onClick={() => setCursor(cursor.subtract(1, 'month'))}><ChevronLeft /></IconButton>
-        <Typography variant="h6" sx={{ minWidth: 120, textAlign: 'center' }}>{cursor.format(t('YYYY년 M월'))}</Typography>
-        <IconButton aria-label={t('다음 달')} onClick={() => setCursor(cursor.add(1, 'month'))}><ChevronRight /></IconButton>
-        <Button size="small" onClick={() => setCursor(dayjs().startOf('month'))}>{t('오늘')}</Button>
-      </Stack>
       {q.isError && <Alert severity="error" sx={{ mb: 2 }}>{errorMessage(q.error)}</Alert>}
-      {q.isFetching && <LinearProgress />}
-      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', gap: '1px', bgcolor: 'divider', border: 1, borderColor: 'divider' }}>
-        {[1, 2, 3, 4, 5, 6, 7].map((d) => (
-          <Box key={d} sx={{ bgcolor: 'background.default', py: 0.5, textAlign: 'center' }}>
-            <Typography variant="caption" sx={{ fontWeight: 700 }}>{t(WEEKDAY[d])}</Typography>
+      <SectionCard
+        menuId="EVT-006"
+        title={
+          <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
+            <IconButton size="small" aria-label={t('이전 달')} onClick={() => setCursor(cursor.subtract(1, 'month'))} sx={{ border: `1px solid ${color.border}`, width: 40, height: 40 }}><ChevronLeft /></IconButton>
+            <Box component="span" sx={{ minWidth: 120, textAlign: 'center' }}>{cursor.format(t('YYYY년 M월'))}</Box>
+            <IconButton size="small" aria-label={t('다음 달')} onClick={() => setCursor(cursor.add(1, 'month'))} sx={{ border: `1px solid ${color.border}`, width: 40, height: 40 }}><ChevronRight /></IconButton>
           </Box>
-        ))}
-        {cells.map((d, i) => (
-          <Paper key={i} square elevation={0} sx={{ minHeight: 96, p: 0.5, bgcolor: d ? 'background.paper' : 'action.hover' }}>
-            {d && (
-              <>
-                <Typography variant="caption" sx={{ fontWeight: d.isSame(dayjs(), 'day') ? 800 : 400, color: d.isSame(dayjs(), 'day') ? 'primary.main' : 'text.secondary' }}>{d.date()}</Typography>
-                <Stack spacing={0.25}>
-                  {eventsOn(d).map((e) => (
-                    <Box
-                      key={e.id}
-                      component={Link}
-                      href={`/events/${e.id}`}
-                      sx={{ px: 0.5, borderRadius: 0.5, bgcolor: e.status === 'CANCELED' ? 'action.disabledBackground' : 'primary.light', color: 'primary.contrastText', textDecoration: e.status === 'CANCELED' ? 'line-through' : 'none', fontSize: 12, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}
-                    >
-                      {time(e.startsAt)} {e.title}
-                    </Box>
-                  ))}
-                </Stack>
-              </>
-            )}
-          </Paper>
-        ))}
-      </Box>
+        }
+        actions={<Button size="small" variant="outlined" onClick={() => setCursor(dayjs().startOf('month'))}>{t('오늘')}</Button>}
+      >
+        {q.isFetching && <LinearProgress sx={{ mb: 1 }} />}
+        <Box sx={{ overflowX: 'auto' }}>
+          <Box sx={{ minWidth: 620, display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', borderTop: `1px solid ${color.divider}`, borderLeft: `1px solid ${color.divider}` }}>
+            {[1, 2, 3, 4, 5, 6, 7].map((d) => (
+              <Box key={d} sx={{ p: 1, fontSize: 12, fontWeight: 600, color: 'text.secondary', bgcolor: color.bg, borderRight: `1px solid ${color.divider}`, borderBottom: `1px solid ${color.divider}` }}>
+                {t(WEEKDAY[d])}
+              </Box>
+            ))}
+            {cells.map((d, i) => {
+              const today = !!d && d.isSame(dayjs(), 'day');
+              return (
+                <Box key={i} sx={{ minHeight: 104, p: 0.75, display: 'flex', flexDirection: 'column', gap: 0.5, bgcolor: d ? (today ? color.selected : 'background.paper') : color.bg, borderRight: `1px solid ${color.divider}`, borderBottom: `1px solid ${color.divider}` }}>
+                  {d && (
+                    <>
+                      <Box component="span" aria-current={today ? 'date' : undefined} sx={{ fontSize: 12, fontWeight: today ? 700 : 400, color: today ? 'primary.main' : 'text.secondary' }}>{d.date()}</Box>
+                      {eventsOn(d).map((e) => {
+                        const tn = e.status === 'CANCELED' ? TONES.gray : TONES.blue;
+                        return (
+                          <Box
+                            key={e.id}
+                            component={Link}
+                            href={`/events/${e.id}`}
+                            title={`${time(e.startsAt)} ${e.title}${e.status === 'CANCELED' ? ` (${t('취소')})` : ''}`}
+                            sx={{ display: 'block', px: 0.75, py: '3px', borderRadius: '4px', bgcolor: tn.bg, color: tn.fg, fontSize: 11, fontWeight: 600, textDecoration: e.status === 'CANCELED' ? 'line-through' : 'none', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}
+                          >
+                            {time(e.startsAt)} {e.title}
+                          </Box>
+                        );
+                      })}
+                    </>
+                  )}
+                </Box>
+              );
+            })}
+          </Box>
+        </Box>
+      </SectionCard>
     </>
   );
 }

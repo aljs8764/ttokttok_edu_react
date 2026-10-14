@@ -54,7 +54,7 @@ export default function VouchersTab() {
       {err && <Alert severity="error">{errorMessage(err)}</Alert>}
       <div>
         <Stack direction="row" alignItems="center" sx={{ mb: 1 }}>
-          <Typography variant="h3" sx={{ flex: 1 }}>{t('바우처 등록 기관')}</Typography>
+          <Typography variant="h4" component="h3" sx={{ flex: 1 }}>{t('바우처 등록 기관')}</Typography>
           <Button variant="contained" onClick={() => setForm(EMPTY)}>{t('바우처 등록')}</Button>
         </Stack>
         <Paper variant="outlined" sx={{ overflowX: 'auto' }}>
@@ -82,7 +82,7 @@ export default function VouchersTab() {
 
       <div>
         <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-          <Typography variant="h3" sx={{ flex: 1 }}>{t('월별 정산')}</Typography>
+          <Typography variant="h4" component="h3" sx={{ flex: 1 }}>{t('월별 정산')}</Typography>
           <TextField size="small" type="month" value={month} onChange={(e) => e.target.value && setMonth(e.target.value)} />
           <Button variant="outlined" disabled={generate.isPending} onClick={() => generate.mutate()}>{t('정산 대상 생성')}</Button>
         </Stack>

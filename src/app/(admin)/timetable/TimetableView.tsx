@@ -11,10 +11,8 @@ import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
 import LinearProgress from '@mui/material/LinearProgress';
 import MenuItem from '@mui/material/MenuItem';
-import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
 import DeleteIcon from '@mui/icons-material/DeleteOutline';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, errorMessage } from '@/lib/api';
@@ -23,9 +21,78 @@ import { useSession } from '@/lib/session';
 import type { Classroom } from '@/lib/types';
 import PageHeader from '@/components/PageHeader';
 import { useT } from '@/lib/i18n';
+import dayjs from 'dayjs';
+import SectionCard from '@/components/ui/SectionCard';
+import EmptyState from '@/components/ui/EmptyState';
+import { color, font, tone as TONES, type Tone } from '@/theme/tokens';
 
 interface Row { weekday: number; startTime: string; endTime: string; subject: string; room: string }
 const hm = (t: string) => t.slice(0, 5);
+
+const BLOCK_TONES: Tone[] = ['blue', 'green', 'coral', 'amber', 'gray'];
+const ROW_PX = 32; // 30분 한 칸
+
+/** 디자인 P2-08 주간 시간표 — 30분 칸 그리드에 수업 블록. 좁은 화면은 가로 스크롤 */
+function WeekGrid({ slots, showClass, toneOf }: { slots: Slot[]; showClass: boolean; toneOf: (classroomId: string) => Tone }) {
+  const tr = useT();
+  const min = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));
+  const startH = Math.min(14, ...slots.map((s) => Math.floor(min(s.startTime) / 60)));
+  const endH = Math.max(20, ...slots.map((s) => Math.ceil(min(s.endTime) / 60)));
+  const rows = (endH - startH) * 2;
+  // 일요일 수업이 없으면 월~토만
+  const days = slots.some((s) => s.weekday === 7) ? [1, 2, 3, 4, 5, 6, 7] : [1, 2, 3, 4, 5, 6];
+  const today = dayjs().day() === 0 ? 7 : dayjs().day();
+  const cols = `56px repeat(${days.length}, minmax(90px, 1fr))`;
+  return (
+    <Box sx={{ overflowX: 'auto' }}>
+      <Box sx={{ minWidth: 640 }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: cols, fontSize: 13, fontWeight: 600, pb: 1 }}>
+          <span />
+          {days.map((d) => (
+            <Box
+              key={d}
+              component="span"
+              aria-current={d === today ? 'date' : undefined}
+              sx={{ textAlign: 'center', mx: 1, py: '2px', borderRadius: '6px', ...(d === today ? { bgcolor: color.primary, color: '#FFFFFF' } : {}) }}
+            >
+              {tr(WEEKDAY[d])}
+            </Box>
+          ))}
+        </Box>
+        <Box sx={{ display: 'grid', gridTemplateColumns: cols, gridTemplateRows: `repeat(${rows}, ${ROW_PX}px)`, position: 'relative' }}>
+          {Array.from({ length: endH - startH }, (_, i) => (
+            <Box key={`t${i}`} component="span" sx={{ gridColumn: 1, gridRow: `${i * 2 + 1} / ${i * 2 + 3}`, fontSize: 11, color: 'text.secondary', borderTop: `1px solid ${color.rowDivider}`, pt: '2px', fontFamily: font.mono }}>
+              {String(startH + i).padStart(2, '0')}:00
+            </Box>
+          ))}
+          {Array.from({ length: endH - startH }, (_, i) => (
+            <Box key={`c${i}`} component="span" sx={{ gridColumn: `2 / ${days.length + 2}`, gridRow: `${i * 2 + 1} / ${i * 2 + 3}`, borderTop: `1px solid ${color.rowDivider}` }} />
+          ))}
+          {slots.map((s) => {
+            const col = days.indexOf(s.weekday);
+            if (col < 0) return null;
+            const r1 = Math.floor((min(s.startTime) - startH * 60) / 30) + 1;
+            const r2 = Math.max(r1 + 1, Math.ceil((min(s.endTime) - startH * 60) / 30) + 1);
+            const t = TONES[toneOf(s.classroomId)];
+            return (
+              <Box
+                key={s.id}
+                sx={{ gridColumn: col + 2, gridRow: `${r1} / ${r2}`, m: '2px 4px', borderRadius: '8px', px: 1, py: 0.75, fontSize: 12, lineHeight: 1.35, display: 'flex', flexDirection: 'column', gap: '2px', overflow: 'hidden', zIndex: 1, bgcolor: t.bg, color: t.fg }}
+              >
+                <Box component="strong">{s.subject ?? s.classroomName}</Box>
+                <span>
+                  {hm(s.startTime)}–{hm(s.endTime)}
+                  {s.teacher?.name ? ` · ${s.teacher.name}` : ''}
+                </span>
+                {(showClass && s.subject) || s.room ? <span>{[showClass && s.subject && s.classroomName, s.room].filter(Boolean).join(' · ')}</span> : null}
+              </Box>
+            );
+          })}
+        </Box>
+      </Box>
+    </Box>
+  );
+}
 
 /** CLS-003 시간표 — 요일별 수업 배치. 같은 반·같은 교사의 겹치는 시간은 서버가 막는다 */
 export default function TimetableView() {
@@ -40,7 +107,9 @@ export default function TimetableView() {
   const classes = useQuery({ queryKey: ['classes', instId], queryFn: () => api.get<Classroom[]>('classes'), enabled: !!instId });
 
   const shown = (slots.data ?? []).filter((s) => !classId || s.classroomId === classId);
-  const byDay = (d: number) => shown.filter((s) => s.weekday === d).sort((a, b) => a.startTime.localeCompare(b.startTime));
+  // 반마다 같은 색 (디자인: 반별 블록 색)
+  const classOrder = Array.from(new Set((slots.data ?? []).map((s) => s.classroomId)));
+  const toneOf = (classroomId: string) => BLOCK_TONES[classOrder.indexOf(classroomId) % BLOCK_TONES.length];
 
   return (
     <>
@@ -56,30 +125,24 @@ export default function TimetableView() {
           )
         }
       />
-      <TextField select size="small" label={tr('반')} value={classId} onChange={(e) => setClassId(e.target.value)} sx={{ minWidth: 200, mb: 2 }}>
-        <MenuItem value="">{tr('전체')}</MenuItem>
-        {classes.data?.map((c) => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
-      </TextField>
       {slots.isError && <Alert severity="error" sx={{ mb: 2 }}>{errorMessage(slots.error)}</Alert>}
-      {slots.isFetching && <LinearProgress />}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(7, 1fr)' }, gap: 1 }}>
-        {[1, 2, 3, 4, 5, 6, 7].map((d) => (
-          <Paper key={d} variant="outlined" sx={{ p: 1, minHeight: 120 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>{tr(WEEKDAY[d])}</Typography>
-            <Stack spacing={0.75}>
-              {byDay(d).map((s) => (
-                <Box key={s.id} sx={{ p: 0.75, borderRadius: 1, bgcolor: 'action.hover' }}>
-                  <Typography variant="caption" sx={{ fontWeight: 700 }}>{hm(s.startTime)}–{hm(s.endTime)}</Typography>
-                  <Typography variant="body2">{s.subject ?? s.classroomName}</Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {[!classId && s.classroomName, s.room, s.teacher?.name].filter(Boolean).join(' · ')}
-                  </Typography>
-                </Box>
-              ))}
-            </Stack>
-          </Paper>
-        ))}
-      </Box>
+      <SectionCard
+        title={tr('주간 시간표')}
+        menuId="CLS-003"
+        actions={
+          <TextField select size="small" label={tr('반')} value={classId} onChange={(e) => setClassId(e.target.value)} sx={{ minWidth: 180 }}>
+            <MenuItem value="">{tr('전체')}</MenuItem>
+            {classes.data?.map((c) => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
+          </TextField>
+        }
+      >
+        {slots.isFetching && !slots.data && <LinearProgress />}
+        {slots.data && shown.length === 0 ? (
+          <EmptyState dense title={tr('등록된 수업이 없습니다')} />
+        ) : (
+          slots.data && <WeekGrid slots={shown} showClass={!classId} toneOf={toneOf} />
+        )}
+      </SectionCard>
       {editing && classId && (
         <EditDialog
           classId={classId}

@@ -46,7 +46,7 @@ export default function EventFollowUpPanel({ eventId, instId }: { eventId: strin
   const err = albums.error ?? reviews.error ?? link.error ?? unlink.error ?? hide.error;
 
   return (
-    <Paper sx={{ p: 2.5, mt: 2 }}>
+    <Paper sx={{ px: 3, py: 2.5, mt: 3 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
         <Typography variant="h4" sx={{ flex: 1 }}>{t('행사 사진·후기')}</Typography>
         <MenuIdChip id="EVT-009" />

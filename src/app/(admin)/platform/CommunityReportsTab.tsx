@@ -95,7 +95,7 @@ export default function CommunityReportsTab() {
       {q.data?.length === 0 && <Alert severity="success">{status === 'OPEN' ? t('처리할 신고가 없습니다.') : t('처리한 신고가 없습니다.')}</Alert>}
       <Stack spacing={1.5}>
         {q.data?.map((r) => (
-          <Paper key={`${r.targetType}-${r.targetId}`} variant="outlined" sx={{ p: 2 }}>
+          <Paper key={`${r.targetType}-${r.targetId}`} variant="outlined" sx={{ px: 3, py: 2.5 }}>
             <Stack direction="row" spacing={1} alignItems="center" sx={{ flexWrap: 'wrap', rowGap: 0.5, mb: 1 }}>
               <Chip size="small" label={r.targetType === 'POST' ? t('게시글') : t('댓글')} />
               <Chip size="small" variant="outlined" label={boardKeyLabel(r.boardKey)} />

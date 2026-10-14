@@ -95,7 +95,7 @@ export default function ClassesView() {
             <Grid key={c.id} size={{ xs: 12, sm: 6, lg: 4 }}>
               <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <CardContent sx={{ flex: 1 }}>
-                  <Typography variant="h3" sx={{ mb: 0.5 }}>
+                  <Typography variant="h4" component="h3" sx={{ mb: 0.5 }}>
                     {c.name}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">

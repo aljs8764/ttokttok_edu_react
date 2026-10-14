@@ -87,7 +87,7 @@ export const theme: Theme = createTheme(
         defaultProps: { elevation: 0 },
         styleOverrides: {
           root: ({ ownerState }) =>
-            (ownerState.elevation ?? 0) === 0 && ownerState.variant !== 'outlined'
+            (ownerState.elevation ?? 0) === 0 && ownerState.variant !== 'outlined' && !ownerState.square
               ? { border: `1px solid ${color.divider}`, borderRadius: radius.card, backgroundImage: 'none' }
               : { borderRadius: 10, backgroundImage: 'none' },
           outlined: { borderColor: color.divider, borderRadius: radius.card },
