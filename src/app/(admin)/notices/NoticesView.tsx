@@ -32,6 +32,7 @@ import type { Notice, NoticeKind, NoticeStatus, Page } from '@/lib/types';
 import PageHeader from '@/components/PageHeader';
 import { targetSummary } from '@/components/TargetPicker';
 import { useT } from '@/lib/i18n';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 
 /** NTC-004 발송 이력 — 교사는 본인 작성분만. 열람률은 원생 기준 */
 export default function NoticesView() {
@@ -70,25 +71,24 @@ export default function NoticesView() {
         }
       />
 
-      <Stack direction="row" spacing={1.5} sx={{ mb: 2 }}>
-        <TextField select size="small" label={t('종류')} value={kind} onChange={(e) => (setKind(e.target.value as NoticeKind | ''), setPage(0))} sx={{ minWidth: 130 }}>
-          <MenuItem value="">{t('전체')}</MenuItem>
-          <MenuItem value="NOTE">{t('알림장')}</MenuItem>
-          <MenuItem value="ANNOUNCEMENT">{t('공지')}</MenuItem>
-        </TextField>
-        <TextField select size="small" label={t('상태')} value={status} onChange={(e) => (setStatus(e.target.value as NoticeStatus | ''), setPage(0))} sx={{ minWidth: 130 }}>
-          <MenuItem value="">{t('전체')}</MenuItem>
-          {(Object.keys(NOTICE_STATUS) as NoticeStatus[]).map((s) => (
-            <MenuItem key={s} value={s}>
-              {t(NOTICE_STATUS[s].label)}
-            </MenuItem>
-          ))}
-        </TextField>
-      </Stack>
-
       {list.isError && <Alert severity="error" sx={{ mb: 2 }}>{errorMessage(list.error)}</Alert>}
 
-      <Paper>
+      <Paper sx={{ pt: 2.5, overflow: 'hidden' }}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} useFlexGap flexWrap="wrap" sx={{ px: 3, pb: 2 }}>
+          <TextField select size="small" label={t('종류')} value={kind} onChange={(e) => (setKind(e.target.value as NoticeKind | ''), setPage(0))} sx={{ minWidth: 130 }}>
+            <MenuItem value="">{t('전체')}</MenuItem>
+            <MenuItem value="NOTE">{t('알림장')}</MenuItem>
+            <MenuItem value="ANNOUNCEMENT">{t('공지')}</MenuItem>
+          </TextField>
+          <TextField select size="small" label={t('상태')} value={status} onChange={(e) => (setStatus(e.target.value as NoticeStatus | ''), setPage(0))} sx={{ minWidth: 130 }}>
+            <MenuItem value="">{t('전체')}</MenuItem>
+            {(Object.keys(NOTICE_STATUS) as NoticeStatus[]).map((s) => (
+              <MenuItem key={s} value={s}>
+                {t(NOTICE_STATUS[s].label)}
+              </MenuItem>
+            ))}
+          </TextField>
+        </Stack>
         {list.isFetching && <LinearProgress />}
         <TableContainer>
           <Table size="small">
@@ -120,8 +120,9 @@ export default function NoticesView() {
                         {n.title}
                       </Typography>
                       {n.attachments.length > 0 && (
-                        <Typography variant="caption" color="text.secondary">
-                          📎{n.attachments.length}
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.25 }} aria-label={t('첨부 {0}개', { 0: n.attachments.length })}>
+                          <AttachFileIcon sx={{ fontSize: 14 }} aria-hidden />
+                          {n.attachments.length}
                         </Typography>
                       )}
                     </Stack>

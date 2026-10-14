@@ -172,7 +172,7 @@ export default function ImportView() {
           </Typography>
           <Stack direction="row" spacing={3} sx={{ mb: 2 }}>
             <Summary label={t('전체')} value={result.totalRows} />
-            <Summary label={t('등록 가능')} value={result.validRows} color="success.main" />
+            <Summary label={t('등록 가능')} value={result.validRows} color="success.dark" />
             <Summary label={t('오류 행')} value={errorRows} color={errorRows ? 'error.main' : undefined} />
           </Stack>
 

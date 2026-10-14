@@ -10,9 +10,6 @@ import LinearProgress from '@mui/material/LinearProgress';
 import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
-import Step from '@mui/material/Step';
-import StepLabel from '@mui/material/StepLabel';
-import Stepper from '@mui/material/Stepper';
 import TextField from '@mui/material/TextField';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
@@ -20,9 +17,12 @@ import Typography from '@mui/material/Typography';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, errorMessage } from '@/lib/api';
 import { DAYS, DAY_LABEL, dayList, hm } from '@/lib/format';
-import { useSession } from '@/lib/session';
+import { useSession, useSwitchInstitution } from '@/lib/session';
 import { INSTITUTION_TYPE_LABEL, type Classroom, type Destination, type DestinationType, type InstitutionSettings, type InstitutionType } from '@/lib/types';
-import PageHeader from '@/components/PageHeader';
+import MenuIdChip from '@/components/ui/MenuIdChip';
+import { useSampleInstitution, useStartSample } from '@/components/SampleModeBanner';
+import { color } from '@/theme/tokens';
+import { useT } from '@/lib/i18n';
 
 const STEPS = ['기관 정보', '하원 목적지', '반 만들기', '시작'];
 const DESTINATION_PRESETS: { name: string; type: DestinationType }[] = [
@@ -31,34 +31,131 @@ const DESTINATION_PRESETS: { name: string; type: DestinationType }[] = [
   { name: '다른 학원', type: 'ACADEMY' },
 ];
 
-/** ONB-001 기관정보 입력 위자드 — 원장이 처음 한 번: 기관 정보 → 하원 목적지 → 반 → 원생·교직원·QR 안내. 각 단계는 설정 화면과 같은 API 를 쓴다. */
+/** ONB-001 기관정보 입력 위자드 — 원장이 처음 한 번: 기관 정보 → 하원 목적지 → 반 → 원생·교직원·QR 안내. 각 단계는 설정 화면과 같은 API 를 쓴다.
+ *  디자인 P1-09: 셸 없는 전체 화면(상단 바 + 단계 막대 + 입력 카드 + 오른쪽 미리보기). */
 export default function OnboardingView() {
-  const { session, role } = useSession();
+  const t = useT();
+  const { session, role, manager } = useSession();
   const instId = session?.institution?.institutionId;
   const owner = role === 'OWNER';
   const [step, setStep] = useState(0);
 
   return (
-    <>
-      <PageHeader title="시작하기" menuId="ONB-001" description="기관 정보와 하원 목적지, 첫 반을 차례로 설정합니다. 나중에 설정·반 관리에서 언제든 바꿀 수 있습니다." />
-      {!owner ? (
-        <Alert severity="info">시작하기 설정은 원장만 할 수 있습니다.</Alert>
-      ) : (
-        <Paper sx={{ p: 3, maxWidth: 900 }}>
-          <Stepper activeStep={step} alternativeLabel sx={{ mb: 3 }}>
-            {STEPS.map((s) => (
-              <Step key={s}>
-                <StepLabel>{s}</StepLabel>
-              </Step>
-            ))}
-          </Stepper>
-          {step === 0 && <InstitutionStep instId={instId} onNext={() => setStep(1)} />}
-          {step === 1 && <DestinationStep instId={instId} onBack={() => setStep(0)} onNext={() => setStep(2)} />}
-          {step === 2 && <ClassStep instId={instId} onBack={() => setStep(1)} onNext={() => setStep(3)} />}
-          {step === 3 && <DoneStep onBack={() => setStep(2)} />}
-        </Paper>
-      )}
-    </>
+    <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <Box component="header" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, px: { xs: 2, md: 4 }, py: 2.25, bgcolor: 'background.paper', borderBottom: `1px solid ${color.divider}`, flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+          <Box aria-hidden sx={{ width: 34, height: 34, borderRadius: '9px', bgcolor: color.accent, color: color.primary, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 16 }}>
+            똑
+          </Box>
+          <Typography component="h1" sx={{ fontWeight: 700, fontSize: 18 }}>
+            {t('똑똑 시작하기')}
+          </Typography>
+          <MenuIdChip id="ONB-001" />
+        </Box>
+        <Button component={NextLink} href="/dashboard" variant="text" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+          {t('나중에 하기')}
+        </Button>
+      </Box>
+
+      <Box component="main" sx={{ flex: 1, px: { xs: 2, md: 4 }, pt: 5, pb: 7, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+        {!owner ? (
+          <Alert severity="info" sx={{ width: '100%', maxWidth: 1040 }}>{t('시작하기 설정은 원장만 할 수 있습니다.')}</Alert>
+        ) : (
+          <>
+            <Box component="ol" aria-label={t('설정 단계')} sx={{ listStyle: 'none', m: 0, p: 0, width: '100%', maxWidth: 1040, display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1.5 }}>
+              {STEPS.map((label, i) => {
+                const done = i < step;
+                const current = i === step;
+                return (
+                  <Box component="li" key={label} aria-current={current ? 'step' : undefined} sx={{ display: 'flex', flexDirection: 'column', gap: 1.25, color: current || done ? 'text.primary' : 'text.secondary' }}>
+                    <Box sx={{ height: 4, borderRadius: 2, bgcolor: current || done ? color.primary : color.divider }} />
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, fontSize: 14, fontWeight: current ? 700 : 400 }}>
+                      <Box
+                        aria-hidden
+                        sx={{
+                          width: 24,
+                          height: 24,
+                          flexShrink: 0,
+                          borderRadius: '50%',
+                          boxSizing: 'border-box',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: 12,
+                          ...(current || done ? { bgcolor: color.primary, color: '#FFFFFF' } : { border: `1.5px solid ${color.borderStrong}` }),
+                        }}
+                      >
+                        {done ? '✓' : i + 1}
+                      </Box>
+                      <Box component="span" sx={{ display: { xs: current ? 'inline' : 'none', sm: 'inline' } }}>{t(label)}</Box>
+                    </Box>
+                  </Box>
+                );
+              })}
+            </Box>
+
+            <Box sx={{ width: '100%', maxWidth: 1040, display: 'flex', flexWrap: 'wrap', gap: 3, alignItems: 'flex-start' }}>
+              <Paper component="section" aria-label={t(STEPS[step])} sx={{ flex: '999 1 520px', minWidth: 0, p: { xs: 2.5, md: 4 } }}>
+                {step === 0 && <InstitutionStep instId={instId} onNext={() => setStep(1)} />}
+                {step === 1 && <DestinationStep instId={instId} onBack={() => setStep(0)} onNext={() => setStep(2)} />}
+                {step === 2 && <ClassStep instId={instId} onBack={() => setStep(1)} onNext={() => setStep(3)} />}
+                {step === 3 && <DoneStep onBack={() => setStep(2)} />}
+              </Paper>
+              <Box component="aside" sx={{ flex: '1 1 300px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <ParentPreview instId={instId} />
+                {manager && <SampleCard />}
+              </Box>
+            </Box>
+          </>
+        )}
+      </Box>
+    </Box>
+  );
+}
+
+/** 학부모 앱에서 보이는 기관 카드 미리보기 — 입력한(저장된) 기관 정보 그대로 */
+function ParentPreview({ instId }: { instId?: string }) {
+  const t = useT();
+  const inst = useQuery({ queryKey: ['institution', instId], queryFn: () => api.get<InstitutionSettings>('institution'), enabled: !!instId });
+  const d = inst.data;
+  return (
+    <Paper sx={{ p: 2.5, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+      <Typography sx={{ fontSize: 13, color: 'text.secondary', fontWeight: 600 }}>{t('학부모 앱에서 이렇게 보여요')}</Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 1.75, borderRadius: '10px', bgcolor: 'background.default' }}>
+        <Box aria-hidden sx={{ width: 44, height: 44, borderRadius: '10px', bgcolor: color.accent, color: color.primary, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
+          {d?.name?.slice(0, 1) ?? ''}
+        </Box>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography sx={{ fontSize: 15, fontWeight: 700 }}>{d?.name ?? '—'}</Typography>
+          <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>{[d?.address, d?.phone].filter(Boolean).join(' · ') || t('주소·연락처를 입력하면 여기에 보여요')}</Typography>
+        </Box>
+      </Box>
+    </Paper>
+  );
+}
+
+/** 샘플 데이터로 먼저 둘러보기 (ONB-003) — 계정 메뉴의 체험 기관과 같은 기능 */
+function SampleCard() {
+  const t = useT();
+  const sample = useSampleInstitution();
+  const startSample = useStartSample();
+  const switchInst = useSwitchInstitution();
+  const mine = sample.data?.sample;
+  return (
+    <Paper sx={{ p: 2.5, display: 'flex', flexDirection: 'column', gap: 1.25, bgcolor: color.accentSoftBg, borderColor: color.accentSoftBorder }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1 }}>
+        <Typography sx={{ fontSize: 15, fontWeight: 700 }}>{t('샘플 데이터로 먼저 둘러보기')}</Typography>
+        <MenuIdChip id="ONB-003" />
+      </Box>
+      <Typography sx={{ fontSize: 13, color: 'text.secondary', lineHeight: 1.6 }}>{t('원생·반이 들어간 데모 기관에서 기능을 먼저 체험해요.')}</Typography>
+      <Button
+        variant="outlined"
+        disabled={startSample.isPending || switchInst.isPending}
+        onClick={() => (mine ? switchInst.mutate(mine.institutionId) : startSample.mutate())}
+      >
+        {t(mine ? '체험 기관으로 이동' : '체험 모드 시작')}
+      </Button>
+    </Paper>
   );
 }
 

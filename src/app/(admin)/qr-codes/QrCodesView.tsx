@@ -37,6 +37,7 @@ import type { CheckinQr, Geofence, QrScanFailure } from '@/lib/types';
 import PageHeader from '@/components/PageHeader';
 import QrImage from '@/components/QrImage';
 import { useT } from '@/lib/i18n';
+import MenuIdChip from '@/components/ui/MenuIdChip';
 
 const REASON: Record<string, string> = {
   QR_INVALID: '재발급·삭제된 QR',
@@ -144,12 +145,12 @@ export default function QrCodesView() {
         ))}
       </Grid>
 
-      <Grid container spacing={2}>
+      <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 6 }}>
           <GeofenceCard current={fence.data?.geofence ?? null} loading={fence.isLoading} editable={owner} />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
-          <Paper sx={{ p: 2.5 }}>
+          <Paper sx={{ px: 3, py: 2.5 }}>
             <Typography variant="subtitle1">{t('최근 7일 스캔 실패')}</Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
               {t('같은 학생이 학원 밖에서 반복해서 찍으면 QR 사진이 공유된 것일 수 있습니다. 재발급하세요.')}
@@ -363,10 +364,10 @@ function GeofenceCard({ current, loading, editable }: { current: Geofence | null
   const mapUrl = valid ? t('https://map.kakao.com/link/map/학원,{0},{1}', { 0: latN, 1: lngN }) : null;
 
   return (
-    <Paper sx={{ p: 2.5 }}>
+    <Paper sx={{ px: 3, py: 2.5 }}>
       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
         <Typography variant="subtitle1">{t('기관 위치')}</Typography>
-        <Chip size="small" variant="outlined" label="QR-002" sx={{ color: 'text.secondary' }} />
+        <MenuIdChip id="QR-002" />
         {current ? <Chip size="small" color="success" label={t('반경 {0}m 확인 중', { 0: current.radiusMeters })} /> : <Chip size="small" label={t('꺼짐')} />}
       </Stack>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -405,7 +406,7 @@ function GeofenceCard({ current, loading, editable }: { current: Geofence | null
         {editable && (
           <Stack direction="row" spacing={1} justifyContent="flex-end" alignItems="center">
             {saved && (
-              <Typography variant="body2" color="success.main">
+              <Typography variant="body2" color="success.dark">
                 {t('저장했습니다')}
               </Typography>
             )}

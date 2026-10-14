@@ -15,7 +15,6 @@ import Link from '@mui/material/Link';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
-import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
@@ -23,6 +22,7 @@ import type { Membership } from '@/lib/types';
 import { ROLE_LABEL } from '@/lib/format';
 import { useT } from '@/lib/i18n';
 import LanguageSwitch from '@/components/LanguageSwitch';
+import AuthLayout, { FieldLabel } from '@/components/shell/AuthLayout';
 
 const SAVED_ID = 'ttok.savedLoginId';
 
@@ -137,81 +137,82 @@ export default function LoginForm() {
     else setError(t('기관을 선택할 수 없습니다'));
   }
 
+  const title = memberships ? '관리할 기관을 선택하세요' : challengeId ? '2단계 인증' : '관리자 로그인';
   return (
-    <Box sx={{ minHeight: '100vh', display: 'grid', placeItems: 'center', p: 2, bgcolor: 'background.default' }}>
-      <Paper sx={{ width: '100%', maxWidth: 400, p: { xs: 3, sm: 4 } }}>
-        <Typography variant="h1" sx={{ letterSpacing: -0.5 }}>
-          {t('똑똑')}<Box component="span" sx={{ color: 'secondary.main' }}>.</Box>
-        </Typography>
-        <Stack direction="row" alignItems="center" sx={{ mb: 3 }}>
-          <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
-            {t('학원 운영 관리자')}
-          </Typography>
-          <LanguageSwitch />
-        </Stack>
-
+    <>
+      <AuthLayout
+        title={title}
+        menuId={memberships ? undefined : challengeId ? 'AUTH-007' : 'AUTH-001'}
+        subtitle={memberships || challengeId ? undefined : t('원장님·선생님 계정으로 로그인해 주세요.')}
+        topRight={<LanguageSwitch />}
+      >
         {memberships ? (
-          <>
-            <Typography variant="subtitle1" gutterBottom>
-              {t('관리할 기관을 선택하세요')}
-            </Typography>
-            <List disablePadding>
-              {memberships.map((m) => (
-                <ListItemButton key={m.institutionId} onClick={() => void choose(m.institutionId)} sx={{ border: 1, borderColor: 'divider', borderRadius: 1, mb: 1 }}>
-                  <ListItemText primary={m.institutionName} secondary={t(ROLE_LABEL[m.role])} />
-                </ListItemButton>
-              ))}
-            </List>
-          </>
+          <List disablePadding>
+            {memberships.map((m) => (
+              <ListItemButton
+                key={m.institutionId}
+                onClick={() => void choose(m.institutionId)}
+                sx={{ border: 1, borderColor: 'divider', borderRadius: 2, mb: 1, minHeight: 56, bgcolor: 'background.paper' }}
+              >
+                <ListItemText primary={m.institutionName} secondary={t(ROLE_LABEL[m.role])} slotProps={{ primary: { sx: { fontWeight: 600 } } }} />
+              </ListItemButton>
+            ))}
+            {error && <Alert severity="error">{t(error)}</Alert>}
+          </List>
         ) : challengeId ? (
           <Box component="form" onSubmit={submitOtp}>
-            <Stack spacing={2}>
-              <Typography variant="subtitle1">{t('2단계 인증')}</Typography>
+            <Stack spacing={2.5}>
               <Typography variant="body2" color="text.secondary">
                 {t('인증 앱(Google Authenticator 등)에 표시된 6자리 숫자를 입력하세요. 휴대폰을 잃어버렸다면 복구 코드(XXXXX-XXXXX)를 입력할 수 있습니다.')}
               </Typography>
-              <TextField
-                label={t('인증 코드')}
-                value={otpCode}
-                onChange={(e) => setOtpCode(e.target.value)}
-                autoComplete="one-time-code"
-                inputProps={{ inputMode: 'text', maxLength: 11 }}
-                autoFocus
-                required
-              />
+              <FieldLabel label={t('인증 코드')} htmlFor="login-otp">
+                <TextField
+                  id="login-otp"
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value)}
+                  autoComplete="one-time-code"
+                  inputProps={{ inputMode: 'text', maxLength: 11 }}
+                  autoFocus
+                  required
+                />
+              </FieldLabel>
               {error && <Alert severity="error">{t(error)}</Alert>}
               <Button type="submit" variant="contained" size="large" disabled={pending || otpCode.trim().length < 6}>
                 {t('확인')}
               </Button>
-              <Link component="button" type="button" variant="body2" onClick={() => { setChallengeId(null); setError(null); }} sx={{ alignSelf: 'center' }}>
+              <Link component="button" type="button" variant="body2" onClick={() => { setChallengeId(null); setError(null); }} sx={{ alignSelf: 'center', fontWeight: 600, minHeight: 40 }}>
                 {t('처음으로')}
               </Link>
             </Stack>
           </Box>
         ) : (
           <Box component="form" onSubmit={submit}>
-            <Stack spacing={2}>
-              <TextField label={t('이메일')} value={loginId} onChange={(e) => setLoginId(e.target.value)} autoComplete="username" autoFocus required />
-              <TextField label={t('비밀번호')} type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required />
-              <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Stack spacing={2.5}>
+              <FieldLabel label={t('이메일')} htmlFor="login-id">
+                <TextField id="login-id" value={loginId} onChange={(e) => setLoginId(e.target.value)} autoComplete="username" autoFocus required />
+              </FieldLabel>
+              <FieldLabel label={t('비밀번호')} htmlFor="login-pw">
+                <TextField id="login-pw" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required />
+              </FieldLabel>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={1}>
                 <Box>
                   <FormControlLabel control={<Checkbox size="small" checked={saveId} onChange={(e) => setSaveId(e.target.checked)} />} label={t('아이디 저장')} />
                   <FormControlLabel control={<Checkbox size="small" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />} label={t('자동 로그인')} />
                 </Box>
+                <Link component="button" type="button" variant="body2" onClick={() => setFindOpen(true)} sx={{ fontWeight: 600, textDecoration: 'none', minHeight: 40 }}>
+                  {t('비밀번호를 잊으셨나요?')}
+                </Link>
               </Stack>
               {error && <Alert severity="error">{t(error)}</Alert>}
               <Button type="submit" variant="contained" size="large" disabled={pending || !loginId || !password}>
                 {t('로그인')}
               </Button>
-              <Link component="button" type="button" variant="body2" onClick={() => setFindOpen(true)} sx={{ alignSelf: 'center' }}>
-                {t('비밀번호를 잊으셨나요?')}
-              </Link>
             </Stack>
           </Box>
         )}
-      </Paper>
+      </AuthLayout>
       <TempPasswordDialog open={findOpen} onClose={() => setFindOpen(false)} />
-    </Box>
+    </>
   );
 }
 

@@ -8,6 +8,7 @@ import { useSession } from '@/lib/session';
 import type { CheckinQr } from '@/lib/types';
 import QrImage from '@/components/QrImage';
 import { useT } from '@/lib/i18n';
+import { chart, color } from '@/theme/tokens';
 
 /**
  * QR-001 인쇄용 화면 — A4 한 장에 QR 하나 (기관명·붙일 곳·사용 안내).
@@ -39,16 +40,16 @@ export default function PrintQrView() {
         @page { size: A4; margin: 0; }
         body { background: #fff !important; }
         .sheet { width: 210mm; height: 297mm; box-sizing: border-box; padding: 24mm 20mm; display: flex; flex-direction: column;
-                 align-items: center; text-align: center; page-break-after: always; break-after: page; color: #1B2559; }
+                 align-items: center; text-align: center; page-break-after: always; break-after: page; color: ${color.primary}; }
         .sheet:last-child { page-break-after: auto; break-after: auto; }
         .brand { font-size: 14pt; font-weight: 800; letter-spacing: -0.3px; }
-        .brand span { color: #FF6B4A; }
+        .brand span { color: ${color.accent}; }
         .inst { margin-top: 10mm; font-size: 30pt; font-weight: 800; }
-        .place { margin-top: 3mm; font-size: 18pt; color: #5B6385; }
-        .qr { margin-top: 12mm; padding: 6mm; border: 1.5mm solid #1B2559; border-radius: 6mm; }
+        .place { margin-top: 3mm; font-size: 18pt; color: ${color.textSecondary}; }
+        .qr { margin-top: 12mm; padding: 6mm; border: 1.5mm solid ${color.primary}; border-radius: 6mm; }
         .title { margin-top: 12mm; font-size: 26pt; font-weight: 800; }
         .steps { margin-top: 6mm; font-size: 14pt; line-height: 1.8; color: #333; }
-        .foot { margin-top: auto; font-size: 10pt; color: #9AA0B8; }
+        .foot { margin-top: auto; font-size: 10pt; color: ${chart.gray}; }
         @media screen { body { background: #EEE !important; } .sheet { background: #fff; margin: 12px auto; box-shadow: 0 1px 6px rgba(0,0,0,.15); } }
       `}</style>
       {list.map((q) => (

@@ -58,7 +58,7 @@ export default function SubscriptionTab() {
       {(sub.isError || change.isError || cancel.isError) && <Alert severity="error">{errorMessage(sub.error ?? change.error ?? cancel.error)}</Alert>}
       {sub.isFetching && <LinearProgress />}
       {s && (
-        <Paper sx={{ p: 2.5 }}>
+        <Paper sx={{ px: 3, py: 2.5 }}>
           <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
             <Typography variant="h3">{t('{0} 플랜', { 0: s.plan.name })}</Typography>
             {st && <Chip size="small" label={t(st.label)} color={st.color} />}

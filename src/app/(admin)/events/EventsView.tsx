@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Chip from '@mui/material/Chip';
 import LinearProgress from '@mui/material/LinearProgress';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
@@ -15,8 +14,6 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
 import AddIcon from '@mui/icons-material/Add';
 import dayjs from 'dayjs';
@@ -31,6 +28,9 @@ import type { Page, SchoolEvent, Tally } from '@/lib/types';
 import PageHeader from '@/components/PageHeader';
 import { targetSummary } from '@/components/TargetPicker';
 import { useT } from '@/lib/i18n';
+import SegmentTabs from '@/components/ui/SegmentTabs';
+import StatusBadge from '@/components/ui/StatusBadge';
+import { color } from '@/theme/tokens';
 
 /** EVT-001 행사 목록 — 다가오는 행사(기본) / 지난 행사. 교사는 본인이 만든 행사만 */
 export default function EventsView() {
@@ -66,10 +66,16 @@ export default function EventsView() {
         }
       />
 
-      <ToggleButtonGroup exclusive size="small" value={upcoming ? 'up' : 'past'} onChange={(_, v) => v && (setUpcoming(v === 'up'), setPage(0))} sx={{ mb: 2 }}>
-        <ToggleButton value="up">{t('다가오는 행사')}</ToggleButton>
-        <ToggleButton value="past">{t('전체(지난 행사 포함)')}</ToggleButton>
-      </ToggleButtonGroup>
+      <SegmentTabs
+        value={upcoming ? 'up' : 'past'}
+        onChange={(v) => (setUpcoming(v === 'up'), setPage(0))}
+        ariaLabel={t('행사 기간')}
+        sx={{ mb: 3 }}
+        items={[
+          { value: 'up', label: t('다가오는 행사') },
+          { value: 'past', label: t('전체(지난 행사 포함)') },
+        ]}
+      />
 
       {list.isError && <Alert severity="error" sx={{ mb: 2 }}>{errorMessage(list.error)}</Alert>}
 
@@ -103,7 +109,7 @@ export default function EventsView() {
                         <Typography variant="body2" sx={{ fontWeight: 600 }}>
                           {e.title}
                         </Typography>
-                        {e.status === 'CANCELED' && <Chip size="small" label={t('취소')} />}
+                        {e.status === 'CANCELED' && <StatusBadge kind="ended" label={t('취소')} />}
                       </Stack>
                       {e.location && (
                         <Typography variant="caption" color="text.secondary">
@@ -117,7 +123,7 @@ export default function EventsView() {
                       {e.rsvpEnabled ? (
                         <Stack direction="row" spacing={1} alignItems="center">
                           <span>{dateTime(e.rsvpDeadline)}</span>
-                          {closed && <Chip size="small" label={t('마감')} variant="outlined" />}
+                          {closed && <StatusBadge kind="ended" label={t('마감')} />}
                         </Stack>
                       ) : (
                         t('안 받음')
@@ -154,7 +160,7 @@ export function TallyBar({ tally, large }: { tally: Tally; large?: boolean }) {
       <Typography variant={large ? 'body2' : 'caption'}>
         {t('참석 {0} · 불참 {1} · 미응답 {2} / {3}명', { 0: tally.attend, 1: tally.absent, 2: tally.pending, 3: tally.targets })}
       </Typography>
-      <Box sx={{ display: 'flex', height: large ? 10 : 6, borderRadius: 3, overflow: 'hidden', bgcolor: 'grey.200', mt: 0.5 }}>
+      <Box sx={{ display: 'flex', height: large ? 10 : 6, borderRadius: 3, overflow: 'hidden', bgcolor: color.neutral, mt: 0.5 }}>
         {seg(tally.attend, 'success.main')}
         {seg(tally.absent, 'error.main')}
       </Box>

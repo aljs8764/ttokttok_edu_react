@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Chip from '@mui/material/Chip';
 import Grid from '@mui/material/Grid';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -20,6 +19,7 @@ import { api, errorMessage } from '@/lib/api';
 import type { Album } from '@/lib/comm';
 import { dateTime } from '@/lib/format';
 import { useT } from '@/lib/i18n';
+import MenuIdChip from '@/components/ui/MenuIdChip';
 
 interface EventAlbumLink { albumId: string; title: string; itemCount: number; createdAt: string }
 interface EventReview { id: string; eventId: string; studentName: string; authorName: string; body: string; hidden: boolean; mine: boolean; createdAt: string }
@@ -49,7 +49,7 @@ export default function EventFollowUpPanel({ eventId, instId }: { eventId: strin
     <Paper sx={{ p: 2.5, mt: 2 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
         <Typography variant="h4" sx={{ flex: 1 }}>{t('행사 사진·후기')}</Typography>
-        <Chip size="small" variant="outlined" label="EVT-009" />
+        <MenuIdChip id="EVT-009" />
       </Box>
       {err && <Alert severity="error" sx={{ mb: 2 }}>{errorMessage(err)}</Alert>}
       <Grid container spacing={3}>

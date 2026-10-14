@@ -64,22 +64,21 @@ export default function AuditTab() {
 
   return (
     <>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mb: 2 }}>
-        <TextField select size="small" label={t('작업')} value={action} onChange={(e) => (setAction(e.target.value), setPage(0))} sx={{ minWidth: 200 }}>
-          <MenuItem value="">{t('전체')}</MenuItem>
-          {Object.entries(ACTIONS).map(([k, v]) => (
-            <MenuItem key={k} value={k}>
-              {t(v)}
-            </MenuItem>
-          ))}
-        </TextField>
-        <DatePicker label={t('시작일')} value={from} onChange={(v) => (setFrom(v), setPage(0))} format="YYYY-MM-DD" maxDate={to ?? undefined} slotProps={{ textField: { size: 'small' } }} />
-        <DatePicker label={t('종료일')} value={to} onChange={(v) => (setTo(v), setPage(0))} format="YYYY-MM-DD" minDate={from ?? undefined} disableFuture slotProps={{ textField: { size: 'small' } }} />
-      </Stack>
-
       {logs.isError && <Alert severity="error" sx={{ mb: 2 }}>{errorMessage(logs.error)}</Alert>}
 
-      <Paper>
+      <Paper sx={{ pt: 2.5, overflow: 'hidden' }}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} useFlexGap flexWrap="wrap" sx={{ px: 3, pb: 2 }}>
+          <TextField select size="small" label={t('작업')} value={action} onChange={(e) => (setAction(e.target.value), setPage(0))} sx={{ minWidth: 200 }}>
+            <MenuItem value="">{t('전체')}</MenuItem>
+            {Object.entries(ACTIONS).map(([k, v]) => (
+              <MenuItem key={k} value={k}>
+                {t(v)}
+              </MenuItem>
+            ))}
+          </TextField>
+          <DatePicker label={t('시작일')} value={from} onChange={(v) => (setFrom(v), setPage(0))} format="YYYY-MM-DD" maxDate={to ?? undefined} slotProps={{ textField: { size: 'small' } }} />
+          <DatePicker label={t('종료일')} value={to} onChange={(v) => (setTo(v), setPage(0))} format="YYYY-MM-DD" minDate={from ?? undefined} disableFuture slotProps={{ textField: { size: 'small' } }} />
+        </Stack>
         {logs.isFetching && <LinearProgress />}
         <TableContainer>
           <Table size="small">

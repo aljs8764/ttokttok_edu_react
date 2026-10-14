@@ -6,6 +6,7 @@ import type * as Leaflet from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { DEFAULT_CENTER, type LatLng } from '@/lib/shuttle';
 import { useT } from '@/lib/i18n';
+import { chart, color, tone } from '@/theme/tokens';
 
 export interface MapStop extends LatLng { name: string; seq: number; passed?: boolean; etaMinutes?: number | null }
 export interface MapVehicle extends LatLng { id: string; label: string; stale?: boolean }
@@ -77,15 +78,15 @@ export default function ShuttleMap({
     g.clearLayers();
     const sorted = [...stops].sort((a, b) => a.seq - b.seq);
     if (sorted.length > 1) {
-      L.polyline(sorted.map((s) => [s.lat, s.lng] as [number, number]), { color: '#94a3b8', weight: 3, dashArray: '6 6' }).addTo(g);
+      L.polyline(sorted.map((s) => [s.lat, s.lng] as [number, number]), { color: chart.gray, weight: 3, dashArray: '6 6' }).addTo(g);
     }
     if (path.length > 1) {
-      L.polyline(path.map((p) => [p.lat, p.lng] as [number, number]), { color: '#2563eb', weight: 4 }).addTo(g);
+      L.polyline(path.map((p) => [p.lat, p.lng] as [number, number]), { color: chart.blue, weight: 4 }).addTo(g);
     }
     sorted.forEach((s) => {
       const eta = s.passed ? t('지남') : s.etaMinutes != null ? t('{0}분', { 0: s.etaMinutes }) : '';
       L.circleMarker([s.lat, s.lng], {
-        radius: 8, weight: 2, color: s.passed ? '#94a3b8' : '#0f766e', fillColor: '#fff', fillOpacity: 1,
+        radius: 8, weight: 2, color: s.passed ? chart.gray : tone.green.fg, fillColor: '#FFFFFF', fillOpacity: 1,
       })
         .bindTooltip(`${s.seq}. ${s.name}${eta ? ` · ${eta}` : ''}`, { permanent: sorted.length <= 12, direction: 'top', offset: [0, -8] })
         .addTo(g);
@@ -93,7 +94,7 @@ export default function ShuttleMap({
     vehicles.forEach((v) => {
       const icon = L.divIcon({
         className: '',
-        html: `<div style="background:${v.stale ? '#9ca3af' : '#f59e0b'};color:#111;border:2px solid #fff;border-radius:16px;padding:2px 8px;font-size:12px;font-weight:700;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.35)">🚌 ${escapeHtml(v.label)}</div>`,
+        html: `<div style="background:${v.stale ? chart.gray : color.warning};color:${color.primary};border:2px solid #fff;border-radius:16px;padding:2px 8px;font-size:12px;font-weight:700;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.35)">${escapeHtml(v.label)}</div>`,
         iconAnchor: [20, 12],
       });
       L.marker([v.lat, v.lng], { icon }).addTo(g);

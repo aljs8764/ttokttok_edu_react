@@ -19,7 +19,7 @@ export default function TicketThread({ ticket, pending, onReply }: { ticket: Tic
     <Stack spacing={1.5}>
       {ticket.messages?.map((m) => (
         <Box key={m.id} sx={{ display: 'flex', justifyContent: m.fromOperator ? 'flex-end' : 'flex-start' }}>
-          <Paper variant="outlined" sx={{ p: 1.5, maxWidth: '85%', bgcolor: m.fromOperator ? 'action.hover' : 'background.paper' }}>
+          <Paper variant="outlined" sx={{ px: 1.75, py: 1.25, maxWidth: '85%', borderRadius: '14px', bgcolor: m.fromOperator ? 'background.default' : 'background.paper' }}>
             <Typography variant="caption" color="text.secondary">
               {m.fromOperator ? t('운영팀') : m.authorName} · {dayjs(m.createdAt).format('M/D HH:mm')}
             </Typography>

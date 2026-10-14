@@ -249,7 +249,7 @@ function WorkAndMemos({ d, loading, readOnly, instId }: P & { readOnly: boolean;
   return (
     <WidgetCard title={t('내 근무 · 공지')} menuId="DASH-023" loading={loading}>
       {d && w && (
-        <Box sx={{ p: 2 }}>
+        <Box sx={{ px: 3, pb: 2 }}>
           {(punch.isError || ack.isError) && <Alert severity="error" sx={{ mb: 1 }}>{errorMessage(punch.error ?? ack.error)}</Alert>}
           <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" useFlexGap>
             <Box sx={{ flex: 1, minWidth: 180 }}>

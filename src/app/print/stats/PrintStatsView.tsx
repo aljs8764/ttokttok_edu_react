@@ -9,12 +9,13 @@ import { useSession } from '@/lib/session';
 import { ratioText, type ClassroomComparison, type EnrollmentStatusReport, type EnrollmentTrendReport, type KpiReport } from '@/lib/stats';
 import { BarChart, Donut, LineChart } from '@/components/charts';
 import { useT } from '@/lib/i18n';
+import { chart, color } from '@/theme/tokens';
 
-const BLUE = '#1b2559';
-const GREEN = '#2e9e6b';
-const ORANGE = '#e8913a';
-const RED = '#d6453d';
-const GRAY = '#9aa0b4';
+const BLUE = chart.primary;
+const GREEN = chart.green;
+const ORANGE = chart.amber;
+const RED = chart.red;
+const GRAY = chart.gray;
 
 /**
  * STAT-001·008 PDF 리포트 — 관리자 레이아웃 밖의 A4 인쇄용 화면.
@@ -56,24 +57,24 @@ export default function PrintStatsView() {
     <>
       <style>{`
         @page { size: A4; margin: 14mm 12mm; }
-        body { background: #fff !important; color: #1B2559; }
+        body { background: #fff !important; color: ${color.primary}; }
         .doc { max-width: 186mm; margin: 0 auto; font-size: 10pt; }
-        .head { display: flex; align-items: flex-end; border-bottom: 2px solid #1B2559; padding-bottom: 4mm; margin-bottom: 6mm; }
+        .head { display: flex; align-items: flex-end; border-bottom: 2px solid ${color.primary}; padding-bottom: 4mm; margin-bottom: 6mm; }
         .head h1 { font-size: 18pt; margin: 0; }
-        .head .meta { margin-left: auto; text-align: right; color: #5B6385; font-size: 9pt; }
-        .brand span { color: #FF6B4A; }
-        h2 { font-size: 12.5pt; margin: 7mm 0 3mm; border-left: 4px solid #FF6B4A; padding-left: 2.5mm; break-after: avoid; }
+        .head .meta { margin-left: auto; text-align: right; color: ${color.textSecondary}; font-size: 9pt; }
+        .brand span { color: ${color.accent}; }
+        h2 { font-size: 12.5pt; margin: 7mm 0 3mm; border-left: 4px solid ${color.accent}; padding-left: 2.5mm; break-after: avoid; }
         .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3mm; }
-        .kpi { border: 1px solid #DDE1EE; border-radius: 2mm; padding: 3mm; }
-        .kpi .l { font-size: 8.5pt; color: #5B6385; } .kpi .v { font-size: 15pt; font-weight: 800; margin-top: 1mm; }
+        .kpi { border: 1px solid ${color.divider}; border-radius: 2mm; padding: 3mm; }
+        .kpi .l { font-size: 8.5pt; color: ${color.textSecondary}; } .kpi .v { font-size: 15pt; font-weight: 800; margin-top: 1mm; }
         table { width: 100%; border-collapse: collapse; font-size: 9pt; }
-        th, td { border-bottom: 1px solid #E6E9F2; padding: 1.6mm 2mm; text-align: right; }
+        th, td { border-bottom: 1px solid ${color.rowDivider}; padding: 1.6mm 2mm; text-align: right; }
         th:first-child, td:first-child { text-align: left; }
-        th { background: #F4F6FB; font-weight: 700; }
+        th { background: ${color.bg}; font-weight: 700; }
         .block { break-inside: avoid; }
         .two { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
-        .note { color: #5B6385; font-size: 8.5pt; margin-top: 2mm; }
-        .foot { margin-top: 8mm; color: #9AA0B8; font-size: 8pt; text-align: center; }
+        .note { color: ${color.textSecondary}; font-size: 8.5pt; margin-top: 2mm; }
+        .foot { margin-top: 8mm; color: ${chart.gray}; font-size: 8pt; text-align: center; }
         @media screen { body { background: #EEE !important; } .doc { background: #fff; padding: 12mm; margin: 12px auto; box-shadow: 0 1px 6px rgba(0,0,0,.15); } .noprint { display: block; } }
         @media print { .noprint { display: none; } }
       `}</style>

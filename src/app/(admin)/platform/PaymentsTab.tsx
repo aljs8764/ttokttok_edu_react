@@ -33,15 +33,15 @@ export default function PaymentsTab() {
   });
   return (
     <>
-      <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
-        <TextField select size="small" label={t('상태')} value={status} onChange={(e) => setStatus(e.target.value)} sx={{ minWidth: 130 }}>
-          <MenuItem value="">{t('전체')}</MenuItem>
-          {Object.entries(PAYMENT_STATUS).map(([k, v]) => <MenuItem key={k} value={k}>{t(v.label)}</MenuItem>)}
-        </TextField>
-        <TextField size="small" type="month" label={t('월')} value={month} onChange={(e) => setMonth(e.target.value)} slotProps={{ inputLabel: { shrink: true } }} />
-      </Stack>
       {(q.isError || act.isError) && <Alert severity="error" sx={{ mb: 2 }}>{errorMessage(q.error ?? act.error)}</Alert>}
-      <Paper variant="outlined" sx={{ overflowX: 'auto' }}>
+      <Paper sx={{ overflowX: 'auto', pt: 2.5 }}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} useFlexGap flexWrap="wrap" sx={{ px: 3, pb: 2, position: 'sticky', left: 0 }}>
+          <TextField select size="small" label={t('상태')} value={status} onChange={(e) => setStatus(e.target.value)} sx={{ minWidth: 130 }}>
+            <MenuItem value="">{t('전체')}</MenuItem>
+            {Object.entries(PAYMENT_STATUS).map(([k, v]) => <MenuItem key={k} value={k}>{t(v.label)}</MenuItem>)}
+          </TextField>
+          <TextField size="small" type="month" label={t('월')} value={month} onChange={(e) => setMonth(e.target.value)} slotProps={{ inputLabel: { shrink: true } }} />
+        </Stack>
         <Table size="small">
           <TableHead>
             <TableRow><TableCell>{t('기관')}</TableCell><TableCell>{t('플랜')}</TableCell><TableCell>{t('이용 기간')}</TableCell><TableCell align="right">{t('금액')}</TableCell><TableCell>{t('상태')}</TableCell><TableCell>{t('기록일')}</TableCell><TableCell align="right">{t('처리')}</TableCell></TableRow>

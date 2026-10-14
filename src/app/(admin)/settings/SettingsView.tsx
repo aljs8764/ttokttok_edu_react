@@ -48,12 +48,17 @@ export default function SettingsView() {
 
   return (
     <>
-      <PageHeader title={tr('설정')} menuId={meta.menuId} />
-      <Tabs value={current} onChange={(_, v) => router.replace(`${pathname}?tab=${v}`)} variant="scrollable" sx={{ mb: 3 }}>
-        {tabs.map((t) => (
-          <Tab key={t.key} value={t.key} label={tr(t.label)} />
-        ))}
-      </Tabs>
+      <PageHeader
+        title={tr('설정')}
+        menuId={meta.menuId}
+        tabs={
+          <Tabs value={current} onChange={(_, v) => router.replace(`${pathname}?tab=${v}`)} variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile aria-label={tr('설정')}>
+            {tabs.map((t) => (
+              <Tab key={t.key} value={t.key} label={tr(t.label)} />
+            ))}
+          </Tabs>
+        }
+      />
       {current === 'institution' && <InstitutionTab />}
       {current === 'destinations' && <DestinationsTab />}
       {current === 'channels' && <NotificationChannelsTab />}

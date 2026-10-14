@@ -153,15 +153,15 @@ export default function InstitutionsTab() {
   const q = useQuery({ queryKey: ['platform', 'institutions', status, kw], queryFn: () => api.get<PlatformInstitution[]>('platform/institutions', { status, q: kw }) });
   return (
     <>
-      <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
-        <TextField select size="small" label={t('상태')} value={status} onChange={(e) => setStatus(e.target.value as '' | ServiceStatus)} sx={{ minWidth: 130 }}>
-          <MenuItem value="">{t('전체')}</MenuItem>
-          {(Object.keys(SERVICE_STATUS) as ServiceStatus[]).map((s) => <MenuItem key={s} value={s}>{t(SERVICE_STATUS[s].label)}</MenuItem>)}
-        </TextField>
-        <TextField size="small" label={t('기관·대표명 검색')} value={kw} onChange={(e) => setKw(e.target.value)} />
-      </Stack>
       {q.isError && <Alert severity="error" sx={{ mb: 2 }}>{errorMessage(q.error)}</Alert>}
-      <Paper variant="outlined" sx={{ overflowX: 'auto' }}>
+      <Paper sx={{ overflowX: 'auto', pt: 2.5 }}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} useFlexGap flexWrap="wrap" sx={{ px: 3, pb: 2, position: 'sticky', left: 0 }}>
+          <TextField select size="small" label={t('상태')} value={status} onChange={(e) => setStatus(e.target.value as '' | ServiceStatus)} sx={{ minWidth: 130 }}>
+            <MenuItem value="">{t('전체')}</MenuItem>
+            {(Object.keys(SERVICE_STATUS) as ServiceStatus[]).map((s) => <MenuItem key={s} value={s}>{t(SERVICE_STATUS[s].label)}</MenuItem>)}
+          </TextField>
+          <TextField size="small" label={t('기관·대표명 검색')} value={kw} onChange={(e) => setKw(e.target.value)} />
+        </Stack>
         <Table size="small">
           <TableHead>
             <TableRow><TableCell>{t('기관')}</TableCell><TableCell>{t('대표')}</TableCell><TableCell>{t('상태')}</TableCell><TableCell>{t('플랜')}</TableCell><TableCell align="right">{t('원생')}</TableCell><TableCell>{t('바우처')}</TableCell><TableCell>{t('가입일')}</TableCell></TableRow>

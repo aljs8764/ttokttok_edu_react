@@ -22,6 +22,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, errorMessage } from '@/lib/api';
 import { LineChart } from '@/components/charts';
 import { useT } from '@/lib/i18n';
+import KpiCard from '@/components/ui/KpiCard';
+import { chart } from '@/theme/tokens';
 
 interface UsageRow {
   institutionId: string; institutionName: string; serviceStatus: string; requests: number; errors: number; denied: number; throttled: number;
@@ -46,13 +48,7 @@ const KIND: Record<string, { label: string; color: 'error' | 'warning' | 'info' 
 const n = (v: number) => v.toLocaleString('ko-KR');
 
 function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
-  return (
-    <Paper sx={{ p: 2 }}>
-      <Typography variant="caption" color="text.secondary">{label}</Typography>
-      <Typography variant="h3">{value}</Typography>
-      {sub && <Typography variant="caption" color="text.secondary">{sub}</Typography>}
-    </Paper>
-  );
+  return <KpiCard size="md" label={label} value={value} footer={sub && <Typography component="span" sx={{ fontSize: 13, color: 'text.secondary' }}>{sub}</Typography>} />;
 }
 
 /** SAAS-006 기관별 사용량·이상 탐지 */
@@ -109,7 +105,7 @@ export default function UsageTab() {
         </Box>
       )}
 
-      <Paper sx={{ p: 2.5 }}>
+      <Paper sx={{ px: 3, py: 2.5 }}>
         <Stack direction="row" alignItems="center" sx={{ mb: 1 }}>
           <Typography variant="h4" sx={{ flex: 1 }}>{t('이상 탐지 경고')}</Typography>
           <ToggleButtonGroup exclusive size="small" value={openOnly} onChange={(_, v) => v !== null && setOpenOnly(v)}>
@@ -142,7 +138,7 @@ export default function UsageTab() {
         </Table>
       </Paper>
 
-      <Paper sx={{ p: 2.5 }}>
+      <Paper sx={{ px: 3, py: 2.5 }}>
         <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
           <Typography variant="h4" sx={{ flex: 1 }}>{daily ? t('일별') : t('시간별')}{' '}{t('요청')}</Typography>
           <TextField select size="small" label={t('기관')} value={inst} onChange={(e) => setInst(e.target.value)} sx={{ minWidth: 220 }}>
@@ -153,9 +149,9 @@ export default function UsageTab() {
         <LineChart
           labels={grouped.map((g) => g.label)}
           series={[
-            { name: t('요청'), color: '#1b2559', values: grouped.map((g) => g.requests) },
-            { name: '5xx', color: '#d6453d', values: grouped.map((g) => g.errors) },
-            { name: '401·403', color: '#e8913a', values: grouped.map((g) => g.denied) },
+            { name: t('요청'), color: chart.primary, values: grouped.map((g) => g.requests) },
+            { name: '5xx', color: chart.red, values: grouped.map((g) => g.errors) },
+            { name: '401·403', color: chart.amber, values: grouped.map((g) => g.denied) },
           ]}
         />
       </Paper>

@@ -4,7 +4,6 @@ import { useMemo, useState } from 'react';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Chip from '@mui/material/Chip';
 import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
 import Skeleton from '@mui/material/Skeleton';
@@ -29,6 +28,10 @@ import PageHeader from '@/components/PageHeader';
 import StatusChip from '@/components/StatusChip';
 import ChangeStatusDialog from '@/components/ChangeStatusDialog';
 import { useT } from '@/lib/i18n';
+import SegmentTabs from '@/components/ui/SegmentTabs';
+import StatusBadge from '@/components/ui/StatusBadge';
+import EmptyState from '@/components/ui/EmptyState';
+import { font, tone as TONES } from '@/theme/tokens';
 
 type Filter = 'ALL' | 'NOT_ARRIVED' | 'ABSENT' | 'LATE';
 
@@ -89,24 +92,26 @@ export default function DailyReportView() {
         }
       />
 
-      <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
-        {(
+      <SegmentTabs<Filter>
+        value={filter}
+        onChange={setFilter}
+        ariaLabel={t('출결 필터')}
+        sx={{ mb: 3 }}
+        items={(
           [
             ['ALL', '전체'],
             ['NOT_ARRIVED', '미등원'],
             ['LATE', '지각'],
             ['ABSENT', '결석'],
           ] as [Filter, string][]
-        ).map(([v, l]) => (
-          <Chip key={v} label={t(l)} color={filter === v ? 'primary' : 'default'} variant={filter === v ? 'filled' : 'outlined'} onClick={() => setFilter(v)} />
-        ))}
-      </Stack>
+        ).map(([v, l]) => ({ value: v, label: t(l) }))}
+      />
 
       {report.isError && <Alert severity="error">{errorMessage(report.error)}</Alert>}
       {report.isLoading && <Skeleton variant="rounded" height={240} />}
       {report.data?.classes.length === 0 && (
-        <Paper sx={{ p: 4, textAlign: 'center' }}>
-          <Typography color="text.secondary">{t('볼 수 있는 반이 없습니다')}</Typography>
+        <Paper>
+          <EmptyState title={t('볼 수 있는 반이 없습니다')} />
         </Paper>
       )}
       <Stack spacing={2}>
@@ -142,13 +147,13 @@ function ClassSection({ date, summary, filter, onEdit }: { date: string; summary
   const rows = summary.rows.filter((r) => matches(r, filter, notArrived));
 
   return (
-    <Paper>
-      <Box sx={{ p: 2, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1.5 }}>
-        <Typography variant="h4">{summary.classroomName}</Typography>
+    <Paper component="section" aria-label={summary.classroomName} sx={{ overflow: 'hidden' }}>
+      <Box sx={{ px: 3, pt: 2.5, pb: 2, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1.5 }}>
+        <Typography variant="h4" component="h3">{summary.classroomName}</Typography>
         <Typography variant="body2" color="text.secondary">
           {summary.startTime.slice(0, 5)}~{summary.endTime.slice(0, 5)}
         </Typography>
-        {!summary.heldToday && <Chip size="small" label={t('수업 없는 날')} />}
+        {!summary.heldToday && <StatusBadge kind="ended" label={t('수업 없는 날')} />}
         <Box sx={{ flex: 1 }} />
         <Count label={t('등원율')} value={percent(c.attendanceRate)} />
         <Count label={t('등원')} value={c.present} />
@@ -158,7 +163,7 @@ function ClassSection({ date, summary, filter, onEdit }: { date: string; summary
         <Count label={t('예정')} value={c.scheduled} />
       </Box>
       <TableContainer>
-        <Table size="small">
+        <Table sx={{ minWidth: 680, '& .MuiTableCell-root:first-of-type': { pl: 3 }, '& .MuiTableCell-root:last-of-type': { pr: 3 } }}>
           <TableHead>
             <TableRow>
               <TableCell>{t('이름')}</TableCell>
@@ -183,14 +188,14 @@ function ClassSection({ date, summary, filter, onEdit }: { date: string; summary
                 <TableCell>
                   <StatusChip status={r.status as AttendanceStatus} isLate={r.isLate} isEarlyLeave={r.isEarlyLeave} />
                 </TableCell>
-                <TableCell>{time(r.checkInAt)}</TableCell>
+                <TableCell sx={{ fontFamily: font.mono, fontSize: 13 }}>{time(r.checkInAt)}</TableCell>
                 <TableCell>
-                  {time(r.checkOutAt)}
+                  <Box component="span" sx={{ fontFamily: font.mono, fontSize: 13 }}>{time(r.checkOutAt)}</Box>
                   {r.nextDestinationName ? ` → ${r.nextDestinationName}` : ''}
                 </TableCell>
                 <TableCell sx={{ color: 'text.secondary', maxWidth: 240 }}>{r.absenceReason ?? ''}</TableCell>
                 <TableCell align="right">
-                  <Button size="small" disabled={!r.dayId} onClick={() => onEdit(r)} title={r.dayId ? '' : t('출결 기록이 아직 없습니다 (수업 없는 날·배치 전)')}>
+                  <Button size="small" variant="outlined" disabled={!r.dayId} onClick={() => onEdit(r)} title={r.dayId ? '' : t('출결 기록이 아직 없습니다 (수업 없는 날·배치 전)')}>
                     {t('변경')}
                   </Button>
                 </TableCell>
@@ -209,7 +214,7 @@ function Count({ label, value, tone }: { label: string; value: number | string; 
       <Typography variant="caption" color="text.secondary" display="block">
         {label}
       </Typography>
-      <Typography variant="subtitle1" sx={{ color: tone === 'error' && value ? 'error.main' : 'text.primary' }}>
+      <Typography variant="subtitle1" sx={{ color: tone === 'error' && value ? TONES.red.fg : 'text.primary' }}>
         {value}
       </Typography>
     </Box>

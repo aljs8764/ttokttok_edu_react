@@ -94,7 +94,7 @@ export default function InstitutionTab() {
           {tr('기관 정보는 원장만 수정할 수 있습니다.')}
         </Alert>
       )}
-      <Grid container spacing={2}>
+      <Grid container spacing={3}>
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField label={tr('기관명')} required fullWidth value={name} onChange={(e) => (setName(e.target.value), setSaved(false))} disabled={ro} inputProps={{ maxLength: 100 }} />
         </Grid>
@@ -180,7 +180,7 @@ export default function InstitutionTab() {
       {owner && (
         <Stack direction="row" spacing={1} justifyContent="flex-end" alignItems="center" sx={{ mt: 3 }}>
           {saved && (
-            <Typography variant="body2" color="success.main" sx={{ mr: 1 }}>
+            <Typography variant="body2" color="success.dark" sx={{ mr: 1 }}>
               {tr('저장했습니다')}
             </Typography>
           )}

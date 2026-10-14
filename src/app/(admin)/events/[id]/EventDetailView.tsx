@@ -115,9 +115,9 @@ export default function EventDetailView({ id }: { id: string }) {
       {canceled && <Alert severity="warning" sx={{ mb: 2 }}>{t('취소된 행사입니다.')}</Alert>}
 
       {s && e && (
-        <Grid container spacing={2}>
+        <Grid container spacing={3}>
           <Grid size={{ xs: 12, md: 4 }}>
-            <Paper sx={{ p: 2.5 }}>
+            <Paper sx={{ px: 3, py: 2.5 }}>
               <Info label={t('일시')}>
                 {dateTime(e.startsAt)}
                 {e.endsAt ? ` ~ ${dateTime(e.endsAt)}` : ''}
@@ -136,7 +136,7 @@ export default function EventDetailView({ id }: { id: string }) {
           </Grid>
 
           <Grid size={{ xs: 12, md: 8 }}>
-            <Paper sx={{ p: 2.5 }}>
+            <Paper sx={{ px: 3, py: 2.5 }}>
               {!e.rsvpEnabled ? (
                 <Typography variant="body2" color="text.secondary">
                   {t('참석 여부를 받지 않는 행사입니다.')}
