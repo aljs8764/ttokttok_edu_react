@@ -50,6 +50,16 @@ export interface PlatformInstitutionDetail extends PlatformInstitution {
   card: { brand: string | null; last4: string } | null;
   staffCount: number;
   recentPayments: PlatformPayment[];
+  /** 운영사가 만든 기관의 가장 최근 원장 초대 */
+  ownerInvitation: OwnerInvitation | null;
+}
+
+export interface OwnerInvitation {
+  email: string;
+  name: string;
+  status: 'PENDING' | 'ACCEPTED' | 'REVOKED' | 'EXPIRED';
+  expiresAt: string;
+  acceptedAt: string | null;
 }
 
 export interface Voucher {

@@ -12,7 +12,7 @@ npm install
 npm run dev                     # http://localhost:3000
 ```
 
-백엔드(`:8080`)와 PostgreSQL 이 떠 있어야 한다. 교직원 초대 메일 링크가 이 웹으로 오도록 백엔드에 `STAFF_INVITE_BASE_URL=http://localhost:3000/invite/` 를 준다. 원장 계정은 백엔드 `POST /api/v1/auth/institutions` 로 만든다.
+백엔드(`:8080`)와 PostgreSQL 이 떠 있어야 한다. 교직원 초대 메일 링크가 이 웹으로 오도록 백엔드에 `STAFF_INVITE_BASE_URL=http://localhost:3000/invite/` 를 준다. 원장 계정은 `/signup`(기관 가입) 화면에서 만들거나, 운영 콘솔(`/platform` → 기관 → 기관 추가)에서 운영사가 기관을 등록하고 원장에게 초대 메일을 보낸다.
 
 ## 구조
 
