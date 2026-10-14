@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, type FormEvent } from 'react';
+import NextLink from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
@@ -207,6 +208,10 @@ export default function LoginForm() {
               <Button type="submit" variant="contained" size="large" disabled={pending || !loginId || !password}>
                 {t('로그인')}
               </Button>
+              <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
+                {t('처음 오셨나요?')}{' '}
+                <Link component={NextLink} href="/signup" sx={{ fontWeight: 600 }}>{t('기관 가입하기')}</Link>
+              </Typography>
             </Stack>
           </Box>
         )}

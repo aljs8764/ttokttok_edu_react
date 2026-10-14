@@ -56,18 +56,19 @@ export default function InviteAcceptForm({ token }: { token: string }) {
       setPending(false);
       return setError((body as ApiErrorBody | null)?.message ?? t('초대를 수락하지 못했습니다'));
     }
-    window.location.href = body?.needsInstitution ? '/login?step=institution' : '/dashboard';
+    // 운영사가 등록한 기관의 원장은 바로 시작하기(ONB-001)로
+    window.location.href = body?.needsInstitution ? '/login?step=institution' : info?.role === 'OWNER' ? '/onboarding' : '/dashboard';
   };
 
   return (
-    <AuthLayout title="교직원 초대" menuId="STF-003">
+    <AuthLayout title={info?.role === 'OWNER' ? '원장 계정 초대' : '교직원 초대'} menuId={info?.role === 'OWNER' ? 'SAAS-001' : 'STF-003'}>
 
         {!info && !loadError && <CircularProgress size={24} />}
         {loadError && (
           <Stack spacing={2}>
             <Alert severity="warning">{loadError}</Alert>
             <Typography variant="body2" color="text.secondary">
-              {t('링크가 만료되었거나 취소되었을 수 있습니다. 원장님께 다시 초대를 요청하세요.')}
+              {t('링크가 만료되었거나 취소되었을 수 있습니다. 초대한 곳에 다시 초대를 요청하세요.')}
             </Typography>
             <Button component={NextLink} href="/login">
               {t('로그인 화면으로')}
