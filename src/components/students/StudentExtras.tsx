@@ -60,7 +60,7 @@ function HealthCard({ studentId }: { studentId: string }) {
     <Paper sx={{ px: 3, py: 2.5, height: '100%' }}>
       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
         <WarningIcon color="warning" fontSize="small" />
-        <Typography variant="h3">{tr('건강·알레르기 특이사항')}</Typography>
+        <Typography variant="h4" component="h3">{tr('건강·알레르기 특이사항')}</Typography>
         <MenuIdChip id="STU-009" />
       </Stack>
       <Typography variant="caption" color="text.secondary">
@@ -105,7 +105,7 @@ function TagsCard({ studentId }: { studentId: string }) {
   return (
     <Paper sx={{ px: 3, py: 2.5, height: '100%' }}>
       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
-        <Typography variant="h3">{tr('태그·그룹')}</Typography>
+        <Typography variant="h4" component="h3">{tr('태그·그룹')}</Typography>
         <MenuIdChip id="STU-011" />
       </Stack>
       <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
@@ -153,7 +153,7 @@ function CounselCard({ studentId }: { studentId: string }) {
   return (
     <Paper sx={{ px: 3, py: 2.5 }}>
       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
-        <Typography variant="h3">{tr('상담일지·메모')}</Typography>
+        <Typography variant="h4" component="h3">{tr('상담일지·메모')}</Typography>
         <MenuIdChip id="STU-010" />
       </Stack>
       <Stack spacing={1.5}>

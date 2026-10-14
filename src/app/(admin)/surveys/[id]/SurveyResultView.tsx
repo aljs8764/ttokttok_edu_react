@@ -16,6 +16,9 @@ import { dateTime } from '@/lib/format';
 import { useSession } from '@/lib/session';
 import PageHeader from '@/components/PageHeader';
 import { useT } from '@/lib/i18n';
+import SectionCard from '@/components/ui/SectionCard';
+import StatusBadge from '@/components/ui/StatusBadge';
+import ProgressBar from '@/components/ui/ProgressBar';
 
 /** NTC-010 설문 결과 — 문항별 집계, 응답자·미응답자, 미응답 재푸시(30분 쿨타임), 마감 */
 export default function SurveyResultView({ id }: { id: string }) {
@@ -65,26 +68,35 @@ export default function SurveyResultView({ id }: { id: string }) {
       {msg && <Alert severity="success" sx={{ mb: 2 }}>{msg}</Alert>}
       {res.isFetching && <LinearProgress />}
       {s && (
-        <Stack spacing={2} sx={{ maxWidth: 900 }}>
-          <Paper sx={{ px: 3, py: 2.5 }}>
-            <Stack direction="row" spacing={1} alignItems="center">
-              <Chip size="small" label={s.status === 'OPEN' ? tr('진행 중') : tr('마감')} color={s.status === 'OPEN' ? 'primary' : 'default'} />
-              <Typography variant="body2">
-                {tr('응답 {0}/{1}명 ({2}%)', { 0: s.responses, 1: s.recipients, 2: s.recipients ? Math.round((s.responses / s.recipients) * 100) : 0 })}
-              </Typography>
-            </Stack>
+        <Stack spacing={3} sx={{ maxWidth: 960 }}>
+          <SectionCard
+            title={<Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>{tr('응답 현황')}<StatusBadge kind={s.status === 'OPEN' ? 'checkedIn' : 'ended'} label={s.status === 'OPEN' ? tr('진행 중') : tr('마감')} /></Box>}
+            menuId="NTC-010"
+          >
+            <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+              {[
+                [tr('응답률'), `${s.recipients ? Math.round((s.responses / s.recipients) * 100) : 0}%`],
+                [tr('응답'), tr('{0}/{1}명', { 0: s.responses, 1: s.recipients })],
+                [tr('미응답'), tr('{0}명', { 0: res.data?.nonRespondents.length ?? 0 })],
+              ].map(([label, value]) => (
+                <Box key={label} sx={{ flex: '1 1 160px', p: 1.75, borderRadius: '10px', bgcolor: 'background.default' }}>
+                  <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>{label}</Typography>
+                  <Typography sx={{ fontSize: 24, fontWeight: 700 }}>{value}</Typography>
+                </Box>
+              ))}
+            </Box>
             {s.description && (
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1, whiteSpace: 'pre-wrap' }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5, whiteSpace: 'pre-wrap' }}>
                 {s.description}
               </Typography>
             )}
-          </Paper>
+          </SectionCard>
 
           {res.data?.questions.map((r, i) => {
             const total = Object.values(r.counts).reduce((a, b) => a + b, 0);
             const keys = r.question.type === 'RATING' ? ['1', '2', '3', '4', '5'] : r.question.options;
             return (
-              <Paper key={r.question.id} sx={{ p: 2.5 }}>
+              <Paper key={r.question.id} sx={{ px: 3, py: 2.5 }}>
                 <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                   Q{i + 1}. {r.question.text}
                   {r.question.required && <Typography component="span" color="error"> *</Typography>}
@@ -108,10 +120,11 @@ export default function SurveyResultView({ id }: { id: string }) {
                       const n = r.counts[k] ?? 0;
                       return (
                         <Box key={k}>
-                          <Typography variant="body2">
-                            {r.question.type === 'RATING' ? tr('{0}점', { 0: k }) : k}{' '}{tr('· {0}명{1}', { 0: n, 1: total ? ` (${Math.round((n / total) * 100)}%)` : '' })}
-                          </Typography>
-                          <LinearProgress variant="determinate" value={total ? (n / total) * 100 : 0} sx={{ height: 8, borderRadius: 4 }} />
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1, fontSize: 14, mb: 0.5 }}>
+                            <span>{r.question.type === 'RATING' ? tr('{0}점', { 0: k }) : k}</span>
+                            <Box component="strong" sx={{ whiteSpace: 'nowrap' }}>{tr('{0}명', { 0: n })}{total ? ` · ${Math.round((n / total) * 100)}%` : ''}</Box>
+                          </Box>
+                          <ProgressBar value={total ? (n / total) * 100 : 0} tone="info" height={8} label={String(k)} />
                         </Box>
                       );
                     })}
@@ -126,7 +139,7 @@ export default function SurveyResultView({ id }: { id: string }) {
               {tr('미응답 {0}명', { 0: res.data?.nonRespondents.length ?? 0 })}
             </Typography>
             <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 0.5, mt: 1 }}>
-              {res.data?.nonRespondents.map((n, k) => <Chip key={k} size="small" label={n} variant="outlined" />)}
+              {res.data?.nonRespondents.map((n, k) => <StatusBadge key={k} kind="noResponse" label={n} />)}
             </Stack>
             <Typography variant="subtitle1" sx={{ fontWeight: 700, mt: 2 }}>
               {tr('응답자 {0}명', { 0: res.data?.respondents.length ?? 0 })}

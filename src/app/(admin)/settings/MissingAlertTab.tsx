@@ -37,8 +37,8 @@ export default function MissingAlertTab() {
   const err = q.error ?? save.error;
 
   return (
-    <Paper variant="outlined" sx={{ p: 2.5, maxWidth: 640 }}>
-      <Typography variant="h3" gutterBottom>{t('미등원 초과 경고')}</Typography>
+    <Paper variant="outlined" sx={{ px: 3, py: 2.5, maxWidth: 640 }}>
+      <Typography variant="h4" component="h3" gutterBottom>{t('미등원 초과 경고')}</Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
         {t('수업 시작 후 정한 시간이 지나도 등원 기록이 없으면 원장·실장과 담당 교사에게 알림을 보냅니다. 결석 신청한 원생은 빼고, 지각 신청이 있으면 예상 등원 시각을 기준으로 늦춰 보냅니다. 다른 기관에서 같은 날 하원한 기록이 있으면(다기관 아이) 어디서 몇 시에 하원했는지도 함께 알려 드립니다.')}
       </Typography>

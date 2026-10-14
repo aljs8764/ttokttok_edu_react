@@ -52,7 +52,7 @@ export default function MetricsTab() {
         <Stat label="CAC" value={m?.cac != null ? won(m.cac) : '-'} sub={tr('마케팅 비용 ÷ 신규 유료')} />
         <Stat label={tr('마케팅·영업 비용')} value={m?.marketingCost != null ? won(m.marketingCost) : tr('미입력')} />
       </Box>
-      <Paper variant="outlined" sx={{ p: 2 }}>
+      <Paper variant="outlined" sx={{ px: 3, py: 2.5 }}>
         <Typography variant="subtitle2" sx={{ mb: 1 }}>{tr('{0} 마케팅·영업 비용 입력 (CAC 계산용)', { 0: month })}</Typography>
         <Stack direction="row" spacing={1}>
           <TextField size="small" label={tr('금액(원)')} value={cost} onChange={(e) => setCost(e.target.value.replace(/[^\d,]/g, ''))} />

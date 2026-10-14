@@ -4,9 +4,8 @@ import { useState } from 'react';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Card from '@mui/material/Card';
-import CardActionArea from '@mui/material/CardActionArea';
-import CardContent from '@mui/material/CardContent';
+import ButtonBase from '@mui/material/ButtonBase';
+import Paper from '@mui/material/Paper';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -26,11 +25,14 @@ import AttachmentField from '@/components/AttachmentField';
 import PageHeader from '@/components/PageHeader';
 import TargetPicker, { toTargetRequest } from '@/components/TargetPicker';
 import { useT } from '@/lib/i18n';
+import SectionCard from '@/components/ui/SectionCard';
+import EmptyState from '@/components/ui/EmptyState';
+import { color } from '@/theme/tokens';
 
 const isVideo = (f: FileRef) => f.mime.startsWith('video/');
 
 function Thumb({ f, size = 96 }: { f: FileRef; size?: number }) {
-  const sx = { width: size, height: size, objectFit: 'cover', borderRadius: 1, bgcolor: 'action.hover' } as const;
+  const sx = { width: size, height: size, flexShrink: 0, objectFit: 'cover', borderRadius: '8px', bgcolor: color.neutral } as const;
   if (!f.downloadUrl) return <Box sx={sx} />;
   return isVideo(f) ? <Box component="video" src={f.downloadUrl} sx={sx} muted preload="metadata" /> : <Box component="img" src={f.downloadUrl} alt={f.name} sx={sx} />;
 }
@@ -45,6 +47,8 @@ export default function AlbumsView() {
   const [openId, setOpenId] = useState<string | null>(null);
 
   const list = useQuery({ queryKey: ['albums', instId], queryFn: () => api.get<Album[]>('albums', { size: 30 }), enabled: !!instId });
+  // 디자인: 왼쪽 앨범 목록 + 오른쪽 선택한 앨범 (기본은 가장 최근 앨범)
+  const current = openId && list.data?.some((x) => x.id === openId) ? openId : list.data?.[0]?.id ?? null;
 
   return (
     <>
@@ -59,39 +63,46 @@ export default function AlbumsView() {
         }
       />
       {list.isError && <Alert severity="error" sx={{ mb: 2 }}>{errorMessage(list.error)}</Alert>}
-      {list.isFetching && <LinearProgress />}
+      {list.isFetching && !list.data && <LinearProgress />}
       {list.data?.length === 0 && (
-        <Typography color="text.secondary" align="center" sx={{ py: 6 }}>
-          {t('올린 앨범이 없습니다')}
-        </Typography>
+        <Paper>
+          <EmptyState title={t('올린 앨범이 없습니다')} action={<Button variant="outlined" startIcon={<AddPhotoIcon />} onClick={() => setCreateOpen(true)}>{t('앨범 올리기')}</Button>} />
+        </Paper>
       )}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
-        {list.data?.map((a) => (
-          <Card key={a.id} variant="outlined">
-            <CardActionArea onClick={() => setOpenId(a.id)}>
-              <CardContent>
-                <Stack direction="row" spacing={0.5} sx={{ mb: 1.5 }}>
-                  {a.items.slice(0, 4).map((f) => <Thumb key={f.id} f={f} size={72} />)}
-                </Stack>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700 }} noWrap>
-                  {a.title}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {t('{0}개 · {1} · {2}', { 0: a.itemCount, 1: a.author.name, 2: dateTime(a.createdAt) })}
-                  {a.recipients !== null && t(' · 받는 학부모 {0}명', { 0: a.recipients })}
-                </Typography>
-              </CardContent>
-            </CardActionArea>
-          </Card>
-        ))}
-      </Box>
+      {!!list.data?.length && (
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, alignItems: 'flex-start' }}>
+          <Paper component="nav" aria-label={t('앨범 목록')} sx={{ flex: '1 1 260px', p: 1.75, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+            {list.data.map((a) => {
+              const active = a.id === current;
+              return (
+                <ButtonBase
+                  key={a.id}
+                  onClick={() => setOpenId(a.id)}
+                  aria-current={active ? 'true' : undefined}
+                  sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: 1.5, p: 1, borderRadius: '10px', textAlign: 'left', bgcolor: active ? color.selected : 'transparent', '&:hover': { bgcolor: active ? color.selected : color.bg } }}
+                >
+                  {a.items[0] ? <Thumb f={a.items[0]} size={48} /> : <Box sx={{ width: 48, height: 48, borderRadius: '8px', bgcolor: color.neutral }} />}
+                  <Box sx={{ minWidth: 0 }}>
+                    <Typography sx={{ fontSize: 14, fontWeight: 700 }} noWrap>{a.title}</Typography>
+                    <Typography sx={{ fontSize: 12, color: 'text.secondary' }} noWrap>
+                      {t('{0}개 · {1} · {2}', { 0: a.itemCount, 1: a.author.name, 2: dateTime(a.createdAt) })}
+                    </Typography>
+                  </Box>
+                </ButtonBase>
+              );
+            })}
+          </Paper>
+          {current && (
+            <AlbumPanel id={current} onDeleted={() => (setOpenId(null), qc.invalidateQueries({ queryKey: ['albums'] }))} />
+          )}
+        </Box>
+      )}
 
       <CreateDialog
         open={createOpen}
         onClose={() => setCreateOpen(false)}
         onCreated={() => (setCreateOpen(false), qc.invalidateQueries({ queryKey: ['albums'] }))}
       />
-      <DetailDialog id={openId} onClose={() => setOpenId(null)} onDeleted={() => (setOpenId(null), qc.invalidateQueries({ queryKey: ['albums'] }))} />
     </>
   );
 }
@@ -141,7 +152,8 @@ function CreateDialog({ open, onClose, onCreated }: { open: boolean; onClose: ()
   );
 }
 
-function DetailDialog({ id, onClose, onDeleted }: { id: string | null; onClose: () => void; onDeleted: () => void }) {
+/** 선택한 앨범 — 사진·영상 그리드 (기존 상세 다이얼로그와 같은 조회·삭제) */
+function AlbumPanel({ id, onDeleted }: { id: string; onDeleted: () => void }) {
   const t = useT();
   const { session } = useSession();
   const instId = session?.institution?.institutionId;
@@ -150,36 +162,14 @@ function DetailDialog({ id, onClose, onDeleted }: { id: string | null; onClose: 
   const a = detail.data;
 
   return (
-    <Dialog open={!!id} onClose={onClose} fullWidth maxWidth="md">
-      <DialogTitle>{a?.title ?? t('앨범')}</DialogTitle>
-      <DialogContent>
-        {detail.isFetching && <LinearProgress />}
-        {detail.isError && <Alert severity="error">{errorMessage(detail.error)}</Alert>}
-        {a && (
-          <Stack spacing={1.5}>
-            <Typography variant="caption" color="text.secondary">
-              {t('{0} · {1} · {2}개', { 0: a.author.name, 1: dateTime(a.createdAt), 2: a.itemCount })}{a.recipients !== null && t(' · 받는 학부모 {0}명', { 0: a.recipients })}
-            </Typography>
-            {a.description && <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{a.description}</Typography>}
-            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 1 }}>
-              {a.items.map((f) =>
-                f.downloadUrl ? (
-                  isVideo(f) ? (
-                    <Box key={f.id} component="video" src={f.downloadUrl} controls preload="metadata" sx={{ width: '100%', borderRadius: 1 }} />
-                  ) : (
-                    <a key={f.id} href={f.downloadUrl} target="_blank" rel="noopener noreferrer">
-                      <Box component="img" src={f.downloadUrl} alt={f.name} sx={{ width: '100%', borderRadius: 1, display: 'block' }} />
-                    </a>
-                  )
-                ) : null,
-              )}
-            </Box>
-            {remove.isError && <Alert severity="error">{errorMessage(remove.error)}</Alert>}
-          </Stack>
-        )}
-      </DialogContent>
-      <DialogActions>
+    <SectionCard
+      title={a?.title ?? t('앨범')}
+      menuId="NTC-011"
+      sx={{ flex: '999 1 560px' }}
+      actions={
         <Button
+          size="small"
+          variant="outlined"
           color="error"
           disabled={!a || remove.isPending}
           onClick={() => {
@@ -188,8 +178,32 @@ function DetailDialog({ id, onClose, onDeleted }: { id: string | null; onClose: 
         >
           {t('삭제')}
         </Button>
-        <Button onClick={onClose}>{t('닫기')}</Button>
-      </DialogActions>
-    </Dialog>
+      }
+    >
+      {detail.isFetching && !a && <LinearProgress />}
+      {detail.isError && <Alert severity="error">{errorMessage(detail.error)}</Alert>}
+      {a && (
+        <Stack spacing={2}>
+          <Typography sx={{ fontSize: 13, color: 'text.secondary' }}>
+            {t('{0} · {1} · {2}개', { 0: a.author.name, 1: dateTime(a.createdAt), 2: a.itemCount })}{a.recipients !== null && t(' · 받는 학부모 {0}명', { 0: a.recipients })}
+          </Typography>
+          {a.description && <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{a.description}</Typography>}
+          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 1.25 }}>
+            {a.items.map((f) =>
+              f.downloadUrl ? (
+                isVideo(f) ? (
+                  <Box key={f.id} component="video" src={f.downloadUrl} controls preload="metadata" aria-label={f.name} sx={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', borderRadius: '10px', bgcolor: color.neutral }} />
+                ) : (
+                  <Box key={f.id} component="a" href={f.downloadUrl} target="_blank" rel="noopener noreferrer" sx={{ display: 'block', borderRadius: '10px', overflow: 'hidden' }}>
+                    <Box component="img" src={f.downloadUrl} alt={f.name} sx={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', display: 'block', bgcolor: color.neutral }} />
+                  </Box>
+                )
+              ) : null,
+            )}
+          </Box>
+          {remove.isError && <Alert severity="error">{errorMessage(remove.error)}</Alert>}
+        </Stack>
+      )}
+    </SectionCard>
   );
 }

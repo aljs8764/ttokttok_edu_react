@@ -73,9 +73,9 @@ function OtpSection() {
   const s = status.data;
 
   return (
-    <Paper variant="outlined" sx={{ p: 2.5 }}>
+    <Paper variant="outlined" sx={{ px: 3, py: 2.5 }}>
       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
-        <Typography variant="h3">{t('2단계 인증')}</Typography>
+        <Typography variant="h4" component="h3">{t('2단계 인증')}</Typography>
         {s && <Chip size="small" color={s.enabled ? 'success' : 'default'} label={s.enabled ? t('사용 중') : t('꺼짐')} />}
       </Stack>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -148,8 +148,8 @@ function IdleSection() {
   });
   const value = q.data?.idleMinutes;
   return (
-    <Paper variant="outlined" sx={{ p: 2.5 }}>
-      <Typography variant="h3" sx={{ mb: 1 }}>{t('자동 로그아웃')}</Typography>
+    <Paper variant="outlined" sx={{ px: 3, py: 2.5 }}>
+      <Typography variant="h4" component="h3" sx={{ mb: 1 }}>{t('자동 로그아웃')}</Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
         {t('관리자 웹을 이 시간 동안 쓰지 않으면 자동으로 로그아웃합니다(1분 전에 안내). 기관의 모든 교직원에게 적용되며, &quot;자동 로그인&quot;을 켠 경우에도 적용됩니다.')}
       </Typography>

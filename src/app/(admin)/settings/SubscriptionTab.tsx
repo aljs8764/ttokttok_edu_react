@@ -60,7 +60,7 @@ export default function SubscriptionTab() {
       {s && (
         <Paper sx={{ px: 3, py: 2.5 }}>
           <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-            <Typography variant="h3">{t('{0} 플랜', { 0: s.plan.name })}</Typography>
+            <Typography variant="h4" component="h3">{t('{0} 플랜', { 0: s.plan.name })}</Typography>
             {st && <Chip size="small" label={t(st.label)} color={st.color} />}
             {s.cancelAtPeriodEnd && <Chip size="small" label={t('기간 종료 시 해지 예정')} color="warning" />}
           </Stack>

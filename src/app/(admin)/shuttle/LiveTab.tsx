@@ -63,9 +63,9 @@ export default function LiveTab() {
         <ShuttleMap stops={stops} vehicles={vehicles} fitKey={trip?.id ?? 'none'} />
       </Box>
       {trip && (
-        <Paper variant="outlined" sx={{ p: 2 }}>
+        <Paper variant="outlined" sx={{ px: 3, py: 2.5 }}>
           <Stack direction="row" alignItems="center" sx={{ mb: 1 }}>
-            <Typography variant="h3" sx={{ flex: 1 }}>
+            <Typography variant="h4" component="h3" sx={{ flex: 1 }}>
               {trip.routeName} {trip.vehicleName && `· ${trip.vehicleName}`} {trip.plateNo && `(${trip.plateNo})`}
             </Typography>
             {trip.position?.speedKmh != null && <Typography variant="body2" color="text.secondary" sx={{ mr: 2 }}>{Math.round(trip.position.speedKmh)} km/h</Typography>}
