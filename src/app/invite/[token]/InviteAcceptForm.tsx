@@ -2,10 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Alert from '@mui/material/Alert';
-import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
-import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
@@ -13,6 +11,7 @@ import NextLink from 'next/link';
 import { ROLE_LABEL, dateTime } from '@/lib/format';
 import type { ApiErrorBody, PublicStaffInvitation } from '@/lib/types';
 import { useT } from '@/lib/i18n';
+import AuthLayout from '@/components/shell/AuthLayout';
 
 /**
  * STF-002 초대 수락 (메일 링크 → /invite/{token}).
@@ -61,14 +60,7 @@ export default function InviteAcceptForm({ token }: { token: string }) {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', display: 'grid', placeItems: 'center', p: 2, bgcolor: 'background.default' }}>
-      <Paper sx={{ width: '100%', maxWidth: 420, p: { xs: 3, sm: 4 } }}>
-        <Typography variant="h1" sx={{ letterSpacing: -0.5 }}>
-          {t('똑똑')}<Box component="span" sx={{ color: 'secondary.main' }}>.</Box>
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-          {t('교직원 초대')}
-        </Typography>
+    <AuthLayout title="교직원 초대" menuId="STF-003">
 
         {!info && !loadError && <CircularProgress size={24} />}
         {loadError && (
@@ -133,7 +125,6 @@ export default function InviteAcceptForm({ token }: { token: string }) {
             </Typography>
           </Stack>
         )}
-      </Paper>
-    </Box>
+    </AuthLayout>
   );
 }
