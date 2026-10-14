@@ -41,6 +41,9 @@ export interface PlatformInstitution {
   studentCount: number;
   voucherCode: string | null;
   createdAt: string;
+  /** SAAS-008 매핑된 메뉴 그룹 (없으면 모든 메뉴) */
+  menuGroupId: string | null;
+  menuGroupName: string | null;
 }
 
 export interface PlatformInstitutionDetail extends PlatformInstitution {

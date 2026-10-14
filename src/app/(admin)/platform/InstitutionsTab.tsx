@@ -27,6 +27,7 @@ import { api, errorMessage } from '@/lib/api';
 import { won } from '@/lib/billing';
 import { PAYMENT_STATUS, SERVICE_STATUS, type OwnerInvitation, type PlatformInstitution, type PlatformInstitutionDetail, type ServiceStatus } from '@/lib/platform';
 import { INSTITUTION_TYPE_LABEL, type InstitutionType } from '@/lib/types';
+import type { MenuGroup } from '@/lib/menus';
 import { useT } from '@/lib/i18n';
 
 const SUB_STATUS = ['TRIAL', 'ACTIVE', 'PAST_DUE', 'CANCELED'];
@@ -87,6 +88,11 @@ function Detail({ id, onClose }: { id: string; onClose: () => void }) {
 
   const approve = useMutation({ mutationFn: () => api.post(`platform/institutions/${id}/approve`), onSuccess: refresh });
   const resend = useMutation({ mutationFn: () => api.post(`platform/institutions/${id}/owner-invitation`), onSuccess: refresh });
+  const groups = useQuery({ queryKey: ['platform', 'menu-groups'], queryFn: () => api.get<MenuGroup[]>('platform/menu-groups') });
+  const assignGroup = useMutation({
+    mutationFn: (menuGroupId: string | null) => api.put(`platform/institutions/${id}/menu-group`, { menuGroupId }),
+    onSuccess: refresh,
+  });
   const suspend = useMutation({ mutationFn: () => api.post(`platform/institutions/${id}/suspend`, { reason }), onSuccess: () => { setReason(''); refresh(); } });
   const override = useMutation({
     mutationFn: () => api.put(`platform/institutions/${id}/subscription`, { planCode: plan || d!.planCode, status: subStatus || d!.subscriptionStatus, nextBillingDate: next || null }),
@@ -97,7 +103,7 @@ function Detail({ id, onClose }: { id: string; onClose: () => void }) {
     onSuccess: () => { setPayOpen(false); refresh(); },
   });
   const d = q.data;
-  const err = approve.error ?? resend.error ?? suspend.error ?? override.error ?? record.error ?? q.error;
+  const err = approve.error ?? resend.error ?? assignGroup.error ?? suspend.error ?? override.error ?? record.error ?? q.error;
 
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="md">
@@ -139,6 +145,18 @@ function Detail({ id, onClose }: { id: string; onClose: () => void }) {
                 <Button color="error" variant="outlined" disabled={!reason.trim()} onClick={() => suspend.mutate()}>{t('정지')}</Button>
               </Stack>
             )}
+            <Divider />
+            <Stack direction="row" spacing={1} alignItems="center">
+              <TextField
+                select size="small" label={t('메뉴 그룹')} value={d.menuGroupId ?? ''} sx={{ minWidth: 220 }}
+                disabled={assignGroup.isPending}
+                onChange={(e) => assignGroup.mutate(e.target.value || null)}
+              >
+                <MenuItem value="">{t('모든 메뉴 (그룹 없음)')}</MenuItem>
+                {groups.data?.map((g) => <MenuItem key={g.id} value={g.id}>{g.name}</MenuItem>)}
+              </TextField>
+              <Typography variant="caption" color="text.secondary">{t('바꾸면 이 기관의 메뉴에 바로 적용됩니다.')}</Typography>
+            </Stack>
             <Divider />
             <Typography variant="subtitle2">{t('구독 직접 변경')}</Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
@@ -221,7 +239,7 @@ export default function InstitutionsTab() {
         </Stack>
         <Table size="small">
           <TableHead>
-            <TableRow><TableCell>{t('기관')}</TableCell><TableCell>{t('대표')}</TableCell><TableCell>{t('상태')}</TableCell><TableCell>{t('플랜')}</TableCell><TableCell align="right">{t('원생')}</TableCell><TableCell>{t('바우처')}</TableCell><TableCell>{t('가입일')}</TableCell></TableRow>
+            <TableRow><TableCell>{t('기관')}</TableCell><TableCell>{t('대표')}</TableCell><TableCell>{t('상태')}</TableCell><TableCell>{t('플랜')}</TableCell><TableCell align="right">{t('원생')}</TableCell><TableCell>{t('바우처')}</TableCell><TableCell>{t('메뉴 그룹')}</TableCell><TableCell>{t('가입일')}</TableCell></TableRow>
           </TableHead>
           <TableBody>
             {q.data?.map((i) => (
@@ -232,10 +250,11 @@ export default function InstitutionsTab() {
                 <TableCell>{i.planCode ?? '-'} {i.subscriptionStatus && <Typography component="span" variant="caption" color="text.secondary">({i.subscriptionStatus})</Typography>}</TableCell>
                 <TableCell align="right">{i.studentCount}</TableCell>
                 <TableCell>{i.voucherCode ?? '-'}</TableCell>
+                <TableCell>{i.menuGroupName ?? t('모든 메뉴')}</TableCell>
                 <TableCell>{dayjs(i.createdAt).format('YYYY-MM-DD')}</TableCell>
               </TableRow>
             ))}
-            {q.data?.length === 0 && <TableRow><TableCell colSpan={7} align="center">{t('기관이 없습니다')}</TableCell></TableRow>}
+            {q.data?.length === 0 && <TableRow><TableCell colSpan={8} align="center">{t('기관이 없습니다')}</TableCell></TableRow>}
           </TableBody>
         </Table>
       </Paper>

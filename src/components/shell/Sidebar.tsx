@@ -17,6 +17,7 @@ import { ROLE_LABEL } from '@/lib/format';
 import { useSampleInstitution, useStartSample } from '@/components/SampleModeBanner';
 import { ops as OPS, sidebar as INST, tone } from '@/theme/tokens';
 import { NAV, OPS_NAV, findNav, type NavGroup, type NavItem } from './nav';
+import { useDisabledMenus } from '@/lib/menus';
 
 export const SIDEBAR_WIDTH = 232;
 
@@ -28,7 +29,7 @@ const PALETTE = {
 
 /**
  * 사이드바 (디자인 Sidebar / OpsSidebar). 남색 232px, 로고, 기관 전환, 메뉴 그룹, 하단 사용자 카드.
- * 메뉴 노출은 기존 권한 로직(managerOnly = 원장·실장)을 그대로 쓴다.
+ * 메뉴 노출은 기존 권한 로직(managerOnly = 원장·실장)을 그대로 쓰고, 메뉴 그룹(SAAS-008)에서 끈 메뉴는 뺀다.
  */
 export default function Sidebar({ variant, platformAdmin, onNavigate, onChangePassword }: {
   variant: Variant;
@@ -42,6 +43,7 @@ export default function Sidebar({ variant, platformAdmin, onNavigate, onChangePa
   const { manager } = useSession();
   const groups = variant === 'ops' ? OPS_NAV : NAV;
   const activeHref = variant === 'inst' ? findNav(pathname)?.item.href : null;
+  const { disabled } = useDisabledMenus();
 
   return (
     <Box
@@ -70,7 +72,7 @@ export default function Sidebar({ variant, platformAdmin, onNavigate, onChangePa
           <OpsNavGroups palette={p} manager={manager} onNavigate={onNavigate} />
         </Suspense>
       ) : (
-        <NavGroups groups={groups} isActive={(i) => i.href === activeHref} palette={p} manager={manager} onNavigate={onNavigate} />
+        <NavGroups groups={groups} isActive={(i) => i.href === activeHref} palette={p} manager={manager} hidden={disabled} onNavigate={onNavigate} />
       )}
 
       <Box sx={{ mt: 'auto', display: 'flex', flexDirection: 'column', gap: 1.25 }}>
@@ -92,18 +94,20 @@ export default function Sidebar({ variant, platformAdmin, onNavigate, onChangePa
 
 type Pal = (typeof PALETTE)[Variant];
 
-function NavGroups({ groups, isActive, palette: p, manager, onNavigate }: {
+function NavGroups({ groups, isActive, palette: p, manager, hidden, onNavigate }: {
   groups: NavGroup[];
   isActive: (i: NavItem) => boolean;
   palette: Pal;
   manager: boolean;
+  /** 메뉴 그룹(SAAS-008)에서 끈 메뉴 */
+  hidden?: Set<string>;
   onNavigate: () => void;
 }) {
   const { t } = useLocale();
   return (
     <>
       {groups.map((g) => {
-        const items = g.items.filter((i) => !i.managerOnly || manager);
+        const items = g.items.filter((i) => (!i.managerOnly || manager) && !hidden?.has(i.href));
         if (items.length === 0) return null;
         return (
           <Box key={g.group} sx={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>

@@ -16,6 +16,7 @@ import { usePlatformAdmin } from '@/lib/platform';
 import { useAccountLocaleSync, useLocale } from '@/lib/i18n';
 import PlatformNoticeBanner from '@/components/PlatformNoticeBanner';
 import IdleLogout from '@/components/IdleLogout';
+import MenuGate from '@/components/MenuGate';
 import ServiceStatusBanner from '@/components/ServiceStatusBanner';
 import Sidebar, { SIDEBAR_WIDTH } from '@/components/shell/Sidebar';
 import { color, ops, sidebar } from '@/theme/tokens';
@@ -109,7 +110,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
           <PlatformNoticeBanner />
         </Box>
         <Box component="main" sx={{ flexGrow: 1, minWidth: 0, px: { xs: 2, md: 4 }, pt: { xs: 2, md: 3.5 }, pb: 6 }}>
-          {children}
+          <MenuGate>{children}</MenuGate>
         </Box>
       </Box>
       {gates}
