@@ -15,15 +15,15 @@ import { useSession, useSwitchInstitution, logout } from '@/lib/session';
 import { useLocale } from '@/lib/i18n';
 import { ROLE_LABEL } from '@/lib/format';
 import { useSampleInstitution, useStartSample } from '@/components/SampleModeBanner';
-import { ops as OPS, sidebar as INST } from '@/theme/tokens';
+import { ops as OPS, sidebar as INST, tone } from '@/theme/tokens';
 import { NAV, OPS_NAV, findNav, type NavGroup, type NavItem } from './nav';
 
 export const SIDEBAR_WIDTH = 232;
 
 type Variant = 'inst' | 'ops';
 const PALETTE = {
-  inst: { bg: INST.bg, card: INST.card, cardBorder: INST.cardBorder, dashed: INST.dashed, group: INST.groupLabel, sub: INST.subText, item: INST.item, activeFg: INST.activeFg, logoBg: INST.logoBg, avatarBg: '#FFE9E3', avatarFg: '#B23A1C' },
-  ops: { bg: OPS.main, card: OPS.card, cardBorder: OPS.dashed, dashed: OPS.dashed, group: OPS.groupLabel, sub: OPS.subText, item: OPS.item, activeFg: OPS.activeFg, logoBg: OPS.logoBg, avatarBg: '#E3F5F1', avatarFg: '#0B7A67' },
+  inst: { bg: INST.bg, card: INST.card, cardBorder: INST.cardBorder, dashed: INST.dashed, group: INST.groupLabel, sub: INST.subText, item: INST.item, activeFg: INST.activeFg, logoBg: INST.logoBg, avatarBg: tone.coral.bg, avatarFg: tone.coral.fg },
+  ops: { bg: OPS.main, card: OPS.card, cardBorder: OPS.dashed, dashed: OPS.dashed, group: OPS.groupLabel, sub: OPS.subText, item: OPS.item, activeFg: OPS.activeFg, logoBg: OPS.logoBg, avatarBg: tone.green.bg, avatarFg: tone.green.fg },
 } as const;
 
 /**

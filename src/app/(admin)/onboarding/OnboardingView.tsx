@@ -82,7 +82,7 @@ export default function OnboardingView() {
                           alignItems: 'center',
                           justifyContent: 'center',
                           fontSize: 12,
-                          ...(current || done ? { bgcolor: color.primary, color: '#FFFFFF' } : { border: '1.5px solid #B9BFD3' }),
+                          ...(current || done ? { bgcolor: color.primary, color: '#FFFFFF' } : { border: `1.5px solid ${color.borderStrong}` }),
                         }}
                       >
                         {done ? '✓' : i + 1}
@@ -142,7 +142,7 @@ function SampleCard() {
   const switchInst = useSwitchInstitution();
   const mine = sample.data?.sample;
   return (
-    <Paper sx={{ p: 2.5, display: 'flex', flexDirection: 'column', gap: 1.25, bgcolor: '#FFFAF8', borderColor: '#F6D3C9' }}>
+    <Paper sx={{ p: 2.5, display: 'flex', flexDirection: 'column', gap: 1.25, bgcolor: color.accentSoftBg, borderColor: color.accentSoftBorder }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1 }}>
         <Typography sx={{ fontSize: 15, fontWeight: 700 }}>{t('샘플 데이터로 먼저 둘러보기')}</Typography>
         <MenuIdChip id="ONB-003" />

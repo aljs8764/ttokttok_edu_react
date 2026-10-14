@@ -23,6 +23,11 @@ export const color = {
   rowDivider: '#EEF0F7',
   /** 입력·보조 버튼 테두리 */
   border: '#D5D9E6',
+  /** 호버·점선·비활성 단계 테두리 */
+  borderStrong: '#B9BFD3',
+  /** 강조 카드(코랄) 배경·테두리 */
+  accentSoftBg: '#FFFAF8',
+  accentSoftBorder: '#F6D3C9',
   /** 세그먼트 탭 트랙 */
   track: '#F1F3F9',
   /** 메뉴ID 칩·중립 배지 배경 */
@@ -43,6 +48,10 @@ export const sidebar = {
   activeBg: '#FFFFFF',
   activeFg: '#1B2559',
   logoBg: '#FF6B4A',
+  /** 로그인 소개 패널 본문·체크 칩·체크 색 */
+  introText: '#C9CFEA',
+  introChip: '#2B3678',
+  introCheck: '#FF8A6E',
 } as const;
 
 /** 운영사 콘솔 사이드바 (OpsSidebar.dc.html) */

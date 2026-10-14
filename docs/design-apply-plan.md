@@ -56,8 +56,13 @@
 | ② | 공통 컴포넌트 `src/components/ui/*` (StatusBadge·MenuIdChip·PageHeader·SectionCard·KpiCard·SegmentTabs·ProgressBar·EmptyState) | 완료 | 81bd41e |
 | ③ | 앱 셸 — 기관 사이드바·운영사 사이드바·모바일 Drawer, 로그인·온보딩·초대 셸 없음 | 완료 | 33ac150 |
 | ④ | Phase 1 화면 (P1-01~11) | 완료 | cd895b6, 3a6c466 |
-| ⑤ | Phase 2 화면 (P2-01~15) | 완료 | (이 커밋) |
-| ⑥ | Phase 3 화면 + 하드코딩 색·폰트 정리 | 대기 | |
+| ⑤ | Phase 2 화면 (P2-01~15) | 완료 | 9f83f0d |
+| ⑥ | Phase 3 화면 + 하드코딩 색·폰트 정리 | 완료 | (이 커밋) |
+
+## 2-1. 남은 것 (다음 작업 후보)
+
+- P2·P3 화면 중 시간표·셔틀·설문·앨범·근태·행사 달력·구독/알림/보안 설정·교재·환불/할인 다이얼로그는 테마(카드·버튼·탭·스위치·배지)로만 바뀌었다. 디자인 아트보드와 같은 화면별 배치(예: 앨범 그리드 카드, 시간표 칸 색)는 아직 손대지 않았다.
+- 빌드 확인 후 화면별로 어긋나는 부분(입력 높이·탭 폭·표 여백)을 사진으로 알려 주면 맞춘다.
 
 ## 3. 위험 요소
 
@@ -90,3 +95,31 @@
 | 통계 (STAT) | 기간 선택·KPI 카드·차트 카드 | 같은 구성, 차트는 기존 SVG 차트(새 의존성 없음) | 차트 라이브러리 추가 안 함 |
 | 수납 (PAY) | 원생별 청구 카드 그리드 | 기존 표(청구서 목록) + KPI 카드 | 기존 기능(일괄 발행·수납 처리·할인·환불) 유지 |
 | [운영사] 4종 (SAAS) | 화면별 전용 대시보드 레이아웃 | 기존 콘솔 탭 내용 + KPI 카드·필터 카드 | 데이터 구조 그대로 |
+| 익명 커뮤니티 (COM) | 디자인 없음 | 게시판 목록 카드(선택 pill), 정렬 세그먼트 탭, 빈 상태 컴포넌트 | 토큰·공통 컴포넌트로 같은 톤 |
+| 셔틀 지도 | 버스 아이콘 | 차량 라벨(이모지 제거, 텍스트만) | 이모지 대신 글자 — 대비·스크린리더 |
+
+## 5. 확인 방법
+
+```
+npm install
+npm run build
+npm run dev
+```
+
+| 확인할 화면 | 경로 |
+|---|---|
+| 로그인 (AUTH-001) · 초대 수락 | `/login`, `/invite/<토큰>` |
+| 온보딩 (셸 없음) | `/onboarding` (원장) |
+| 사이드바·좁은 화면 Drawer | 아무 화면에서 창 폭 900px 미만 |
+| 대시보드 (원장·교사, 교사 화면 보기) | `/dashboard`, `/dashboard?teacherId=<교직원>` |
+| 원생 목록·상세·가입 승인·엑셀 | `/students`, `/students/<id>`, `/students/join-requests`, `/students/import` |
+| 출결 | `/attendance`, `/attendance/monthly`, `/absence-requests` |
+| 반·교직원·시간표·대기자 | `/classes`, `/staff`, `/timetable`, `/waitlist` |
+| 알림장·템플릿 | `/notices`, `/notices/new`, `/notices/<id>`, `/notice-templates` |
+| 행사 | `/events`, `/events/<id>`, `/event-calendar`, `/event-templates` |
+| 소통 | `/messages`, `/consults`, `/surveys`, `/albums`, `/community` |
+| 경영 | `/invoices`, `/stats`, `/staff-attendance` |
+| 설정 (탭 10개) | `/settings?tab=institution` … `account` |
+| 운영사 콘솔 (OpsSidebar) | `/platform?tab=metrics` … `community` (운영사 계정) |
+| 인쇄 | `/print/stats`, `/print/qr?ids=` |
+| 메뉴ID 숨김 | `.env.local` 에 `NEXT_PUBLIC_SHOW_MENU_IDS=false` 후 재시작 |

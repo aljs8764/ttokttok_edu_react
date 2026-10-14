@@ -1530,4 +1530,6 @@ export const EN_SCREENS: Record<string, string> = {
   '첨부 {0}개': '{0} attachments',
   '출결 필터': 'Attendance filter',
   '행사 기간': 'Event period',
+  '게시판': 'Boards',
+  '정렬': 'Sort',
 };

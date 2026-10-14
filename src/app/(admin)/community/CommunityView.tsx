@@ -14,11 +14,7 @@ import ListItemText from '@mui/material/ListItemText';
 import ListSubheader from '@mui/material/ListSubheader';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
 import TextField from '@mui/material/TextField';
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
 import SearchIcon from '@mui/icons-material/Search';
 import EditIcon from '@mui/icons-material/EditOutlined';
@@ -29,6 +25,9 @@ import dayjs from 'dayjs';
 import PageHeader from '@/components/PageHeader';
 import { api, errorMessage } from '@/lib/api';
 import { useT } from '@/lib/i18n';
+import SegmentTabs from '@/components/ui/SegmentTabs';
+import EmptyState from '@/components/ui/EmptyState';
+import { color } from '@/theme/tokens';
 import {
   CATEGORIES, ago, authorLabel, boardLabel, categoryLabel,
   type CommunityBoard, type CommunityMe, type CommunityPage, type CommunityPostDetail, type CommunityPostSummary,
@@ -139,7 +138,7 @@ export default function CommunityView() {
   return (
     <>
       <PageHeader
-        title="커뮤니티" menuId="COM"
+        title="커뮤니티" menuId="COM-001"
         description={t('같은 역할끼리 익명으로 고민과 정보를 나눕니다. 이름은 화면에 보이지 않습니다.')}
         actions={board && !isMine ? (
           <Button variant="contained" startIcon={<EditIcon />} disabled={sanctioned}
@@ -164,8 +163,8 @@ export default function CommunityView() {
       )}
 
       {boards.length > 0 && (
-        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems="flex-start">
-          <Paper variant="outlined" sx={{ width: { xs: '100%', md: 240 }, flexShrink: 0 }}>
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} alignItems="flex-start">
+          <Paper component="nav" aria-label={t('게시판')} sx={{ width: { xs: '100%', md: 240 }, flexShrink: 0, py: 1, '& .MuiListSubheader-root': { bgcolor: 'transparent', color: 'text.secondary', lineHeight: '32px', px: 2.5 }, '& .MuiListItemButton-root': { mx: 1, borderRadius: 2, minHeight: 40 }, '& .MuiListItemButton-root.Mui-selected': { bgcolor: color.selected, '& .MuiListItemText-primary': { fontWeight: 600 } } }}>
             <List dense disablePadding>
               {lounges.length > 0 && <ListSubheader>{t('전국 라운지')}</ListSubheader>}
               {lounges.map(boardItem)}
@@ -179,18 +178,30 @@ export default function CommunityView() {
             </List>
           </Paper>
 
-          <Paper variant="outlined" sx={{ flex: 1, minWidth: 0, width: '100%' }}>
+          <Paper component="section" aria-label={isMine ? t('내가 쓴 글·댓글') : board ? boardLabel(board) : undefined} sx={{ flex: 1, minWidth: 0, width: '100%', overflow: 'hidden' }}>
             {isMine ? (
-              <Tabs value={myTab} onChange={(_, v: 'posts' | 'comments') => setMyTab(v)} sx={{ mx: 2, mt: 1 }}>
-                <Tab value="posts" label={t('내 글')} />
-                <Tab value="comments" label={t('내 댓글')} />
-              </Tabs>
+              <Box sx={{ px: 3, py: 2, borderBottom: `1px solid ${color.rowDivider}` }}>
+                <SegmentTabs<'posts' | 'comments'>
+                  value={myTab}
+                  onChange={setMyTab}
+                  ariaLabel={t('내 활동')}
+                  items={[
+                    { value: 'posts', label: t('내 글') },
+                    { value: 'comments', label: t('내 댓글') },
+                  ]}
+                />
+              </Box>
             ) : board && (
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }} alignItems={{ sm: 'center' }}>
-                <ToggleButtonGroup size="small" exclusive value={sort} onChange={(_, v: PostSort | null) => v && setSort(v)}>
-                  <ToggleButton value="LATEST">{t('최신')}</ToggleButton>
-                  <ToggleButton value="POPULAR">{t('인기 (7일)')}</ToggleButton>
-                </ToggleButtonGroup>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} useFlexGap flexWrap="wrap" sx={{ px: 3, py: 2, borderBottom: `1px solid ${color.rowDivider}` }} alignItems={{ sm: 'center' }}>
+                <SegmentTabs<PostSort>
+                  value={sort}
+                  onChange={setSort}
+                  ariaLabel={t('정렬')}
+                  items={[
+                    { value: 'LATEST', label: t('최신') },
+                    { value: 'POPULAR', label: t('인기 (7일)') },
+                  ]}
+                />
                 <Stack direction="row" spacing={0.5} sx={{ flexWrap: 'wrap', rowGap: 0.5 }}>
                   <Chip size="small" label={t('전체')} color={category === 'ALL' ? 'primary' : 'default'} onClick={() => setCategory('ALL')} />
                   {CATEGORIES.map((c) => (
@@ -209,7 +220,7 @@ export default function CommunityView() {
 
             {isMine && myTab === 'comments' ? (
               <List disablePadding>
-                {myCommentsQ.data?.length === 0 && <Typography sx={{ p: 3 }} color="text.secondary">{t('쓴 댓글이 없습니다.')}</Typography>}
+                {myCommentsQ.data?.length === 0 && <EmptyState dense title={t('쓴 댓글이 없습니다.')} />}
                 {myCommentsQ.data?.map((c) => (
                   <ListItemButton key={c.id} divider onClick={() => setOpenId(c.postId)}>
                     <ListItemText
@@ -224,9 +235,7 @@ export default function CommunityView() {
               <List disablePadding>
                 {activeQ.isLoading && <Box sx={{ p: 3, textAlign: 'center' }}><CircularProgress size={24} /></Box>}
                 {activeQ.isSuccess && posts.length === 0 && (
-                  <Typography sx={{ p: 3 }} color="text.secondary">
-                    {isMine ? t('쓴 글이 없습니다.') : q ? t('검색 결과가 없습니다.') : t('아직 글이 없습니다. 첫 글을 남겨 보세요.')}
-                  </Typography>
+                  <EmptyState dense title={isMine ? t('쓴 글이 없습니다.') : q ? t('검색 결과가 없습니다.') : t('아직 글이 없습니다. 첫 글을 남겨 보세요.')} />
                 )}
                 {posts.map((p) => (
                   <PostRow key={p.id} p={p} onOpen={() => setOpenId(p.id)} showBoard={isMine ? boardName(p.boardKey) : undefined} />

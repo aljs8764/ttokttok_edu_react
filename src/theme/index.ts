@@ -219,7 +219,7 @@ export const theme: Theme = createTheme(
             backgroundColor: color.paper,
             borderRadius: radius.control,
             '& .MuiOutlinedInput-notchedOutline': { borderColor: color.border },
-            '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#B9BFD3' },
+            '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: color.borderStrong },
             '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: color.primary, borderWidth: 1.5 },
           },
           // 높이: medium ≈ 46, small ≈ 42 (multiline·Autocomplete 는 자체 여백 유지)

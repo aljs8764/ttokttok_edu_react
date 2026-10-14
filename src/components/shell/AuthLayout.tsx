@@ -57,13 +57,13 @@ export default function AuthLayout({ title, menuId, subtitle, topRight, children
             <br />
             {t('학부모는 바로 압니다.')}
           </Typography>
-          <Typography sx={{ fontSize: 17, lineHeight: 1.7, color: '#C9CFEA' }}>
+          <Typography sx={{ fontSize: 17, lineHeight: 1.7, color: sidebar.introText }}>
             {t('원생·출결·알림장·행사를 한 화면에서. 등·하원 상태는 1초 안에 학부모 앱으로 전달돼요.')}
           </Typography>
           <Box component="ul" sx={{ listStyle: 'none', m: 0, p: 0, display: 'flex', flexDirection: 'column', gap: 1.75 }}>
             {FEATURES.map((f) => (
               <Box component="li" key={f} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, fontSize: 15 }}>
-                <Box aria-hidden sx={{ width: 28, height: 28, borderRadius: '8px', bgcolor: '#2B3678', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FF8A6E' }}>
+                <Box aria-hidden sx={{ width: 28, height: 28, borderRadius: '8px', bgcolor: sidebar.introChip, display: 'flex', alignItems: 'center', justifyContent: 'center', color: sidebar.introCheck }}>
                   <CheckIcon sx={{ fontSize: 16 }} />
                 </Box>
                 {t(f)}

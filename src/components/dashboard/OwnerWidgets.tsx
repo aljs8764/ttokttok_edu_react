@@ -69,7 +69,7 @@ export function BusinessKpiRow({ instId }: { instId?: string }) {
       {!k
         ? Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} variant="rounded" height={120} sx={{ borderRadius: 3 }} />)
         : cards.map((c, i) => (
-            <Box key={c.label} component={Link} href={c.href} sx={{ textDecoration: 'none', color: 'inherit', borderRadius: 3, '&:hover .MuiPaper-root': { borderColor: '#B9BFD3' }, '&:focus-visible': { outline: `2px solid ${color.primary}`, outlineOffset: 2 } }}>
+            <Box key={c.label} component={Link} href={c.href} sx={{ textDecoration: 'none', color: 'inherit', borderRadius: 3, '&:hover .MuiPaper-root': { borderColor: color.borderStrong }, '&:focus-visible': { outline: `2px solid ${color.primary}`, outlineOffset: 2 } }}>
               <KpiCard
                 label={c.label}
                 menuId={i === 0 ? 'DASH-009' : undefined}

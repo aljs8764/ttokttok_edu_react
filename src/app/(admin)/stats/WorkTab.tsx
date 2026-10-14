@@ -5,7 +5,6 @@ import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import LinearProgress from '@mui/material/LinearProgress';
-import Paper from '@mui/material/Paper';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
@@ -18,7 +17,7 @@ import { useQuery } from '@tanstack/react-query';
 import { api, errorMessage } from '@/lib/api';
 import { ratioText } from '@/lib/stats';
 import { useT, translate } from '@/lib/i18n';
-import MenuIdChip from '@/components/ui/MenuIdChip';
+import SectionCard from '@/components/ui/SectionCard';
 
 interface RankRow { id: string; name: string; notices: number; targets: number; read: number; rate: number | null; weak: boolean }
 interface NoticeRanking { from: string; to: string; institutionRate: number | null; classrooms: RankRow[]; teachers: RankRow[] }
@@ -48,13 +47,9 @@ const offsetText = (m: number | null) => (m == null ? '-' : m < 0 ? translate('ì
 
 function Section({ title, menuId, children }: { title: string; menuId: string; children: ReactNode }) {
   return (
-    <Paper sx={{ px: 3, py: 2.5 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-        <Typography variant="h4" sx={{ flex: 1 }}>{title}</Typography>
-        <MenuIdChip id={menuId} />
-      </Box>
+    <SectionCard title={title} menuId={menuId}>
       {children}
-    </Paper>
+    </SectionCard>
   );
 }
 
