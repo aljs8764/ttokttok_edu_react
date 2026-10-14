@@ -71,19 +71,19 @@ export default function WaitlistView() {
           ))}
         </Stack>
       )}
-      <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
-        <TextField select size="small" label={t('반')} value={classId} onChange={(e) => setClassId(e.target.value)} sx={{ minWidth: 180 }}>
-          <MenuItem value="">{t('전체')}</MenuItem>
-          {classes.data?.map((c) => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
-        </TextField>
-        <TextField select size="small" label={t('상태')} value={status} onChange={(e) => setStatus(e.target.value as WaitlistStatus | '')} sx={{ minWidth: 140 }}>
-          <MenuItem value="">{t('전체')}</MenuItem>
-          {(Object.keys(WAITLIST_STATUS) as WaitlistStatus[]).map((s) => <MenuItem key={s} value={s}>{t(WAITLIST_STATUS[s].label)}</MenuItem>)}
-        </TextField>
-      </Stack>
       {(list.isError || setSt.isError || contacted.isError) && <Alert severity="error" sx={{ mb: 2 }}>{errorMessage(list.error ?? setSt.error ?? contacted.error)}</Alert>}
-      {list.isFetching && <LinearProgress />}
-      <Paper variant="outlined" sx={{ overflowX: 'auto' }}>
+      <Paper sx={{ overflowX: 'auto', pt: 2.5 }}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} useFlexGap flexWrap="wrap" sx={{ px: 3, pb: 2, position: 'sticky', left: 0 }}>
+          <TextField select size="small" label={t('반')} value={classId} onChange={(e) => setClassId(e.target.value)} sx={{ minWidth: 180 }}>
+            <MenuItem value="">{t('전체')}</MenuItem>
+            {classes.data?.map((c) => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
+          </TextField>
+          <TextField select size="small" label={t('상태')} value={status} onChange={(e) => setStatus(e.target.value as WaitlistStatus | '')} sx={{ minWidth: 140 }}>
+            <MenuItem value="">{t('전체')}</MenuItem>
+            {(Object.keys(WAITLIST_STATUS) as WaitlistStatus[]).map((s) => <MenuItem key={s} value={s}>{t(WAITLIST_STATUS[s].label)}</MenuItem>)}
+          </TextField>
+        </Stack>
+        {list.isFetching && <LinearProgress />}
         <Table size="small">
           <TableHead>
             <TableRow>

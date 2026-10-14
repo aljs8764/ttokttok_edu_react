@@ -22,6 +22,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, errorMessage } from '@/lib/api';
 import { LineChart } from '@/components/charts';
 import { useT } from '@/lib/i18n';
+import KpiCard from '@/components/ui/KpiCard';
+import { chart } from '@/theme/tokens';
 
 interface UsageRow {
   institutionId: string; institutionName: string; serviceStatus: string; requests: number; errors: number; denied: number; throttled: number;
@@ -46,13 +48,7 @@ const KIND: Record<string, { label: string; color: 'error' | 'warning' | 'info' 
 const n = (v: number) => v.toLocaleString('ko-KR');
 
 function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
-  return (
-    <Paper sx={{ px: 3, py: 2.5 }}>
-      <Typography variant="caption" color="text.secondary">{label}</Typography>
-      <Typography variant="h3">{value}</Typography>
-      {sub && <Typography variant="caption" color="text.secondary">{sub}</Typography>}
-    </Paper>
-  );
+  return <KpiCard size="md" label={label} value={value} footer={sub && <Typography component="span" sx={{ fontSize: 13, color: 'text.secondary' }}>{sub}</Typography>} />;
 }
 
 /** SAAS-006 기관별 사용량·이상 탐지 */
@@ -153,9 +149,9 @@ export default function UsageTab() {
         <LineChart
           labels={grouped.map((g) => g.label)}
           series={[
-            { name: t('요청'), color: '#1b2559', values: grouped.map((g) => g.requests) },
-            { name: '5xx', color: '#d6453d', values: grouped.map((g) => g.errors) },
-            { name: '401·403', color: '#e8913a', values: grouped.map((g) => g.denied) },
+            { name: t('요청'), color: chart.primary, values: grouped.map((g) => g.requests) },
+            { name: '5xx', color: chart.red, values: grouped.map((g) => g.errors) },
+            { name: '401·403', color: chart.amber, values: grouped.map((g) => g.denied) },
           ]}
         />
       </Paper>

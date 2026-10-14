@@ -34,6 +34,7 @@ import { useSession } from '@/lib/session';
 import type { Page, Student } from '@/lib/types';
 import PageHeader from '@/components/PageHeader';
 import { useT } from '@/lib/i18n';
+import { color } from '@/theme/tokens';
 
 /** NTC-007 알림장 회신 · NTC-008 학부모 1:1 채팅 — 교직원 메시지함. 교사는 담당 반 원생 대화만 보인다. */
 export default function MessagesView() {
@@ -188,7 +189,7 @@ function Thread({ conversation }: { conversation: Conversation }) {
       <Stack spacing={1} sx={{ p: 2, flex: 1, overflowY: 'auto', maxHeight: 460 }}>
         {ordered.map((m) => (
           <Box key={m.id} sx={{ alignSelf: m.side === 'STAFF' ? 'flex-end' : 'flex-start', maxWidth: '75%' }}>
-            <Box sx={{ px: 1.5, py: 1, borderRadius: 2, bgcolor: m.side === 'STAFF' ? 'primary.main' : 'action.hover', color: m.side === 'STAFF' ? 'primary.contrastText' : 'text.primary', whiteSpace: 'pre-wrap' }}>
+            <Box sx={{ px: 1.75, py: 1.25, fontSize: 14, lineHeight: 1.6, borderRadius: m.side === 'STAFF' ? '14px 14px 4px 14px' : '14px 14px 14px 4px', bgcolor: m.side === 'STAFF' ? 'primary.main' : color.track, color: m.side === 'STAFF' ? 'primary.contrastText' : 'text.primary', whiteSpace: 'pre-wrap' }}>
               {m.body}
             </Box>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: m.side === 'STAFF' ? 'right' : 'left' }}>

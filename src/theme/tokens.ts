@@ -76,3 +76,22 @@ export const font = {
 } as const;
 
 export const radius = { control: 8, card: 12, pill: 999 } as const;
+
+/** 차트 계열 색 (SVG 차트 공용) */
+export const chart = {
+  primary: color.primary,
+  blue: color.info,
+  green: color.success,
+  amber: color.warning,
+  red: color.error,
+  accent: color.accent,
+  gray: '#9AA0B8',
+  violet: '#6C63C7',
+  teal: '#2A8FBD',
+  pink: '#C2569B',
+  /** 0 값·트랙 */
+  track: color.neutral,
+  /** 히트맵용 rgb 문자열 */
+  rgbPrimary: '27,37,89',
+  rgbAccent: '255,107,74',
+} as const;

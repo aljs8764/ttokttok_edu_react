@@ -19,15 +19,10 @@ import { api, errorMessage } from '@/lib/api';
 import { won } from '@/lib/billing';
 import type { PlatformMetrics } from '@/lib/platform';
 import { useT } from '@/lib/i18n';
+import KpiCard from '@/components/ui/KpiCard';
 
 function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
-  return (
-    <Paper sx={{ px: 3, py: 2.5 }}>
-      <Typography variant="caption" color="text.secondary">{label}</Typography>
-      <Typography variant="h3">{value}</Typography>
-      {sub && <Typography variant="caption" color="text.secondary">{sub}</Typography>}
-    </Paper>
-  );
+  return <KpiCard size="md" label={label} value={value} footer={sub && <Typography component="span" sx={{ fontSize: 13, color: 'text.secondary' }}>{sub}</Typography>} />;
 }
 
 /** SAAS-007 MRR·ARR·Churn·CAC */

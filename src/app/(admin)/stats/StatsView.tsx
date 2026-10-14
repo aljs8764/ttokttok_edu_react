@@ -42,14 +42,17 @@ import PageHeader from '@/components/PageHeader';
 import WorkTab from './WorkTab';
 import { useT } from '@/lib/i18n';
 import MenuIdChip from '@/components/ui/MenuIdChip';
+import SectionCard from '@/components/ui/SectionCard';
+import KpiCard from '@/components/ui/KpiCard';
+import { chart } from '@/theme/tokens';
 
 type Section = 'KPI' | 'CLASSROOMS' | 'ENROLLMENT';
 const SECTION_LABEL: Record<Section, string> = { KPI: '기간 KPI', CLASSROOMS: '반별 비교', ENROLLMENT: '재원 현황' };
-const BLUE = '#1b2559';
-const GREEN = '#2e9e6b';
-const ORANGE = '#e8913a';
-const RED = '#d6453d';
-const GRAY = '#9aa0b4';
+const BLUE = chart.primary;
+const GREEN = chart.green;
+const ORANGE = chart.amber;
+const RED = chart.red;
+const GRAY = chart.gray;
 
 /** STAT-001~007 통계·분석 (원장·실장 전용). 기간은 STAT-001·002·003·004·007 공통 */
 export default function StatsView() {
@@ -157,32 +160,14 @@ export default function StatsView() {
 
 function Card({ title, menuId, children }: { title: string; menuId?: string; children: ReactNode }) {
   return (
-    <Paper sx={{ px: 3, py: 2.5 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-        <Typography variant="h4" sx={{ flex: 1 }}>
-          {title}
-        </Typography>
-        {menuId && <MenuIdChip id={menuId} />}
-      </Box>
+    <SectionCard title={title} menuId={menuId}>
       {children}
-    </Paper>
+    </SectionCard>
   );
 }
 
 function Metric({ label, value, sub }: { label: string; value: string; sub?: string }) {
-  return (
-    <Paper sx={{ px: 3, py: 2.5 }}>
-      <Typography variant="body2" color="text.secondary">
-        {label}
-      </Typography>
-      <Typography variant="h2" sx={{ my: 0.5 }}>
-        {value}
-      </Typography>
-      <Typography variant="caption" color="text.secondary">
-        {sub}
-      </Typography>
-    </Paper>
-  );
+  return <KpiCard size="md" label={label} value={value} footer={sub && <Typography component="span" sx={{ fontSize: 13, color: 'text.secondary' }}>{sub}</Typography>} />;
 }
 
 function State({ q, children }: { q: { isLoading: boolean; isError: boolean; error: unknown }; children: ReactNode }) {
@@ -202,7 +187,7 @@ function KpiTab({ range, enabled, instId }: { range: { from: string; to: string 
     <State q={q}>
       {d && (
         <Stack spacing={2}>
-          <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(4, 1fr)' } }}>
+          <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
             <Metric label={t('평균 등원율')} value={ratioText(d.summary.attendanceRate)} sub={t('등원 {0} / 예정 {1}', { 0: d.summary.present, 1: d.summary.scheduled })} />
             <Metric label={t('지각률')} value={ratioText(d.summary.lateRate)} sub={t('지각 {0}건', { 0: d.summary.late })} />
             <Metric label={t('결석률')} value={ratioText(d.summary.absentRate)} sub={t('결석 {0}건', { 0: d.summary.absent })} />
@@ -256,7 +241,7 @@ function CongestionTab({ range, enabled, instId }: { range: { from: string; to: 
             {d.cells.length === 0 ? (
               <Typography color="text.secondary">{t('선택한 기간에 등·하원 기록이 없습니다.')}</Typography>
             ) : (
-              <Heatmap weekdays={WEEKDAY_LABEL.slice(1).map((w) => t(w))} hours={hourRange} value={value} color={kind === 'checkIns' ? '27,37,89' : '232,145,58'} />
+              <Heatmap weekdays={WEEKDAY_LABEL.slice(1).map((w) => t(w))} hours={hourRange} value={value} color={kind === 'checkIns' ? chart.rgbPrimary : chart.rgbAccent} />
             )}
           </Card>
           {d.peaks.length > 0 && (
@@ -354,7 +339,7 @@ function EnrollmentTab({ enabled, instId }: { enabled: boolean; instId?: string 
   const t = useT();
   const status = useQuery({ queryKey: ['stats', 'enrollment', instId], queryFn: () => api.get<EnrollmentStatusReport>('stats/enrollment'), enabled });
   const trend = useQuery({ queryKey: ['stats', 'enrollment-trend', instId], queryFn: () => api.get<EnrollmentTrendReport>('stats/enrollment/trend'), enabled });
-  const palette = [BLUE, GREEN, ORANGE, RED, GRAY, '#6c63c7', '#2a8fbd', '#c2569b'];
+  const palette = [BLUE, GREEN, ORANGE, RED, GRAY, chart.violet, chart.teal, chart.pink];
   return (
     <Stack spacing={2}>
       <State q={status}>

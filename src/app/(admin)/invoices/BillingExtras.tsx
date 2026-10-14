@@ -194,7 +194,7 @@ export function RefundDialog({ invoice, onClose, onDone }: { invoice: Invoice; o
           </Stack>
           {calc.isError && <Alert severity="error">{errorMessage(calc.error)}</Alert>}
           {calc.data && (
-            <Paper variant="outlined" sx={{ p: 1.5, bgcolor: 'grey.50' }}>
+            <Paper variant="outlined" sx={{ p: 1.5, bgcolor: 'background.default' }}>
               <Typography variant="subtitle2">{tr('계산 환불액 {0}', { 0: won(calc.data.refundAmount) })}</Typography>
               {calc.data.lines.map((l, i) => <Typography key={i} variant="caption" component="div" color="text.secondary">· {l}</Typography>)}
             </Paper>

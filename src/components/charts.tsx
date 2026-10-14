@@ -5,6 +5,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { useTheme } from '@mui/material/styles';
 import { useT } from '@/lib/i18n';
+import { chart } from '@/theme/tokens';
 
 /** 외부 차트 라이브러리 없이 쓰는 가벼운 SVG 차트 모음 (통계 화면·대시보드 위젯 공용) */
 
@@ -159,7 +160,7 @@ export function Donut({ slices, size = 160 }: { slices: { label: string; value: 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap' }}>
       <svg viewBox="0 0 160 160" width={size} height={size} role="img">
-        <circle cx="80" cy="80" r={r} fill="none" stroke="#eef0f6" strokeWidth="22" />
+        <circle cx="80" cy="80" r={r} fill="none" stroke={chart.track} strokeWidth="22" />
         {total > 0 &&
           slices.map((s) => {
             const len = (s.value / total) * c;
@@ -190,7 +191,7 @@ export function Donut({ slices, size = 160 }: { slices: { label: string; value: 
 }
 
 /** 요일×시간 히트맵. value(weekday, hour) → 0 이상 숫자 */
-export function Heatmap({ weekdays, hours, value, color = '27,37,89' }: { weekdays: string[]; hours: number[]; value: (weekday: number, hour: number) => number; color?: string }) {
+export function Heatmap({ weekdays, hours, value, color = chart.rgbPrimary }: { weekdays: string[]; hours: number[]; value: (weekday: number, hour: number) => number; color?: string }) {
   const tr = useT();
   let max = 0;
   weekdays.forEach((_, wi) => hours.forEach((h) => (max = Math.max(max, value(wi + 1, h)))));

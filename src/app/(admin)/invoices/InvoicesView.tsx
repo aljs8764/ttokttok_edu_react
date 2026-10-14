@@ -33,6 +33,8 @@ import type { Classroom, Page, Student } from '@/lib/types';
 import PageHeader from '@/components/PageHeader';
 import { DiscountRulesDialog, RefundDialog, RefundListDialog, useDiscountPreview } from './BillingExtras';
 import { useT } from '@/lib/i18n';
+import KpiCard from '@/components/ui/KpiCard';
+import { tone as TONES } from '@/theme/tokens';
 
 function StatusChip({ i }: { i: Invoice }) {
   const t = useT();
@@ -44,11 +46,12 @@ function StatusChip({ i }: { i: Invoice }) {
 
 function Stat({ label, value, sub, tone }: { label: string; value: string; sub?: string; tone?: 'error' }) {
   return (
-    <Paper sx={{ px: 3, py: 2.5 }}>
-      <Typography variant="caption" color="text.secondary">{label}</Typography>
-      <Typography variant="h3" color={tone === 'error' ? 'error' : undefined}>{value}</Typography>
-      {sub && <Typography variant="caption" color="text.secondary">{sub}</Typography>}
-    </Paper>
+    <KpiCard
+      size="md"
+      label={label}
+      value={<Box component="span" sx={{ color: tone === 'error' ? TONES.red.fg : 'inherit' }}>{value}</Box>}
+      footer={sub && <Typography component="span" sx={{ fontSize: 13, color: 'text.secondary' }}>{sub}</Typography>}
+    />
   );
 }
 
