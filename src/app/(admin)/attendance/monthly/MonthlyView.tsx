@@ -31,7 +31,8 @@ import type { Classroom, MonthlyAttendance, MonthlyCell, MonthlyRow } from '@/li
 import PageHeader from '@/components/PageHeader';
 import { useT } from '@/lib/i18n';
 
-const MARK_COLOR: Record<string, string> = { O: 'success.main', '△': 'warning.main', X: 'error.main' };
+// 글자 색은 대비 4.5:1 이상인 dark 톤 (기호 O·△·X 로도 구분)
+const MARK_COLOR: Record<string, string> = { O: 'success.dark', '△': 'warning.dark', X: 'error.dark' };
 
 /** ATT-003 월간 출석부 (O/△/X, 결석 사유) + ATT-004 출석부 엑셀 */
 export default function MonthlyView() {

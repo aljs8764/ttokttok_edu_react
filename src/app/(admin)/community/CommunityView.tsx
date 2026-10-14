@@ -181,7 +181,7 @@ export default function CommunityView() {
 
           <Paper variant="outlined" sx={{ flex: 1, minWidth: 0, width: '100%' }}>
             {isMine ? (
-              <Tabs value={myTab} onChange={(_, v: 'posts' | 'comments') => setMyTab(v)} sx={{ px: 2, borderBottom: 1, borderColor: 'divider' }}>
+              <Tabs value={myTab} onChange={(_, v: 'posts' | 'comments') => setMyTab(v)} sx={{ mx: 2, mt: 1 }}>
                 <Tab value="posts" label={t('내 글')} />
                 <Tab value="comments" label={t('내 댓글')} />
               </Tabs>

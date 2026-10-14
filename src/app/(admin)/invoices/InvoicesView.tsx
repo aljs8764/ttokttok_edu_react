@@ -44,7 +44,7 @@ function StatusChip({ i }: { i: Invoice }) {
 
 function Stat({ label, value, sub, tone }: { label: string; value: string; sub?: string; tone?: 'error' }) {
   return (
-    <Paper sx={{ p: 2 }}>
+    <Paper sx={{ px: 3, py: 2.5 }}>
       <Typography variant="caption" color="text.secondary">{label}</Typography>
       <Typography variant="h3" color={tone === 'error' ? 'error' : undefined}>{value}</Typography>
       {sub && <Typography variant="caption" color="text.secondary">{sub}</Typography>}

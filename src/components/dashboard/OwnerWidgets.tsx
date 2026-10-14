@@ -42,6 +42,8 @@ import type {
   ChurnReason, ChurnRisk, ClassFlag, InboxItem, InboxKey, InstitutionCard, OwnerBilling, OwnerClassRow, OwnerKpi, OwnerStaff, StaffMemo, StaffMemoAck,
 } from '@/lib/dashboard';
 import WidgetCard from '@/components/dashboard/WidgetCard';
+import KpiCard from '@/components/ui/KpiCard';
+import { color, tone } from '@/theme/tokens';
 import { useT } from '@/lib/i18n';
 
 const ratio = (v: number | null | undefined) => (v === null || v === undefined ? '-' : ratioText(v, 0));
@@ -62,16 +64,20 @@ export function BusinessKpiRow({ instId }: { instId?: string }) {
       ]
     : [];
   return (
-    <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(5, 1fr)' }, mb: 2 }}>
+    <Box component="section" aria-label={t('경영 KPI')} sx={{ display: 'grid', gap: 2, gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', mb: 3 }}>
       {q.isError && <Alert severity="error" sx={{ gridColumn: '1 / -1' }}>{errorMessage(q.error)}</Alert>}
       {!k
-        ? Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} variant="rounded" height={104} />)
-        : cards.map((c) => (
-            <Paper key={c.label} component={Link} href={c.href} sx={{ p: 2, textDecoration: 'none', color: 'inherit', '&:hover': { boxShadow: 3 } }}>
-              <Typography variant="body2" color="text.secondary">{c.label}</Typography>
-              <Typography variant="h2" sx={{ my: 0.5, color: c.tone === 'error' ? 'error.main' : c.tone === 'success' ? 'success.main' : 'text.primary' }}>{c.value}</Typography>
-              <Typography variant="caption" color="text.secondary">{c.sub}</Typography>
-            </Paper>
+        ? Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} variant="rounded" height={120} sx={{ borderRadius: 3 }} />)
+        : cards.map((c, i) => (
+            <Box key={c.label} component={Link} href={c.href} sx={{ textDecoration: 'none', color: 'inherit', borderRadius: 3, '&:hover .MuiPaper-root': { borderColor: '#B9BFD3' }, '&:focus-visible': { outline: `2px solid ${color.primary}`, outlineOffset: 2 } }}>
+              <KpiCard
+                label={c.label}
+                menuId={i === 0 ? 'DASH-009' : undefined}
+                size="md"
+                value={<Box component="span" sx={{ color: c.tone === 'error' ? tone.red.fg : c.tone === 'success' ? tone.green.fg : 'inherit' }}>{c.value}</Box>}
+                footer={<Typography component="span" sx={{ fontSize: 13, color: 'text.secondary' }}>{c.sub}</Typography>}
+              />
+            </Box>
           ))}
     </Box>
   );
@@ -171,7 +177,7 @@ export function ClassBoardWidget({ instId }: { instId?: string }) {
           </TableBody>
         </Table>
       </Box>
-      <Box sx={{ p: 1.5, textAlign: 'right' }}>
+      <Box sx={{ px: 3, py: 1.5 }}>
         <Typography component={Link} href="/classes" variant="body2" color="primary" sx={{ textDecoration: 'none' }}>{t('반 관리로 →')}</Typography>
       </Box>
     </WidgetCard>
@@ -191,7 +197,7 @@ export function OwnerBillingWidget({ instId }: { instId?: string }) {
   return (
     <WidgetCard title={t('수납 · 미납')} menuId="DASH-012" loading={q.isLoading}>
       {b && (
-        <Box sx={{ p: 2 }}>
+        <Box sx={{ px: 3, pb: 2 }}>
           <Stack direction="row" spacing={3} sx={{ mb: 1.5 }}>
             <Box>
               <Typography variant="caption" color="text.secondary">{t('미납')}</Typography>

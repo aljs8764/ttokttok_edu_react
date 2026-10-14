@@ -1521,4 +1521,10 @@ export const EN_SCREENS: Record<string, string> = {
   '샘플 데이터로 먼저 둘러보기': 'Explore with sample data first',
   '원생·반이 들어간 데모 기관에서 기능을 먼저 체험해요.': 'Try features in a demo institution with students and classes.',
   '체험 모드 시작': 'Start demo mode',
+  '안녕하세요, {0} {1}님': 'Hello, {0} ({1})',
+  '오늘 등원 예정 {0}명 중 {1}명이 등원했어요.': '{1} of {0} expected students have checked in today.',
+  '확인이 필요한 학생이 {0}명 있어요.': '{0} students need attention.',
+  '출결 현황 보기': 'View attendance',
+  '실시간 등·하원 타임라인': 'Live check-in/out timeline',
+  '전체 출결 로그 보기 →': 'See full attendance log →',
 };

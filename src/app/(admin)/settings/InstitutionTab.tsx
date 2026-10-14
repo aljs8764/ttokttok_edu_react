@@ -180,7 +180,7 @@ export default function InstitutionTab() {
       {owner && (
         <Stack direction="row" spacing={1} justifyContent="flex-end" alignItems="center" sx={{ mt: 3 }}>
           {saved && (
-            <Typography variant="body2" color="success.main" sx={{ mr: 1 }}>
+            <Typography variant="body2" color="success.dark" sx={{ mr: 1 }}>
               {tr('저장했습니다')}
             </Typography>
           )}

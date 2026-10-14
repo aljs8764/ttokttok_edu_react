@@ -207,7 +207,7 @@ function ProgressQuoteButton({ classIds, onQuote }: { classIds: string[]; onQuot
       <Button size="small" variant="outlined" disabled={classIds.length === 0 || quote.isPending} onClick={() => quote.mutate()}>
         {tr('진도 불러오기')}
       </Button>
-      <Typography variant="caption" color={message ? 'warning.main' : 'text.secondary'}>
+      <Typography variant="caption" color={message ? 'warning.dark' : 'text.secondary'}>
         {message || (classIds.length === 0 ? tr('대상에서 반을 고르면 그 반의 최근 진도·숙제를 본문에 붙일 수 있습니다.') : tr('반별 가장 최근 진도·숙제를 본문 끝에 붙입니다.'))}
       </Typography>
     </Stack>

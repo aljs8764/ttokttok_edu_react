@@ -2,10 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Alert from '@mui/material/Alert';
-import Chip from '@mui/material/Chip';
 import InputAdornment from '@mui/material/InputAdornment';
 import MenuItem from '@mui/material/MenuItem';
-import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -35,6 +33,15 @@ import RegisterStudentDialog from '@/components/students/RegisterStudentDialog';
 import InviteParentDialog from '@/components/students/InviteParentDialog';
 import PageHeader from '@/components/PageHeader';
 import { useT } from '@/lib/i18n';
+import Box from '@mui/material/Box';
+import SectionCard from '@/components/ui/SectionCard';
+import SegmentTabs from '@/components/ui/SegmentTabs';
+import StatusBadge from '@/components/ui/StatusBadge';
+import EmptyState from '@/components/ui/EmptyState';
+import MenuIdChip from '@/components/ui/MenuIdChip';
+import Avatar from '@/components/ui/Avatar';
+import { MUI_COLOR_TONE } from '@/theme/status';
+import { font } from '@/theme/tokens';
 
 /**
  * STU-001 원생 목록 — 반·재원상태 필터, 이름/보호자 번호 뒷 4자리 검색, 20개씩.
@@ -107,45 +114,53 @@ export default function StudentsView() {
         }
       />
 
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mb: 2 }}>
-        <TextField
-          size="small"
-          placeholder={tr('이름 또는 보호자 번호 뒷 4자리')}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          sx={{ minWidth: 260 }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon fontSize="small" />
-              </InputAdornment>
-            ),
-          }}
-        />
-        <TextField select size="small" label={tr('반')} value={classId} onChange={(e) => (setClassId(e.target.value), setPage(0))} sx={{ minWidth: 150 }}>
-          <MenuItem value="">{tr('전체')}</MenuItem>
-          {(classes.data ?? []).map((c) => (
-            <MenuItem key={c.id} value={c.id}>
-              {c.name}
-            </MenuItem>
-          ))}
-        </TextField>
-        <TextField select size="small" label={tr('상태')} value={status} onChange={(e) => (setStatus(e.target.value as StudentStatus | ''), setPage(0))} sx={{ minWidth: 120 }}>
-          <MenuItem value="">{tr('전체')}</MenuItem>
-          {(Object.keys(STUDENT_STATUS) as StudentStatus[]).map((s) => (
-            <MenuItem key={s} value={s}>
-              {tr(STUDENT_STATUS[s].label)}
-            </MenuItem>
-          ))}
-        </TextField>
-      </Stack>
-
       {list.isError && <Alert severity="error" sx={{ mb: 2 }}>{errorMessage(list.error)}</Alert>}
 
-      <Paper>
-        {list.isFetching && <LinearProgress />}
+      <SectionCard flush sx={{ pb: 0 }}>
+        <Box sx={{ px: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
+            <SegmentTabs<StudentStatus | ''>
+              value={status}
+              onChange={(v) => (setStatus(v), setPage(0))}
+              ariaLabel={tr('재원 상태')}
+              items={[
+                { value: '', label: tr('전체') },
+                ...(Object.keys(STUDENT_STATUS) as StudentStatus[]).map((st) => ({ value: st, label: tr(STUDENT_STATUS[st].label) })),
+              ]}
+            />
+            <MenuIdChip id="STU-001" />
+          </Box>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+            <TextField select size="small" label={tr('반')} value={classId} onChange={(e) => (setClassId(e.target.value), setPage(0))} sx={{ minWidth: 160 }}>
+              <MenuItem value="">{tr('전체')}</MenuItem>
+              {(classes.data ?? []).map((c) => (
+                <MenuItem key={c.id} value={c.id}>
+                  {c.name}
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              size="small"
+              placeholder={tr('이름 또는 보호자 번호 뒷 4자리')}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              sx={{ flex: '1 1 260px', maxWidth: { sm: 420 } }}
+              slotProps={{
+                htmlInput: { 'aria-label': tr('원생 검색') },
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon fontSize="small" />
+                    </InputAdornment>
+                  ),
+                },
+              }}
+            />
+          </Stack>
+        </Box>
+        <Box sx={{ mt: 2, height: 4 }}>{list.isFetching && <LinearProgress sx={{ height: 4, borderRadius: 0 }} />}</Box>
         <TableContainer>
-          <Table size="small">
+          <Table sx={{ minWidth: 760, '& .MuiTableCell-root:first-of-type': { pl: 3 }, '& .MuiTableCell-root:last-of-type': { pr: 3 } }}>
             <TableHead>
               <TableRow>
                 <TableCell>{tr('이름')}</TableCell>
@@ -159,32 +174,44 @@ export default function StudentsView() {
             <TableBody>
               {list.data?.items.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 4, color: 'text.secondary' }}>
-                    {tr('조건에 맞는 원생이 없습니다')}
+                  <TableCell colSpan={6} sx={{ border: 0 }}>
+                    <EmptyState dense title={tr('조건에 맞는 원생이 없습니다')} />
                   </TableCell>
                 </TableRow>
               )}
               {list.data?.items.map((s) => (
-                <TableRow key={s.id} hover onClick={() => router.push(`/students/${s.id}`)} sx={{ cursor: 'pointer' }}>
-                  <TableCell sx={{ fontWeight: 600 }}>{s.name}</TableCell>
+                <TableRow
+                  key={s.id}
+                  hover
+                  tabIndex={0}
+                  onClick={() => router.push(`/students/${s.id}`)}
+                  onKeyDown={(e) => e.key === 'Enter' && router.push(`/students/${s.id}`)}
+                  sx={{ cursor: 'pointer' }}
+                >
+                  <TableCell>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+                      <Avatar name={s.name} />
+                      <Box component="span" sx={{ fontWeight: 600 }}>{s.name}</Box>
+                    </Box>
+                  </TableCell>
                   <TableCell>{s.classroomIds.map((id) => classNames.get(id) ?? '-').join(', ') || '-'}</TableCell>
                   <TableCell>
                     <Stack spacing={0.5}>
                       {s.guardians.map((g) => (
                         <Stack key={g.id} direction="row" spacing={1} alignItems="center">
-                          <Typography variant="body2">
+                          <Typography sx={{ fontFamily: font.mono, fontSize: 13 }}>
                             {g.phone}
-                            {g.relation ? ` (${g.relation})` : ''}
                           </Typography>
-                          <Chip size="small" variant="outlined" color={LINK_STATUS[g.linkStatus]?.color} label={tr(LINK_STATUS[g.linkStatus]?.label ?? g.linkStatus)} />
+                          {g.relation && <Typography variant="body2" color="text.secondary">({g.relation})</Typography>}
+                          <StatusBadge tone={MUI_COLOR_TONE[LINK_STATUS[g.linkStatus]?.color ?? 'default']} label={tr(LINK_STATUS[g.linkStatus]?.label ?? g.linkStatus)} />
                         </Stack>
                       ))}
                     </Stack>
                   </TableCell>
-                  <TableCell>{s.birthDate ?? '••••-••-••'}</TableCell>
+                  <TableCell sx={{ fontFamily: font.mono, fontSize: 13 }}>{s.birthDate ?? '••••-••-••'}</TableCell>
                   <TableCell>{s.grade ?? '-'}</TableCell>
                   <TableCell>
-                    <Chip size="small" label={tr(STUDENT_STATUS[s.status].label)} color={STUDENT_STATUS[s.status].color} variant={s.status === 'WITHDRAWN' ? 'outlined' : 'filled'} />
+                    <StatusBadge tone={MUI_COLOR_TONE[STUDENT_STATUS[s.status].color]} label={tr(STUDENT_STATUS[s.status].label)} />
                   </TableCell>
                 </TableRow>
               ))}
@@ -200,7 +227,7 @@ export default function StudentsView() {
           rowsPerPageOptions={[20]}
           labelDisplayedRows={({ from, to, count }) => tr('{0}–{1} / 총 {2}명', { 0: from, 1: to, 2: count })}
         />
-      </Paper>
+      </SectionCard>
 
       <RegisterStudentDialog open={registerOpen} classes={classes.data ?? []} onClose={() => setRegisterOpen(false)} onCreated={(st) => router.push(`/students/${st.id}`)} />
       <InviteParentDialog open={inviteOpen} onClose={() => setInviteOpen(false)} />

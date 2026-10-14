@@ -3,12 +3,9 @@
 import Link from 'next/link';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
-import Divider from '@mui/material/Divider';
-import LinearProgress from '@mui/material/LinearProgress';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
-import Paper from '@mui/material/Paper';
 import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 import { useQuery } from '@tanstack/react-query';
@@ -17,21 +14,17 @@ import { dateTime, time } from '@/lib/format';
 import { ratioText, type CongestionToday, type LowReadNotices } from '@/lib/stats';
 import { BarChart } from '@/components/charts';
 import { useT } from '@/lib/i18n';
-import MenuIdChip from '@/components/ui/MenuIdChip';
+import WidgetCard from '@/components/dashboard/WidgetCard';
+import StatusBadge from '@/components/ui/StatusBadge';
+import ProgressBar from '@/components/ui/ProgressBar';
+import { color } from '@/theme/tokens';
 
 /** DASH-004 미열람 알림장 위젯 — 최근 7일 발송분 중 열람률이 낮은 건 */
 export function LowReadNoticesWidget({ instId }: { instId?: string }) {
   const t = useT();
   const q = useQuery({ queryKey: ['dashboard', 'low-read', instId], queryFn: () => api.get<LowReadNotices>('dashboard/widgets/low-read-notices', { limit: 5 }), enabled: !!instId, refetchInterval: 120_000 });
   return (
-    <Paper>
-      <Box sx={{ px: 2, py: 1.5, display: 'flex', alignItems: 'center' }}>
-        <Typography variant="h4" sx={{ flex: 1 }}>
-          {t('열람률 낮은 알림장')}
-        </Typography>
-        <MenuIdChip id="DASH-004" />
-      </Box>
-      <Divider />
+    <WidgetCard title={t('열람률 낮은 알림장')} menuId="DASH-004">
       {q.isLoading ? (
         <Box sx={{ p: 2 }}>
           <Skeleton />
@@ -46,12 +39,12 @@ export function LowReadNoticesWidget({ instId }: { instId?: string }) {
           {q.data.notices.map((n) => (
             <ListItem key={n.noticeId} divider component={Link} href={`/notices/${n.noticeId}`} sx={{ color: 'inherit', textDecoration: 'none', display: 'block' }}>
               <ListItemText primary={n.title} secondary={t('{0} 발송 · {1}/{2}명 열람 ({3})', { 0: dateTime(n.sentAt), 1: n.readStudents, 2: n.targetStudents, 3: ratioText(n.readRate, 0) })} />
-              <LinearProgress variant="determinate" value={n.readRate * 100} color="warning" sx={{ height: 5, borderRadius: 3 }} />
+              <ProgressBar value={n.readRate * 100} tone="warning" label={n.title} />
             </ListItem>
           ))}
         </List>
       )}
-    </Paper>
+    </WidgetCard>
   );
 }
 
@@ -61,16 +54,8 @@ export function CongestionMiniWidget({ instId }: { instId?: string }) {
   const q = useQuery({ queryKey: ['dashboard', 'congestion', instId], queryFn: () => api.get<CongestionToday>('dashboard/widgets/congestion'), enabled: !!instId, refetchInterval: 120_000 });
   const hours = q.data?.hours ?? [];
   return (
-    <Paper>
-      <Box sx={{ px: 2, py: 1.5, display: 'flex', alignItems: 'center' }}>
-        <Typography variant="h4" sx={{ flex: 1 }}>
-          {t('오늘 혼잡도')}
-        </Typography>
-        {q.data?.peakHour !== null && q.data?.peakHour !== undefined && <Chip size="small" color="primary" label={t('피크 {0}시', { 0: q.data.peakHour })} sx={{ mr: 1 }} />}
-        <MenuIdChip id="DASH-006" />
-      </Box>
-      <Divider />
-      <Box sx={{ p: 2 }}>
+    <WidgetCard title={t('오늘 혼잡도')} menuId="DASH-006" actions={<>{q.data?.peakHour !== null && q.data?.peakHour !== undefined && <Chip size="small" color="primary" label={t('피크 {0}시', { 0: q.data.peakHour })} sx={{ mr: 1 }} />}</>}>
+      <Box sx={{ px: 3, pb: 1.5 }}>
         {q.isLoading ? (
           <Skeleton variant="rounded" height={120} />
         ) : hours.length === 0 ? (
@@ -82,18 +67,18 @@ export function CongestionMiniWidget({ instId }: { instId?: string }) {
             height={150}
             labels={hours.map((h) => t('{0}시', { 0: h.hour }))}
             series={[
-              { name: t('등원'), color: '#1b2559', values: hours.map((h) => h.checkIns) },
-              { name: t('하원'), color: '#e8913a', values: hours.map((h) => h.checkOuts) },
+              { name: t('등원'), color: color.primary, values: hours.map((h) => h.checkIns) },
+              { name: t('하원'), color: color.accent, values: hours.map((h) => h.checkOuts) },
             ]}
           />
         )}
-        <Box sx={{ textAlign: 'right' }}>
-          <Typography component={Link} href="/stats" variant="body2" color="primary" sx={{ textDecoration: 'none' }}>
+        <Box sx={{ pt: 1 }}>
+          <Typography component={Link} href="/stats" sx={{ fontSize: 14, fontWeight: 600, color: color.link, textDecoration: 'none' }}>
             {t('통계에서 더 보기 →')}
           </Typography>
         </Box>
       </Box>
-    </Paper>
+    </WidgetCard>
   );
 }
 
@@ -119,15 +104,11 @@ export function MissingAlertWidget({ instId }: { instId?: string }) {
   if (!q.isLoading && rows.length === 0) return null;
   const still = rows.filter((r) => r.currentStatus === 'SCHEDULED').length;
   return (
-    <Paper sx={{ borderColor: still > 0 ? 'error.main' : undefined }} variant={still > 0 ? 'outlined' : undefined}>
-      <Box sx={{ px: 2, py: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
-        <Typography variant="h4" sx={{ flex: 1 }}>
-          {t('미등원 경고')}
-        </Typography>
-        {still > 0 && <Chip size="small" color="error" label={t('확인 필요 {0}명', { 0: still })} />}
-        <MenuIdChip id="ATT-010" />
-      </Box>
-      <Divider />
+    <WidgetCard
+      title={t('미등원 경고')}
+      menuId="ATT-010"
+      actions={still > 0 ? <StatusBadge kind="risk" label={t('확인 필요 {0}명', { 0: still })} /> : undefined}
+    >
       {q.isLoading ? (
         <Box sx={{ p: 2 }}>
           <Skeleton />
@@ -140,10 +121,11 @@ export function MissingAlertWidget({ instId }: { instId?: string }) {
                 primary={
                   <>
                     {r.studentName} · {r.classroomName} {r.classStart}
+                    {' '}
                     {r.currentStatus === 'SCHEDULED' ? (
-                      <Chip size="small" color="error" label={t('미등원')} sx={{ ml: 1 }} />
+                      <StatusBadge kind="risk" label={t('미등원')} />
                     ) : (
-                      <Chip size="small" color="success" variant="outlined" label={r.currentStatus === 'ABSENT' ? t('결석 처리') : t('등원함')} sx={{ ml: 1 }} />
+                      <StatusBadge kind={r.currentStatus === 'ABSENT' ? 'absent' : 'checkedIn'} label={r.currentStatus === 'ABSENT' ? t('결석 처리') : t('등원함')} />
                     )}
                   </>
                 }
@@ -156,11 +138,11 @@ export function MissingAlertWidget({ instId }: { instId?: string }) {
           ))}
         </List>
       )}
-      <Box sx={{ px: 2, py: 1, textAlign: 'right' }}>
-        <Typography component={Link} href="/settings?tab=missing" variant="caption" color="text.secondary">
+      <Box sx={{ px: 3, pt: 1.5, pb: 1 }}>
+        <Typography component={Link} href="/settings?tab=missing" sx={{ fontSize: 13, fontWeight: 600, color: color.link, textDecoration: 'none' }}>
           {t('경고 기준 설정')}
         </Typography>
       </Box>
-    </Paper>
+    </WidgetCard>
   );
 }

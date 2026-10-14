@@ -99,7 +99,7 @@ export default function StudentDetailView({ id }: { id: string }) {
       {d && s && (
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 6 }}>
-            <Paper sx={{ p: 2.5, height: '100%' }}>
+            <Paper sx={{ px: 3, py: 2.5, height: '100%' }}>
               <SectionTitle
                 title={t('기본 정보')}
                 action={
@@ -137,7 +137,7 @@ export default function StudentDetailView({ id }: { id: string }) {
           </Grid>
 
           <Grid size={{ xs: 12, md: 6 }}>
-            <Paper sx={{ p: 2.5, height: '100%' }}>
+            <Paper sx={{ px: 3, py: 2.5, height: '100%' }}>
               <SectionTitle
                 title={t('보호자')}
                 action={
@@ -179,7 +179,7 @@ export default function StudentDetailView({ id }: { id: string }) {
           </Grid>
 
           <Grid size={{ xs: 12, md: 6 }}>
-            <Paper sx={{ p: 2.5 }}>
+            <Paper sx={{ px: 3, py: 2.5 }}>
               <SectionTitle title={t('반 이력')} />
               <History
                 rows={d.classHistory.map((h) => ({
@@ -193,7 +193,7 @@ export default function StudentDetailView({ id }: { id: string }) {
           </Grid>
 
           <Grid size={{ xs: 12, md: 6 }}>
-            <Paper sx={{ p: 2.5 }}>
+            <Paper sx={{ px: 3, py: 2.5 }}>
               <SectionTitle title={t('재원 상태 이력')} />
               <History
                 rows={d.statusHistory.map((h, i) => ({

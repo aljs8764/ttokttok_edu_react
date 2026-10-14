@@ -66,7 +66,7 @@ export default function SurveyResultView({ id }: { id: string }) {
       {res.isFetching && <LinearProgress />}
       {s && (
         <Stack spacing={2} sx={{ maxWidth: 900 }}>
-          <Paper sx={{ p: 2.5 }}>
+          <Paper sx={{ px: 3, py: 2.5 }}>
             <Stack direction="row" spacing={1} alignItems="center">
               <Chip size="small" label={s.status === 'OPEN' ? tr('진행 중') : tr('마감')} color={s.status === 'OPEN' ? 'primary' : 'default'} />
               <Typography variant="body2">
@@ -121,7 +121,7 @@ export default function SurveyResultView({ id }: { id: string }) {
             );
           })}
 
-          <Paper sx={{ p: 2.5 }}>
+          <Paper sx={{ px: 3, py: 2.5 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
               {tr('미응답 {0}명', { 0: res.data?.nonRespondents.length ?? 0 })}
             </Typography>

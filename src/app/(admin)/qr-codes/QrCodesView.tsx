@@ -150,7 +150,7 @@ export default function QrCodesView() {
           <GeofenceCard current={fence.data?.geofence ?? null} loading={fence.isLoading} editable={owner} />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
-          <Paper sx={{ p: 2.5 }}>
+          <Paper sx={{ px: 3, py: 2.5 }}>
             <Typography variant="subtitle1">{t('최근 7일 스캔 실패')}</Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
               {t('같은 학생이 학원 밖에서 반복해서 찍으면 QR 사진이 공유된 것일 수 있습니다. 재발급하세요.')}
@@ -364,7 +364,7 @@ function GeofenceCard({ current, loading, editable }: { current: Geofence | null
   const mapUrl = valid ? t('https://map.kakao.com/link/map/학원,{0},{1}', { 0: latN, 1: lngN }) : null;
 
   return (
-    <Paper sx={{ p: 2.5 }}>
+    <Paper sx={{ px: 3, py: 2.5 }}>
       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
         <Typography variant="subtitle1">{t('기관 위치')}</Typography>
         <MenuIdChip id="QR-002" />
@@ -406,7 +406,7 @@ function GeofenceCard({ current, loading, editable }: { current: Geofence | null
         {editable && (
           <Stack direction="row" spacing={1} justifyContent="flex-end" alignItems="center">
             {saved && (
-              <Typography variant="body2" color="success.main">
+              <Typography variant="body2" color="success.dark">
                 {t('저장했습니다')}
               </Typography>
             )}

@@ -15,6 +15,7 @@ import { api } from '@/lib/api';
 import { SUBSCRIPTION_STATUS, won, type BillingWidgetData } from '@/lib/billing';
 import { percent } from '@/lib/format';
 import { useT } from '@/lib/i18n';
+import WidgetCard from '@/components/dashboard/WidgetCard';
 import MenuIdChip from '@/components/ui/MenuIdChip';
 
 /** DASH-007 구독·수납 현황 — 원장·실장 대시보드에만 */
@@ -26,21 +27,14 @@ export default function BillingWidget({ instId }: { instId?: string }) {
   const st = d ? SUBSCRIPTION_STATUS[d.status] : null;
 
   return (
-    <Paper>
-      <Box sx={{ px: 2, py: 1.5, display: 'flex', alignItems: 'center' }}>
-        <Typography variant="h4" sx={{ flex: 1 }}>
-          {t('구독 · 수납 현황')}
-        </Typography>
-        <MenuIdChip id="DASH-007" />
-      </Box>
-      <Divider />
+    <WidgetCard title={t('구독 · 수납 현황')} menuId="DASH-007">
       {q.isLoading || !d || !inv ? (
-        <Box sx={{ p: 2 }}>
+        <Box sx={{ px: 3, pb: 2 }}>
           <Skeleton />
           <Skeleton />
         </Box>
       ) : (
-        <Stack spacing={2} sx={{ p: 2 }}>
+        <Stack spacing={2} sx={{ px: 3, pb: 2 }}>
           <Box>
             <Stack direction="row" spacing={1} alignItems="center">
               <Typography sx={{ fontWeight: 700 }}>{t('{0} 플랜', { 0: d.planName })}</Typography>
@@ -77,6 +71,6 @@ export default function BillingWidget({ instId }: { instId?: string }) {
           </Box>
         </Stack>
       )}
-    </Paper>
+    </WidgetCard>
   );
 }

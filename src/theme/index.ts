@@ -49,10 +49,10 @@ export const theme: Theme = createTheme(
     palette: {
       primary: { main: color.primary, contrastText: '#FFFFFF' },
       secondary: { main: color.accent, contrastText: color.primary },
-      success: { main: color.success, contrastText: '#FFFFFF' },
-      info: { main: color.info, contrastText: '#FFFFFF' },
-      warning: { main: color.warning, contrastText: color.primary },
-      error: { main: color.error, contrastText: '#FFFFFF' },
+      success: { main: color.success, dark: tone.green.fg, contrastText: '#FFFFFF' },
+      info: { main: color.info, dark: tone.blue.fg, contrastText: '#FFFFFF' },
+      warning: { main: color.warning, dark: tone.amber.fg, contrastText: color.primary },
+      error: { main: color.error, dark: tone.red.fg, contrastText: '#FFFFFF' },
       background: { default: color.bg, paper: color.paper },
       text: { primary: color.text, secondary: color.textSecondary },
       divider: color.divider,
@@ -129,10 +129,12 @@ export const theme: Theme = createTheme(
               '&.MuiChip-clickable:hover, &.MuiChip-clickable.Mui-focusVisible': { backgroundColor: t.bg, filter: 'brightness(0.96)' },
             };
           },
-          outlined: ({ ownerState }) =>
-            !ownerState.color || ownerState.color === 'default'
-              ? { borderColor: color.border, color: color.textSecondary, backgroundColor: color.paper }
-              : {},
+          // 색 있는 outlined 칩도 배지 톤으로 (main 색 글자는 흰 바탕 대비 4.5:1 미달)
+          outlined: ({ ownerState }) => {
+            if (!ownerState.color || ownerState.color === 'default') return { borderColor: color.border, color: color.textSecondary, backgroundColor: color.paper };
+            const t = CHIP_TONE[ownerState.color as ChipTone] ?? tone.gray;
+            return { borderColor: t.bg, color: t.fg, backgroundColor: t.bg, '& .MuiChip-icon, & .MuiChip-deleteIcon': { color: t.fg } };
+          },
         },
       },
       MuiTabs: {
@@ -195,7 +197,8 @@ export const theme: Theme = createTheme(
       },
       MuiTableCell: {
         styleOverrides: {
-          root: { borderBottom: `1px solid ${color.rowDivider}`, fontSize: 14, padding: '12px' },
+          // 카드 가장자리 여백(24)과 맞추려고 첫·끝 칸은 안쪽 여백을 넓힌다
+          root: { borderBottom: `1px solid ${color.rowDivider}`, fontSize: 14, padding: '12px', '&:first-of-type': { paddingLeft: 24 }, '&:last-of-type': { paddingRight: 24 } },
           head: {
             fontSize: 12,
             fontWeight: 600,

@@ -122,7 +122,7 @@ export default function NoticeDetailView({ id }: { id: string }) {
       {n && (
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 5 }}>
-            <Paper sx={{ p: 2.5 }}>
+            <Paper sx={{ px: 3, py: 2.5 }}>
               <Stack direction="row" spacing={1} sx={{ mb: 1.5 }}>
                 <Chip size="small" label={tr(NOTICE_KIND[n.kind])} variant="outlined" color={n.kind === 'ANNOUNCEMENT' ? 'primary' : 'default'} />
                 <Chip size="small" label={tr(NOTICE_STATUS[n.status].label)} color={NOTICE_STATUS[n.status].color} />
@@ -156,7 +156,7 @@ export default function NoticeDetailView({ id }: { id: string }) {
           </Grid>
 
           <Grid size={{ xs: 12, md: 7 }}>
-            <Paper sx={{ p: 2.5 }}>
+            <Paper sx={{ px: 3, py: 2.5 }}>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ sm: 'center' }} sx={{ mb: 2 }}>
                 <Box sx={{ flex: 1 }}>
                   <Typography variant="subtitle1">{tr('수신 확인')}</Typography>

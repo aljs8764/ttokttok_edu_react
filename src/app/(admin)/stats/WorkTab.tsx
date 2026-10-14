@@ -48,7 +48,7 @@ const offsetText = (m: number | null) => (m == null ? '-' : m < 0 ? translate('ì
 
 function Section({ title, menuId, children }: { title: string; menuId: string; children: ReactNode }) {
   return (
-    <Paper sx={{ p: 2.5 }}>
+    <Paper sx={{ px: 3, py: 2.5 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
         <Typography variant="h4" sx={{ flex: 1 }}>{title}</Typography>
         <MenuIdChip id={menuId} />

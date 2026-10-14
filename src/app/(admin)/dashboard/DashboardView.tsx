@@ -5,21 +5,12 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import TuneIcon from '@mui/icons-material/Tune';
+import AddIcon from '@mui/icons-material/Add';
 import Link from 'next/link';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
-import Chip from '@mui/material/Chip';
-import Divider from '@mui/material/Divider';
-import LinearProgress from '@mui/material/LinearProgress';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
-import Paper from '@mui/material/Paper';
 import Skeleton from '@mui/material/Skeleton';
-import Stack from '@mui/material/Stack';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
@@ -38,7 +29,13 @@ import PageHeader from '@/components/PageHeader';
 import SampleModeBanner from '@/components/SampleModeBanner';
 import StatusChip from '@/components/StatusChip';
 import { useT } from '@/lib/i18n';
-import MenuIdChip from '@/components/ui/MenuIdChip';
+import KpiCard from '@/components/ui/KpiCard';
+import StatusBadge from '@/components/ui/StatusBadge';
+import SegmentTabs from '@/components/ui/SegmentTabs';
+import EmptyState from '@/components/ui/EmptyState';
+import WidgetCard from '@/components/dashboard/WidgetCard';
+import { color, font, tone } from '@/theme/tokens';
+import type { StatusKind } from '@/theme/status';
 
 export const OWNER_WIDGETS = [
   'business-kpi', 'today-kpi', 'inbox', 'classes', 'missing', 'students', 'churn', 'billing', 'staff', 'memos',
@@ -181,6 +178,27 @@ function OwnerDashboard({ widgets, actions }: { widgets: DashboardWidget[]; acti
         actions={actions}
         description={today.data ? t('{0} · {1} 기준{2}', { 0: dayjs(today.data.date).format(t('M월 D일 (dd)')), 1: time(today.data.asOf), 2: manager ? '' : t(' · 담당 반') }) : undefined}
       />
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: 2, mb: 3 }}>
+        <Box>
+          <Typography variant="h2" component="h2">
+            {t('안녕하세요, {0} {1}님', { 0: session?.user.name ?? '', 1: role ? t(ROLE_LABEL[role]) : '' })}
+          </Typography>
+          {k && (
+            <Typography sx={{ mt: 0.75, fontSize: 15, color: 'text.secondary' }}>
+              {t('오늘 등원 예정 {0}명 중 {1}명이 등원했어요.', { 0: k.total - k.excusedAbsent, 1: k.present })}
+              {k.notArrived > 0 && ` ${t('확인이 필요한 학생이 {0}명 있어요.', { 0: k.notArrived })}`}
+            </Typography>
+          )}
+        </Box>
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+          <Button variant="outlined" component={Link} href="/attendance">
+            {t('출결 현황 보기')}
+          </Button>
+          <Button variant="contained" component={Link} href="/notices/new" startIcon={<AddIcon />}>
+            {t('알림장 쓰기')}
+          </Button>
+        </Box>
+      </Box>
       <SampleModeBanner empty={owner && setupClasses.data?.length === 0} />
       {needsSetup && (
         <Alert
@@ -201,16 +219,44 @@ function OwnerDashboard({ widgets, actions }: { widgets: DashboardWidget[]; acti
         w.key === 'business-kpi' ? (
           <BusinessKpiRow key={w.key} instId={instId} />
         ) : (
-          <Box key={w.key} sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(4, 1fr)' }, mb: 2 }}>
-        <Kpi label={t('실시간 등원율')} value={k ? percent(k.attendanceRate) : null} sub={k ? t('{0} / {1}명', { 0: k.present, 1: k.total - k.excusedAbsent }) : ''} progress={k?.attendanceRate ?? undefined} />
-        <Kpi label={t('미등원')} value={k ? t('{0}명', { 0: k.notArrived }) : null} sub={t('지각 기준 시각 경과')} tone={k && k.notArrived > 0 ? 'error' : undefined} />
-        <Kpi label={t('결석 · 지각')} value={k ? t('{0} · {1}명', { 0: k.absent, 1: k.late }) : null} sub={k ? t('사유 등록 결석 {0}명', { 0: k.excusedAbsent }) : ''} />
-        <Kpi label={t('공지 열람률')} value={k ? percent(k.noticeReadRate) : null} sub={t('최근 24시간 발송분')} />
-      </Box>
+          <Box key={w.key} component="section" aria-label={t('오늘 출결 KPI')} sx={{ display: 'grid', gap: 2, gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', mb: 3 }}>
+            <KpiCard
+              label={t('실시간 등원율')}
+              menuId="DASH-001"
+              loading={!k}
+              value={k ? percent(k.attendanceRate) : ''}
+              sub={k ? t('{0} / {1}명', { 0: k.present, 1: k.total - k.excusedAbsent }) : undefined}
+              progress={k?.attendanceRate ?? null}
+              progressTone="success"
+            />
+            <KpiCard
+              label={t('미등원')}
+              menuId="DASH-001"
+              loading={!k}
+              value={k ? <Box component="span" sx={{ color: k.notArrived > 0 ? tone.red.fg : 'inherit' }}>{t('{0}명', { 0: k.notArrived })}</Box> : ''}
+              footer={k && <StatusBadge kind={k.notArrived > 0 ? 'late' : 'neutral'} label={t('지각 기준 시각 경과')} />}
+            />
+            <KpiCard
+              label={t('결석 · 지각')}
+              menuId="DASH-005"
+              loading={!k}
+              value={k ? t('{0} · {1}명', { 0: k.absent, 1: k.late }) : ''}
+              footer={k && <StatusBadge kind={k.excusedAbsent > 0 ? 'absent' : 'neutral'} label={t('사유 등록 결석 {0}명', { 0: k.excusedAbsent })} />}
+            />
+            <KpiCard
+              label={t('공지 열람률')}
+              menuId="DASH-001"
+              loading={!k}
+              value={k ? percent(k.noticeReadRate) : ''}
+              sub={t('최근 24시간 발송분')}
+              progress={k?.noticeReadRate ?? null}
+              progressTone="info"
+            />
+          </Box>
         ),
       )}
 
-      <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' }, alignItems: 'start' }}>
+      <Box sx={{ display: 'grid', gap: 3, gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' }, alignItems: 'start' }}>
         {widgets
           .filter((w) => w.visible && blocks[w.key])
           .map((w) => (
@@ -223,119 +269,86 @@ function OwnerDashboard({ widgets, actions }: { widgets: DashboardWidget[]; acti
   );
 }
 
-function Kpi({ label, value, sub, progress, tone }: { label: string; value: string | null; sub?: string; progress?: number; tone?: 'error' }) {
-  return (
-    <Paper sx={{ p: 2.5 }}>
-      <Typography variant="body2" color="text.secondary">
-        {label}
-      </Typography>
-      {value === null ? (
-        <Skeleton width={80} height={44} />
-      ) : (
-        <Typography variant="h1" sx={{ my: 0.5, color: tone === 'error' ? 'error.main' : 'text.primary' }}>
-          {value}
-        </Typography>
-      )}
-      {progress !== undefined && <LinearProgress variant="determinate" value={Math.min(100, progress)} sx={{ height: 6, borderRadius: 3, my: 1 }} color="success" />}
-      <Typography variant="caption" color="text.secondary">
-        {sub}
-      </Typography>
-    </Paper>
-  );
-}
-
 /** DASH-005 미등원 · 지각 · 결석 명단 */
 function StudentWidgets({ data, loading }: { data?: DashboardToday; loading: boolean }) {
   const t = useT();
   const [tab, setTab] = useState<'notArrived' | 'late' | 'absent'>('notArrived');
   const list: DashboardStudentItem[] = data?.widgets[tab] ?? [];
   return (
-    <Paper>
-      <Box sx={{ px: 2, pt: 1, display: 'flex', alignItems: 'center' }}>
-        <Typography variant="h4" sx={{ flex: 1 }}>
-          {t('확인이 필요한 원생')}
-        </Typography>
-        <MenuIdChip id="DASH-005" />
+    <WidgetCard title={t('확인이 필요한 원생')} menuId="DASH-005">
+      <Box sx={{ px: 3, pb: 1.5 }}>
+        <SegmentTabs
+          value={tab}
+          onChange={setTab}
+          ariaLabel={t('확인이 필요한 원생')}
+          items={[
+            { value: 'notArrived', label: t('미등원 {0}', { 0: data?.widgets.notArrived.length ?? '' }) },
+            { value: 'late', label: t('지각 {0}', { 0: data?.widgets.late.length ?? '' }) },
+            { value: 'absent', label: t('결석 {0}', { 0: data?.widgets.absent.length ?? '' }) },
+          ]}
+        />
       </Box>
-      <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ px: 1 }}>
-        <Tab value="notArrived" label={t('미등원 {0}', { 0: data?.widgets.notArrived.length ?? '' })} />
-        <Tab value="late" label={t('지각 {0}', { 0: data?.widgets.late.length ?? '' })} />
-        <Tab value="absent" label={t('결석 {0}', { 0: data?.widgets.absent.length ?? '' })} />
-      </Tabs>
-      <Divider />
       {loading ? (
-        <Box sx={{ p: 2 }}>
+        <Box sx={{ px: 3, pb: 2 }}>
           <Skeleton />
           <Skeleton />
         </Box>
       ) : list.length === 0 ? (
-        <Typography variant="body2" color="text.secondary" sx={{ p: 3, textAlign: 'center' }}>
-          {t('해당 원생이 없습니다')}
-        </Typography>
+        <EmptyState dense title={t('해당 원생이 없습니다')} />
       ) : (
-        <List dense disablePadding sx={{ maxHeight: 320, overflow: 'auto' }}>
+        <Box component="ul" sx={{ listStyle: 'none', m: 0, p: 0, maxHeight: 340, overflow: 'auto' }}>
           {list.map((s) => (
-            <ListItem key={s.dayId} divider secondaryAction={<StatusChip status={s.status} isLate={tab === 'late'} />}>
-              <ListItemText
-                primary={`${s.studentName} · ${s.classroomName}`}
-                secondary={
-                  tab === 'notArrived'
+            <Box component="li" key={s.dayId} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 3, py: 1.25, borderTop: `1px solid ${color.rowDivider}` }}>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography sx={{ fontSize: 14 }}>
+                  <Box component="strong" sx={{ fontWeight: 600 }}>{s.studentName}</Box>{' '}
+                  <Box component="span" sx={{ color: 'text.secondary' }}>· {s.classroomName}</Box>
+                </Typography>
+                <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
+                  {tab === 'notArrived'
                     ? t('수업 {0} 시작 · {1}분 경과', { 0: s.classStartTime.slice(0, 5), 1: s.minutesLate ?? 0 })
                     : tab === 'late'
                       ? t('{0} 등원 · {1}분 늦음', { 0: time(s.checkInAt), 1: s.minutesLate ?? 0 })
-                      : s.absenceReason ?? t('사유 미등록')
-                }
-              />
-            </ListItem>
+                      : s.absenceReason ?? t('사유 미등록')}
+                </Typography>
+              </Box>
+              <StatusChip status={s.status} isLate={tab === 'late'} />
+            </Box>
           ))}
-        </List>
+        </Box>
       )}
-      <Box sx={{ p: 1.5, textAlign: 'right' }}>
-        <Typography component={Link} href="/attendance" variant="body2" color="primary" sx={{ textDecoration: 'none' }}>
+      <Box sx={{ px: 3, pt: 1.5, pb: 1 }}>
+        <Typography component={Link} href="/attendance" sx={{ fontSize: 14, fontWeight: 600, color: color.link, textDecoration: 'none' }}>
           {t('데일리 리포트에서 처리 →')}
         </Typography>
       </Box>
-    </Paper>
+    </WidgetCard>
   );
 }
 
-const SCHEDULE_LABEL: Record<ScheduleItem['kind'], { label: string; color: 'primary' | 'warning' | 'info' }> = {
-  EVENT: { label: '행사', color: 'primary' },
-  RSVP_DEADLINE: { label: '응답 마감', color: 'warning' },
-  NOTICE_SCHEDULED: { label: '예약 발송', color: 'info' },
+const SCHEDULE_LABEL: Record<ScheduleItem['kind'], { label: string; kind: StatusKind }> = {
+  EVENT: { label: '행사', kind: 'info' },
+  RSVP_DEADLINE: { label: '응답 마감', kind: 'caution' },
+  NOTICE_SCHEDULED: { label: '예약 발송', kind: 'neutral' },
 };
 
 /** DASH-003 오늘·내일 일정 */
 function SchedulePanel({ items, loading }: { items?: ScheduleItem[]; loading: boolean }) {
   const t = useT();
   return (
-    <Paper>
-      <Box sx={{ px: 2, py: 1.5, display: 'flex', alignItems: 'center' }}>
-        <Typography variant="h4" sx={{ flex: 1 }}>
-          {t('오늘·내일 일정')}
-        </Typography>
-        <MenuIdChip id="DASH-003" />
+    <WidgetCard title={t('오늘·내일 일정')} menuId="DASH-003" loading={loading} empty={!items?.length && t('예정된 일정이 없습니다')}>
+      <Box component="ul" sx={{ listStyle: 'none', m: 0, p: 0 }}>
+        {(items ?? []).map((i) => (
+          <Box component="li" key={`${i.kind}-${i.refId}`} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, px: 3, py: 1.25, borderTop: `1px solid ${color.rowDivider}` }}>
+            <StatusBadge kind={SCHEDULE_LABEL[i.kind].kind} label={t(SCHEDULE_LABEL[i.kind].label)} minWidth={72} />
+            <Box sx={{ minWidth: 0 }}>
+              <Typography sx={{ fontSize: 14, fontWeight: 600 }}>{i.title}</Typography>
+              <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>{[dateTime(i.at), i.detail].filter(Boolean).join(' · ')}</Typography>
+            </Box>
+          </Box>
+        ))}
       </Box>
-      <Divider />
-      {loading ? (
-        <Box sx={{ p: 2 }}>
-          <Skeleton />
-        </Box>
-      ) : !items?.length ? (
-        <Typography variant="body2" color="text.secondary" sx={{ p: 3, textAlign: 'center' }}>
-          {t('예정된 일정이 없습니다')}
-        </Typography>
-      ) : (
-        <List dense disablePadding>
-          {items.map((i) => (
-            <ListItem key={`${i.kind}-${i.refId}`} divider>
-              <Chip size="small" label={t(SCHEDULE_LABEL[i.kind].label)} color={SCHEDULE_LABEL[i.kind].color} variant="outlined" sx={{ mr: 1.5, minWidth: 72 }} />
-              <ListItemText primary={i.title} secondary={[dateTime(i.at), i.detail].filter(Boolean).join(' · ')} />
-            </ListItem>
-          ))}
-        </List>
-      )}
-    </Paper>
+    </WidgetCard>
   );
 }
 
@@ -345,54 +358,41 @@ const SOURCE_LABEL: Record<TimelineEntry['source'], string> = { TEACHER_APP: '�
 function TimelinePanel({ entries, loading }: { entries?: TimelineEntry[]; loading: boolean }) {
   const t = useT();
   return (
-    <Paper>
-      <Box sx={{ px: 2, py: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
-        <Typography variant="h4" sx={{ flex: 1 }}>
-          {t('실시간 타임라인')}
-        </Typography>
-        <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'success.main' }} title={t('실시간 연결')} />
-        <MenuIdChip id="DASH-002" />
-      </Box>
-      <Divider />
-      {loading ? (
-        <Box sx={{ p: 2 }}>
-          <Skeleton />
-          <Skeleton />
-          <Skeleton />
+    <WidgetCard
+      title={t('실시간 등·하원 타임라인')}
+      menuId="DASH-002"
+      actions={
+        <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75, fontSize: 12, fontWeight: 600, color: tone.green.fg }}>
+          <Box component="span" aria-hidden sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'success.main' }} />
+          LIVE
         </Box>
-      ) : !entries?.length ? (
-        <Typography variant="body2" color="text.secondary" sx={{ p: 3, textAlign: 'center' }}>
-          {t('아직 오늘 출결 기록이 없습니다')}
+      }
+      loading={loading}
+      empty={!entries?.length && t('아직 오늘 출결 기록이 없습니다')}
+    >
+      <Box component="ol" sx={{ listStyle: 'none', m: 0, p: 0, maxHeight: 640, overflow: 'auto' }}>
+        {(entries ?? []).map((e) => (
+          <Box component="li" key={e.eventId} sx={{ display: 'flex', alignItems: 'center', gap: 2, px: 3, py: 1.5, borderTop: `1px solid ${color.rowDivider}`, flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
+            <Typography component="time" sx={{ fontFamily: font.mono, fontSize: 13, color: 'text.secondary', width: 44, flexShrink: 0 }}>
+              {time(e.occurredAt)}
+            </Typography>
+            <StatusChip status={e.toStatus} isLate={e.isLate} />
+            <Typography sx={{ flex: 1, minWidth: 0, fontSize: 14 }}>
+              <Box component="strong" sx={{ fontWeight: 600 }}>{e.studentName}</Box>
+              {e.classroomName && <Box component="span" sx={{ color: 'text.secondary' }}> · {e.classroomName}</Box>}
+              {e.type === 'STATUS_CHANGE' && e.reason && <Box component="span" sx={{ color: 'text.secondary' }}> · {t('수동 변경: {0}', { 0: e.reason })}</Box>}
+            </Typography>
+            <Typography sx={{ fontSize: 13, color: e.destinationName ? 'text.primary' : 'text.secondary', textAlign: 'right' }}>
+              {e.destinationName ? `→ ${e.destinationName}` : `${e.actorName} (${t(SOURCE_LABEL[e.source])})`}
+            </Typography>
+          </Box>
+        ))}
+      </Box>
+      <Box sx={{ px: 3, pt: 1.5, pb: 1 }}>
+        <Typography component={Link} href="/attendance" sx={{ fontSize: 14, fontWeight: 600, color: color.link, textDecoration: 'none' }}>
+          {t('전체 출결 로그 보기 →')}
         </Typography>
-      ) : (
-        <List dense disablePadding sx={{ maxHeight: 640, overflow: 'auto' }}>
-          {entries.map((e) => (
-            <ListItem key={e.eventId} divider alignItems="flex-start">
-              <Typography variant="body2" color="text.secondary" sx={{ width: 48, flexShrink: 0, pt: 0.5 }}>
-                {time(e.occurredAt)}
-              </Typography>
-              <ListItemText
-                primary={
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <span>
-                      {e.studentName}
-                      {e.classroomName ? ` · ${e.classroomName}` : ''}
-                    </span>
-                    <StatusChip status={e.toStatus} isLate={e.isLate} />
-                  </Stack>
-                }
-                secondary={[
-                  e.destinationName && `→ ${e.destinationName}`,
-                  e.type === 'STATUS_CHANGE' && e.reason && t('수동 변경: {0}', { 0: e.reason }),
-                  `${e.actorName} (${t(SOURCE_LABEL[e.source])})`,
-                ]
-                  .filter(Boolean)
-                  .join(' · ')}
-              />
-            </ListItem>
-          ))}
-        </List>
-      )}
-    </Paper>
+      </Box>
+    </WidgetCard>
   );
 }

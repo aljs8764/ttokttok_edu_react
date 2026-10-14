@@ -57,7 +57,7 @@ function HealthCard({ studentId }: { studentId: string }) {
   const dirty = q.data && (f.allergies !== (q.data.allergies ?? '') || f.conditions !== (q.data.conditions ?? '') || f.notes !== (q.data.notes ?? ''));
 
   return (
-    <Paper sx={{ p: 2.5, height: '100%' }}>
+    <Paper sx={{ px: 3, py: 2.5, height: '100%' }}>
       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
         <WarningIcon color="warning" fontSize="small" />
         <Typography variant="h3">{tr('건강·알레르기 특이사항')}</Typography>
@@ -103,7 +103,7 @@ function TagsCard({ studentId }: { studentId: string }) {
   const on = new Set((mine.data ?? []).map((t) => t.id));
 
   return (
-    <Paper sx={{ p: 2.5, height: '100%' }}>
+    <Paper sx={{ px: 3, py: 2.5, height: '100%' }}>
       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
         <Typography variant="h3">{tr('태그·그룹')}</Typography>
         <MenuIdChip id="STU-011" />
@@ -151,7 +151,7 @@ function CounselCard({ studentId }: { studentId: string }) {
   const remove = useMutation({ mutationFn: (id: string) => api.delete(`counsel-notes/${id}`), onSuccess: refresh });
 
   return (
-    <Paper sx={{ p: 2.5 }}>
+    <Paper sx={{ px: 3, py: 2.5 }}>
       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
         <Typography variant="h3">{tr('상담일지·메모')}</Typography>
         <MenuIdChip id="STU-010" />
