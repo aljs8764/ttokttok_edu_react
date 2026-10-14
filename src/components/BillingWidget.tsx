@@ -5,7 +5,6 @@ import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
 import LinearProgress from '@mui/material/LinearProgress';
-import Paper from '@mui/material/Paper';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -16,7 +15,6 @@ import { SUBSCRIPTION_STATUS, won, type BillingWidgetData } from '@/lib/billing'
 import { percent } from '@/lib/format';
 import { useT } from '@/lib/i18n';
 import WidgetCard from '@/components/dashboard/WidgetCard';
-import MenuIdChip from '@/components/ui/MenuIdChip';
 
 /** DASH-007 구독·수납 현황 — 원장·실장 대시보드에만 */
 export default function BillingWidget({ instId }: { instId?: string }) {
