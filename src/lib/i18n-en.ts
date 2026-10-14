@@ -1527,4 +1527,7 @@ export const EN_SCREENS: Record<string, string> = {
   '출결 현황 보기': 'View attendance',
   '실시간 등·하원 타임라인': 'Live check-in/out timeline',
   '전체 출결 로그 보기 →': 'See full attendance log →',
+  '첨부 {0}개': '{0} attachments',
+  '출결 필터': 'Attendance filter',
+  '행사 기간': 'Event period',
 };

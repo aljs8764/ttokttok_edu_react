@@ -94,7 +94,7 @@ export default function InstitutionTab() {
           {tr('기관 정보는 원장만 수정할 수 있습니다.')}
         </Alert>
       )}
-      <Grid container spacing={2}>
+      <Grid container spacing={3}>
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField label={tr('기관명')} required fullWidth value={name} onChange={(e) => (setName(e.target.value), setSaved(false))} disabled={ro} inputProps={{ maxLength: 100 }} />
         </Grid>

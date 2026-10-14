@@ -145,7 +145,7 @@ export default function QrCodesView() {
         ))}
       </Grid>
 
-      <Grid container spacing={2}>
+      <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 6 }}>
           <GeofenceCard current={fence.data?.geofence ?? null} loading={fence.isLoading} editable={owner} />
         </Grid>

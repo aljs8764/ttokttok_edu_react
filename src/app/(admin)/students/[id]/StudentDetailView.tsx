@@ -97,7 +97,7 @@ export default function StudentDetailView({ id }: { id: string }) {
       {detail.isError && <Alert severity="error">{errorMessage(detail.error)}</Alert>}
 
       {d && s && (
-        <Grid container spacing={2}>
+        <Grid container spacing={3}>
           <Grid size={{ xs: 12, md: 6 }}>
             <Paper sx={{ px: 3, py: 2.5, height: '100%' }}>
               <SectionTitle

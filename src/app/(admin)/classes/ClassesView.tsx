@@ -87,7 +87,7 @@ export default function ClassesView() {
         <Alert severity="info">{manager ? t('아직 반이 없습니다. 반을 먼저 만들어야 원생을 등록할 수 있습니다.') : t('담당 반이 없습니다. 원장님께 배정을 요청하세요.')}</Alert>
       )}
 
-      <Grid container spacing={2}>
+      <Grid container spacing={3}>
         {classes.data?.map((c) => {
           const count = c.headcount ?? 0;
           const ratio = Math.min(100, (count / Math.max(1, c.capacity)) * 100);

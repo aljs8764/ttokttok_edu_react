@@ -120,7 +120,7 @@ export default function NoticeDetailView({ id }: { id: string }) {
       {notice.isError && <Alert severity="error">{errorMessage(notice.error)}</Alert>}
 
       {n && (
-        <Grid container spacing={2}>
+        <Grid container spacing={3}>
           <Grid size={{ xs: 12, md: 5 }}>
             <Paper sx={{ px: 3, py: 2.5 }}>
               <Stack direction="row" spacing={1} sx={{ mb: 1.5 }}>
