@@ -52,8 +52,8 @@
 
 | # | 내용 | 상태 | 커밋 |
 |---|---|---|---|
-| ① | 디자인 토큰·MUI 테마·IBM Plex 폰트(next/font) | 진행 | |
-| ② | 공통 컴포넌트 `src/components/ui/*` (StatusBadge·MenuIdChip·PageHeader·SectionCard·KpiCard·SegmentTabs·ProgressBar·EmptyState) | 대기 | |
+| ① | 디자인 토큰·MUI 테마·IBM Plex 폰트(next/font) | 완료 | 26ff092 |
+| ② | 공통 컴포넌트 `src/components/ui/*` (StatusBadge·MenuIdChip·PageHeader·SectionCard·KpiCard·SegmentTabs·ProgressBar·EmptyState) | 완료 | (이 커밋) |
 | ③ | 앱 셸 — 기관 사이드바·운영사 사이드바·모바일 Drawer, 로그인·온보딩·초대 셸 없음 | 대기 | |
 | ④ | Phase 1 화면 (P1-01~11) | 대기 | |
 | ⑤ | Phase 2 화면 (P2-01~15) | 대기 | |

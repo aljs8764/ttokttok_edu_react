@@ -38,6 +38,7 @@ import PageHeader from '@/components/PageHeader';
 import SampleModeBanner from '@/components/SampleModeBanner';
 import StatusChip from '@/components/StatusChip';
 import { useT } from '@/lib/i18n';
+import MenuIdChip from '@/components/ui/MenuIdChip';
 
 export const OWNER_WIDGETS = [
   'business-kpi', 'today-kpi', 'inbox', 'classes', 'missing', 'students', 'churn', 'billing', 'staff', 'memos',
@@ -254,7 +255,7 @@ function StudentWidgets({ data, loading }: { data?: DashboardToday; loading: boo
         <Typography variant="h4" sx={{ flex: 1 }}>
           {t('확인이 필요한 원생')}
         </Typography>
-        <Chip size="small" variant="outlined" label="DASH-005" />
+        <MenuIdChip id="DASH-005" />
       </Box>
       <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ px: 1 }}>
         <Tab value="notArrived" label={t('미등원 {0}', { 0: data?.widgets.notArrived.length ?? '' })} />
@@ -313,7 +314,7 @@ function SchedulePanel({ items, loading }: { items?: ScheduleItem[]; loading: bo
         <Typography variant="h4" sx={{ flex: 1 }}>
           {t('오늘·내일 일정')}
         </Typography>
-        <Chip size="small" variant="outlined" label="DASH-003" />
+        <MenuIdChip id="DASH-003" />
       </Box>
       <Divider />
       {loading ? (
@@ -350,7 +351,7 @@ function TimelinePanel({ entries, loading }: { entries?: TimelineEntry[]; loadin
           {t('실시간 타임라인')}
         </Typography>
         <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'success.main' }} title={t('실시간 연결')} />
-        <Chip size="small" variant="outlined" label="DASH-002" />
+        <MenuIdChip id="DASH-002" />
       </Box>
       <Divider />
       {loading ? (

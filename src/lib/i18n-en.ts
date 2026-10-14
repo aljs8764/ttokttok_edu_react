@@ -1489,4 +1489,11 @@ export const EN_SCREENS: Record<string, string> = {
   '{0} 교직원': '{0} staff',
   '{0} 학부모': '{0} parents',
   '삭제하면 되돌릴 수 없습니다. 삭제할까요?': 'This can\'t be undone. Delete?',
+  // UI/UX 디자인 적용 (2026-10-14)
+  '경영': 'Management',
+  'SaaS 운영': 'SaaS operations',
+  'CS·공지': 'Support & notices',
+  '경영 지표': 'Business metrics',
+  '가입 기관': 'Institutions',
+  '현재 위치': 'You are here',
 };

@@ -18,6 +18,7 @@ import { useQuery } from '@tanstack/react-query';
 import { api, errorMessage } from '@/lib/api';
 import { ratioText } from '@/lib/stats';
 import { useT, translate } from '@/lib/i18n';
+import MenuIdChip from '@/components/ui/MenuIdChip';
 
 interface RankRow { id: string; name: string; notices: number; targets: number; read: number; rate: number | null; weak: boolean }
 interface NoticeRanking { from: string; to: string; institutionRate: number | null; classrooms: RankRow[]; teachers: RankRow[] }
@@ -50,7 +51,7 @@ function Section({ title, menuId, children }: { title: string; menuId: string; c
     <Paper sx={{ p: 2.5 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
         <Typography variant="h4" sx={{ flex: 1 }}>{title}</Typography>
-        <Chip size="small" variant="outlined" label={menuId} />
+        <MenuIdChip id={menuId} />
       </Box>
       {children}
     </Paper>

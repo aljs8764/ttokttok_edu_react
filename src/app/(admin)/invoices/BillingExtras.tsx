@@ -33,6 +33,7 @@ import { PAY_METHOD, won, type Invoice, type PayMethod } from '@/lib/billing';
 import { WITHDRAWAL_REASON } from '@/lib/student';
 import type { WithdrawalReason } from '@/lib/types';
 import { useT, translate } from '@/lib/i18n';
+import MenuIdChip from '@/components/ui/MenuIdChip';
 
 // ───────── PAY-006 할인 규칙 ─────────
 export type DiscountKind = 'SIBLING' | 'LONG_TERM' | 'MULTI_CLASS';
@@ -72,7 +73,7 @@ export function DiscountRulesDialog({ onClose }: { onClose: () => void }) {
 
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="md">
-      <DialogTitle>{tr('원비 할인 규칙')}{' '}<Chip size="small" variant="outlined" label="PAY-006" sx={{ ml: 1 }} /></DialogTitle>
+      <DialogTitle>{tr('원비 할인 규칙')}{' '}<MenuIdChip id="PAY-006" sx={{ ml: 1 }} /></DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           {tr('청구서를 만들 때 조건에 맞는 원생에게 자동으로 할인을 적용합니다. 여러 규칙에 해당하면 모두 더해 적용하고(청구액을 넘지 않음), 퍼센트 할인은 10원 단위로 버립니다.')}
@@ -176,7 +177,7 @@ export function RefundDialog({ invoice, onClose, onDone }: { invoice: Invoice; o
 
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>{tr('중도 퇴원 환불 · {0}', { 0: invoice.student.name })}{' '}<Chip size="small" variant="outlined" label="PAY-007" sx={{ ml: 1 }} /></DialogTitle>
+      <DialogTitle>{tr('중도 퇴원 환불 · {0}', { 0: invoice.student.name })}{' '}<MenuIdChip id="PAY-007" sx={{ ml: 1 }} /></DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ pt: 1 }}>
           <Typography variant="body2">{tr('{0} · 납부 {1}', { 0: invoice.title, 1: won(invoice.amount) })}</Typography>

@@ -17,6 +17,7 @@ import { dateTime, time } from '@/lib/format';
 import { ratioText, type CongestionToday, type LowReadNotices } from '@/lib/stats';
 import { BarChart } from '@/components/charts';
 import { useT } from '@/lib/i18n';
+import MenuIdChip from '@/components/ui/MenuIdChip';
 
 /** DASH-004 미열람 알림장 위젯 — 최근 7일 발송분 중 열람률이 낮은 건 */
 export function LowReadNoticesWidget({ instId }: { instId?: string }) {
@@ -28,7 +29,7 @@ export function LowReadNoticesWidget({ instId }: { instId?: string }) {
         <Typography variant="h4" sx={{ flex: 1 }}>
           {t('열람률 낮은 알림장')}
         </Typography>
-        <Chip size="small" variant="outlined" label="DASH-004" />
+        <MenuIdChip id="DASH-004" />
       </Box>
       <Divider />
       {q.isLoading ? (
@@ -66,7 +67,7 @@ export function CongestionMiniWidget({ instId }: { instId?: string }) {
           {t('오늘 혼잡도')}
         </Typography>
         {q.data?.peakHour !== null && q.data?.peakHour !== undefined && <Chip size="small" color="primary" label={t('피크 {0}시', { 0: q.data.peakHour })} sx={{ mr: 1 }} />}
-        <Chip size="small" variant="outlined" label="DASH-006" />
+        <MenuIdChip id="DASH-006" />
       </Box>
       <Divider />
       <Box sx={{ p: 2 }}>
@@ -124,7 +125,7 @@ export function MissingAlertWidget({ instId }: { instId?: string }) {
           {t('미등원 경고')}
         </Typography>
         {still > 0 && <Chip size="small" color="error" label={t('확인 필요 {0}명', { 0: still })} />}
-        <Chip size="small" variant="outlined" label="ATT-010" />
+        <MenuIdChip id="ATT-010" />
       </Box>
       <Divider />
       {q.isLoading ? (

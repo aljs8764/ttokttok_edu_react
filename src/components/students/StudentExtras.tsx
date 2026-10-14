@@ -21,6 +21,7 @@ import { dateTime } from '@/lib/format';
 import type { CounselNote, Health, StudentTag } from '@/lib/ops';
 import { useSession } from '@/lib/session';
 import { useT } from '@/lib/i18n';
+import MenuIdChip from '@/components/ui/MenuIdChip';
 
 /** 원생 상세 아래: STU-009 건강·알레르기, STU-011 태그, STU-010 상담일지 */
 export default function StudentExtras({ studentId }: { studentId: string }) {
@@ -60,7 +61,7 @@ function HealthCard({ studentId }: { studentId: string }) {
       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
         <WarningIcon color="warning" fontSize="small" />
         <Typography variant="h3">{tr('건강·알레르기 특이사항')}</Typography>
-        <Chip size="small" variant="outlined" label="STU-009" />
+        <MenuIdChip id="STU-009" />
       </Stack>
       <Typography variant="caption" color="text.secondary">
         {tr('암호화해서 저장합니다. 알레르기를 적으면 교사 앱의 반 화면에 경고 배지가 뜹니다.')}
@@ -105,7 +106,7 @@ function TagsCard({ studentId }: { studentId: string }) {
     <Paper sx={{ p: 2.5, height: '100%' }}>
       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
         <Typography variant="h3">{tr('태그·그룹')}</Typography>
-        <Chip size="small" variant="outlined" label="STU-011" />
+        <MenuIdChip id="STU-011" />
       </Stack>
       <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
         {(all.data ?? []).map((t) => (
@@ -153,7 +154,7 @@ function CounselCard({ studentId }: { studentId: string }) {
     <Paper sx={{ p: 2.5 }}>
       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
         <Typography variant="h3">{tr('상담일지·메모')}</Typography>
-        <Chip size="small" variant="outlined" label="STU-010" />
+        <MenuIdChip id="STU-010" />
       </Stack>
       <Stack spacing={1.5}>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>

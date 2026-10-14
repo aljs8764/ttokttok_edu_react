@@ -2,11 +2,11 @@
 
 import type { ReactNode } from 'react';
 import Box from '@mui/material/Box';
-import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
 import Paper from '@mui/material/Paper';
 import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
+import MenuIdChip from '@/components/ui/MenuIdChip';
 
 /** 대시보드 위젯 틀: 제목 + 메뉴ID + (선택) 오른쪽 버튼 */
 export default function WidgetCard({ title, menuId, actions, children, loading, empty }: {
@@ -25,7 +25,7 @@ export default function WidgetCard({ title, menuId, actions, children, loading, 
           {title}
         </Typography>
         {actions}
-        {menuId && <Chip size="small" variant="outlined" label={menuId} />}
+        {menuId && <MenuIdChip id={menuId} />}
       </Box>
       <Divider />
       {loading ? (

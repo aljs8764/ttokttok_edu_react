@@ -15,6 +15,7 @@ import { api } from '@/lib/api';
 import { SUBSCRIPTION_STATUS, won, type BillingWidgetData } from '@/lib/billing';
 import { percent } from '@/lib/format';
 import { useT } from '@/lib/i18n';
+import MenuIdChip from '@/components/ui/MenuIdChip';
 
 /** DASH-007 구독·수납 현황 — 원장·실장 대시보드에만 */
 export default function BillingWidget({ instId }: { instId?: string }) {
@@ -30,7 +31,7 @@ export default function BillingWidget({ instId }: { instId?: string }) {
         <Typography variant="h4" sx={{ flex: 1 }}>
           {t('구독 · 수납 현황')}
         </Typography>
-        <Chip size="small" variant="outlined" label="DASH-007" />
+        <MenuIdChip id="DASH-007" />
       </Box>
       <Divider />
       {q.isLoading || !d || !inv ? (

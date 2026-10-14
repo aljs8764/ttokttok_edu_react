@@ -30,6 +30,7 @@ import dayjs, { type Dayjs } from 'dayjs';
 import { api, errorMessage } from '@/lib/api';
 import type { Classroom } from '@/lib/types';
 import { useT } from '@/lib/i18n';
+import MenuIdChip from '@/components/ui/MenuIdChip';
 
 export interface Textbook { id: string; classroomId: string; name: string; publisher: string | null; memo: string | null; archived: boolean }
 export interface Progress {
@@ -87,7 +88,7 @@ export default function CurriculumDialog({ classroom, onClose }: { classroom: Cl
   return (
     <Dialog open={!!classroom} onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle>
-        {tr('{0} 교재·진도', { 0: classroom?.name })}{' '}<Chip size="small" variant="outlined" label="CLS-005" sx={{ ml: 1 }} />
+        {tr('{0} 교재·진도', { 0: classroom?.name })}{' '}<MenuIdChip id="CLS-005" sx={{ ml: 1 }} />
       </DialogTitle>
       <DialogContent>
         <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>

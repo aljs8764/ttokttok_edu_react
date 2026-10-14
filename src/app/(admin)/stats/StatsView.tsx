@@ -41,6 +41,7 @@ import { BarChart, Donut, Heatmap, LineChart } from '@/components/charts';
 import PageHeader from '@/components/PageHeader';
 import WorkTab from './WorkTab';
 import { useT } from '@/lib/i18n';
+import MenuIdChip from '@/components/ui/MenuIdChip';
 
 type Section = 'KPI' | 'CLASSROOMS' | 'ENROLLMENT';
 const SECTION_LABEL: Record<Section, string> = { KPI: '기간 KPI', CLASSROOMS: '반별 비교', ENROLLMENT: '재원 현황' };
@@ -114,7 +115,7 @@ export default function StatsView() {
               />
             ))}
             <Button variant="outlined" startIcon={<DownloadIcon />} disabled={!rangeValid || sections.length === 0 || downloading} onClick={exportReport}>
-              {t('엑셀 리포트')}{' '}<Chip size="small" label="STAT-008" sx={{ ml: 1 }} />
+              {t('엑셀 리포트')}{' '}<MenuIdChip id="STAT-008" sx={{ ml: 1 }} />
             </Button>
             <Button
               variant="outlined"
@@ -161,7 +162,7 @@ function Card({ title, menuId, children }: { title: string; menuId?: string; chi
         <Typography variant="h4" sx={{ flex: 1 }}>
           {title}
         </Typography>
-        {menuId && <Chip size="small" variant="outlined" label={menuId} />}
+        {menuId && <MenuIdChip id={menuId} />}
       </Box>
       {children}
     </Paper>

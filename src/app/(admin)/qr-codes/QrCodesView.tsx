@@ -37,6 +37,7 @@ import type { CheckinQr, Geofence, QrScanFailure } from '@/lib/types';
 import PageHeader from '@/components/PageHeader';
 import QrImage from '@/components/QrImage';
 import { useT } from '@/lib/i18n';
+import MenuIdChip from '@/components/ui/MenuIdChip';
 
 const REASON: Record<string, string> = {
   QR_INVALID: '재발급·삭제된 QR',
@@ -366,7 +367,7 @@ function GeofenceCard({ current, loading, editable }: { current: Geofence | null
     <Paper sx={{ p: 2.5 }}>
       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
         <Typography variant="subtitle1">{t('기관 위치')}</Typography>
-        <Chip size="small" variant="outlined" label="QR-002" sx={{ color: 'text.secondary' }} />
+        <MenuIdChip id="QR-002" />
         {current ? <Chip size="small" color="success" label={t('반경 {0}m 확인 중', { 0: current.radiusMeters })} /> : <Chip size="small" label={t('꺼짐')} />}
       </Stack>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
