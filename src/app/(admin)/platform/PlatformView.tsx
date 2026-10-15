@@ -15,6 +15,8 @@ import TicketsTab from './TicketsTab';
 import NoticesTab from './NoticesTab';
 import UsageTab from './UsageTab';
 import CommunityReportsTab from './CommunityReportsTab';
+import MenuGroupsTab from './MenuGroupsTab';
+import AdminsTab from './AdminsTab';
 import { useT } from '@/lib/i18n';
 
 const TABS = [
@@ -23,9 +25,11 @@ const TABS = [
   { id: 'usage', label: '사용량·이상 탐지', group: 'SaaS 운영', menuId: 'SAAS-006', node: <UsageTab /> },
   { id: 'payments', label: '구독 결제', group: 'SaaS 운영', menuId: 'SAAS-002', node: <PaymentsTab /> },
   { id: 'vouchers', label: '바우처', group: 'SaaS 운영', menuId: 'SAAS-003', node: <VouchersTab /> },
+  { id: 'menu-groups', label: '메뉴 그룹', group: 'SaaS 운영', menuId: 'SAAS-008', node: <MenuGroupsTab /> },
   { id: 'tickets', label: '문의(CS)', group: 'CS·공지', menuId: 'SAAS-004', node: <TicketsTab /> },
   { id: 'notices', label: '공지·점검', group: 'CS·공지', menuId: 'SAAS-005', node: <NoticesTab /> },
   { id: 'community', label: '커뮤니티 신고', group: 'CS·공지', menuId: 'COM-008', node: <CommunityReportsTab /> },
+  { id: 'admins', label: '운영사 계정', group: '운영사 설정', menuId: 'SAAS-009', node: <AdminsTab /> },
 ];
 
 /** SAAS-001~007 운영사 전용 백오피스 */
@@ -46,7 +50,7 @@ export default function PlatformView() {
         title={tr(current.label)}
         menuId={current.menuId}
         breadcrumb={<>{tr('운영 콘솔')} › {tr(current.group)}</>}
-        description={tr('가입 기관 승인·정지, 사용량·이상 탐지, 구독 결제, 바우처 정산, 문의 응대, 공지·점검, 커뮤니티 신고, 핵심 지표를 관리합니다.')}
+        description={tr('가입 기관 승인·정지, 사용량·이상 탐지, 구독 결제, 바우처 정산, 기관별 메뉴 그룹, 문의 응대, 공지·점검, 커뮤니티 신고, 운영사 계정, 핵심 지표를 관리합니다.')}
         tabs={
           // 넓은 화면은 운영사 사이드바가 같은 메뉴를 보여 주므로 좁은 화면에서만 탭을 둔다
           <Box sx={{ display: { md: 'none' } }}>

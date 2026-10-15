@@ -28,6 +28,8 @@ import ConsultIcon from '@mui/icons-material/EventAvailableOutlined';
 import TrendIcon from '@mui/icons-material/TrendingUpOutlined';
 import ApartmentIcon from '@mui/icons-material/ApartmentOutlined';
 import SpeedIcon from '@mui/icons-material/SpeedOutlined';
+import MenuGroupIcon from '@mui/icons-material/AccountTreeOutlined';
+import AdminIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
 import PaymentsIcon from '@mui/icons-material/PaymentsOutlined';
 import VoucherIcon from '@mui/icons-material/ConfirmationNumberOutlined';
 import HeadsetIcon from '@mui/icons-material/HeadsetMicOutlined';
@@ -40,6 +42,8 @@ export interface NavItem {
   icon: ReactNode;
   /** 원장·실장만 (기존 권한 로직 그대로) */
   managerOnly?: boolean;
+  /** 메뉴 그룹(SAAS-008)으로 끌 수 없는 메뉴 — 설정·문의는 끄면 기관이 되돌릴 방법이 없다 */
+  required?: boolean;
 }
 export interface NavGroup {
   group: string;
@@ -93,8 +97,8 @@ export const NAV: NavGroup[] = [
   {
     group: '설정',
     items: [
-      { href: '/settings', label: '설정', icon: <SettingsIcon /> },
-      { href: '/support', label: '문의하기', icon: <SupportIcon />, managerOnly: true },
+      { href: '/settings', label: '설정', icon: <SettingsIcon />, required: true },
+      { href: '/support', label: '문의하기', icon: <SupportIcon />, managerOnly: true, required: true },
     ],
   },
 ];
@@ -109,6 +113,7 @@ export const OPS_NAV: NavGroup[] = [
       { href: '/platform?tab=usage', label: '사용량·이상 탐지', icon: <SpeedIcon /> },
       { href: '/platform?tab=payments', label: '구독 결제', icon: <PaymentsIcon /> },
       { href: '/platform?tab=vouchers', label: '바우처', icon: <VoucherIcon /> },
+      { href: '/platform?tab=menu-groups', label: '메뉴 그룹', icon: <MenuGroupIcon /> },
     ],
   },
   {
@@ -117,6 +122,12 @@ export const OPS_NAV: NavGroup[] = [
       { href: '/platform?tab=tickets', label: '문의(CS)', icon: <HeadsetIcon /> },
       { href: '/platform?tab=notices', label: '공지·점검', icon: <AnnouncementIcon /> },
       { href: '/platform?tab=community', label: '커뮤니티 신고', icon: <ReportIcon /> },
+    ],
+  },
+  {
+    group: '운영사 설정',
+    items: [
+      { href: '/platform?tab=admins', label: '운영사 계정', icon: <AdminIcon /> },
     ],
   },
 ];
@@ -131,4 +142,14 @@ export function findNav(pathname: string): { group: string; item: NavItem } | nu
     }
   }
   return best;
+}
+
+/** 메뉴 그룹에서 끈 메뉴를 빼고, 역할에 맞는 첫 메뉴 — 대시보드가 꺼진 기관의 첫 화면 */
+export function firstEnabledHref(disabled: Set<string>, manager: boolean): string {
+  for (const g of NAV) {
+    for (const i of g.items) {
+      if ((!i.managerOnly || manager) && !disabled.has(i.href)) return i.href;
+    }
+  }
+  return '/settings';
 }
